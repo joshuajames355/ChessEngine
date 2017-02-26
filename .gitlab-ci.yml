@@ -1,4 +1,4 @@
 buildJob:
   stage: build
   script:
-    cd /gitlab-ci/ChessEngine; cmake -G "Unix Makefiles" $CI_PROJECT_DIR ; make
+    cd /gitlab-ci/ChessEngine; sudo cmake -G "Unix Makefiles" $CI_PROJECT_DIR ; sudo make
