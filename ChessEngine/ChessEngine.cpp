@@ -7,6 +7,12 @@ int main(int argc, char *argv[])
 {
 	const int SEARCHDEPTH = 4;
 
+	if (argc < 65)
+	{
+		std::cout << "Not Enough Arguments";
+		return 0;
+	}
+
 	//Imports board
 	int counter = 1;
 	std::array<std::array<piece, 8>, 8> board;
