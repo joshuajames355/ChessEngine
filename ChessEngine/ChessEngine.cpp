@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 
 	if (argc < 65)
 	{
-		std::cout << "Not Enough Arguments";
+		std::cout << "Not Enough Arguments \n";
 		return 0;
 	}
 

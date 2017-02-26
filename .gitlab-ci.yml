@@ -1,0 +1,5 @@
+buildJob:
+	stage: build
+	script:
+		-cmake -G "Unix Makefiles" .
+		-make
