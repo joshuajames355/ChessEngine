@@ -5,3 +5,5 @@ project (ChessEngine)
 file(GLOB SOURCES ChessEngine/*.cpp)
 
 add_executable(ChessEngine ${SOURCES})
+
+target_compile_features(ChessEngine PRIVATE cxx_strong_enums)
