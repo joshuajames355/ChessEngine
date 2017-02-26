@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "scoring.h"
 
 int calculateScoreDiff(std::array<std::array<piece, 8>, 8> board, colours aiColour)

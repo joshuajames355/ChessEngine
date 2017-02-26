@@ -2,6 +2,6 @@ cmake_minimum_required (VERSION 2.6)
 
 project (ChessEngine)
 
-source_group (ChessEngine)
+file(GLOB SOURCES ChessEngine/*.cpp)
 
-add_executable(ChessEngine ChessEngine.cxx)
+add_executable(ChessEngine ${SOURCES})

@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "moveGeneration.h"
 
 std::vector<std::array<std::array<piece, 8>, 8>> searchForMoves(std::array<std::array<piece, 8>, 8> board, colours aiColour)

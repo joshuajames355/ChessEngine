@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "piece.h"
 
 piece::piece()

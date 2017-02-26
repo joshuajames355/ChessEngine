@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "moveTree.h"
 
 void moveTreeNode::fillTree(colours aiColour)
