@@ -3,5 +3,4 @@ buildJob:
   script:
     mkdir build; cd build; cmake -G "Unix Makefiles" .. ; make
   artifacts:
-    path:
-    - build/ChessEngine
+    path: build/ChessEngine
