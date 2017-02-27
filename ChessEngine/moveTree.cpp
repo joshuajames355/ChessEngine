@@ -35,14 +35,14 @@ void moveTreeNode::fillTree(colours aiColour, colours nodeColour , bool first)
 			{
 				children.push_back(newChild);
 				children[children.size() - 1].fillTree(aiColour, newColour, false);
-				score = max(score, children[children.size() - 1].score);
-				alpha = max(alpha, score);
+				score = std::max(score, children[children.size() - 1].score);
+				alpha = std::max(alpha, score);
 			}
 			else
 			{
 				newChild.fillTree(aiColour, newColour, false);
-				score = max(score, newChild.score);
-				alpha = max(alpha, score);
+				score = std::max(score, newChild.score);
+				alpha = std::max(alpha, score);
 			}
 
 			if (beta <= alpha)
@@ -66,14 +66,14 @@ void moveTreeNode::fillTree(colours aiColour, colours nodeColour , bool first)
 			{
 				children.push_back(newChild);
 				children[children.size() - 1].fillTree(aiColour, newColour, false);
-				score = min(score, children[children.size() - 1].score);
-				beta = max(beta, score);
+				score = std::min(score, children[children.size() - 1].score);
+				beta = std::min(beta, score);
 			}
 			else
 			{
 				newChild.fillTree(aiColour, newColour, false);
-				score = min(score, newChild.score);
-				beta = min(beta, score);
+				score = std::min(score, newChild.score);
+				beta = std::min(beta, score);
 			}
 
 			if (beta <= alpha)

@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <array>
-#include <minmax.h>
+#include <algorithm>
 
 #include "piece.h"
 #include "moveGeneration.h"
