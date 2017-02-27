@@ -25,6 +25,9 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	printBoard(board);
+	std::cout << "\n\n";
+
 	//Loads in colour of AI
 	colours aiColour;
 	if (std::string(argv[65]) == "white")
@@ -42,14 +45,32 @@ int main(int argc, char *argv[])
 
 	moveTreeNode moveTree;
 	moveTree.move = board;
+	moveTree.alpha = -9999999;
+	moveTree.beta = 9999999;
+
 	moveTree.recursionLayers = SEARCHDEPTH;
 
 	time_t timer = time(NULL);
 
-	moveTree.fillTree(aiColour);
+	moveTree.fillTree(aiColour , aiColour,true);
 
-	std::cout << difftime(time(NULL), timer) << "\n";
-	std::cout << "Done";
+	int bestScore = -999999999;
+	std::array<std::array<piece, 8>, 8> bestMove;
+	for (int x = 0; x < moveTree.children.size(); x++)
+	{
+		if (moveTree.children[x].score > bestScore)
+		{
+			bestMove = moveTree.children[x].move;
+			bestScore = moveTree.children[x].score;
+		}
+	}
+
+	std::cout << "\n" << difftime(time(NULL), timer) << "\n";
+	std::cout << "Done\n\n\n\n";
+
+	printBoard(bestMove);
+
+	std::cout << "\n" << bestScore << "\n";
 
 
 	int test;

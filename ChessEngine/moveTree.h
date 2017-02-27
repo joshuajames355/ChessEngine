@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <array>
+#include <minmax.h>
 
 #include "piece.h"
 #include "moveGeneration.h"
@@ -9,8 +10,8 @@
 struct moveTreeNode
 {
 	std::array<std::array<piece, 8>, 8> move;
-	int score;
-	std::vector<moveTreeNode> children;
+	int score , alpha , beta;
 	int recursionLayers;
-	void fillTree(colours aiColour);
+	void fillTree(colours aiColour , colours nodeColour , bool first);
+	std::vector<moveTreeNode> children;
 };
