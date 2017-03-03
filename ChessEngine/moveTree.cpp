@@ -16,7 +16,7 @@ void moveTreeNode::fillTree(colours aiColour, colours nodeColour , bool first)
 
 	if (recursionLayers == 0)
 	{
-		score = calculateScoreDiff(move, aiColour);
+		//score = calculateScoreDiff(move, aiColour);
 		return;
 	}
 

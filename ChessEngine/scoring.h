@@ -1,16 +1,7 @@
 #pragma once
-#include <array>
-
-#include "piece.h"
 #include "pieceSquare.h"
+#include "board.h"
 
-class counter
-{
-public:
-	counter(std::array<std::array<piece, 8>, 8> board);
-	int WP, WN, WB, WR, WQ, WK, BP, BN, BB, BR, BQ, BK;
-};
-
-int calculateScoreDiff(std::array<std::array<piece, 8>, 8> board, colours aiColour);
-int calculateMaterialScore(std::array<std::array<piece, 8>, 8> board, colours aiColour, counter pieceCounts);
-int calculatePositionalScore(std::array<std::array<piece, 8>, 8> board, colours aiColour, counter pieceCounts);
+int calculateScoreDiff(Board* board, colours aiColour);
+int calculateMaterialScore(Board* board, colours aiColour);
+int calculatePositionalScore(Board* board, colours aiColour);

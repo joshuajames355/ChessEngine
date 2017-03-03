@@ -4,9 +4,11 @@
 #include <fstream>
 #include <iostream>
 #include <array>
+#include <stdint.h>
 
 #include "ChessEngine.h"
 #include "piece.h"
+
 
 class pieceSquare
 {
@@ -15,7 +17,7 @@ public:
 	pieceSquare(std::string filename , pieceType typeNew , colours defaultColourNew);
 	void loadFromFile(std::string filename);
 
-	int calcScore(std::array<std::array<piece, 8>, 8> board, colours aiColour);
+	int calcScore(int64_t bitboard, colours targetColour);
 
 	int square[8][8];
 	colours defaultColour;

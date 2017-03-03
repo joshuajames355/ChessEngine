@@ -1,11 +1,24 @@
 #include "board.h"
 
 
-board::board()
+Board::Board()
 {
+	whitePawnBitboard = emptyBitboard;
+	whiteRookBitboard = emptyBitboard; 
+	whiteKnightBitboard = emptyBitboard; 
+	whiteBishopBitboard = emptyBitboard; 
+	whiteQueenBitboard = emptyBitboard; 
+	whiteKingBitboard = emptyBitboard; 
+
+	blackPawnBitboard = emptyBitboard;
+	blackRookBitboard = emptyBitboard; 
+	blackKnightBitboard = emptyBitboard;
+	blackBishopBitboard = emptyBitboard;
+	blackQueenBitboard = emptyBitboard; 
+	blackKingBitboard = emptyBitboard; 
 }
 
-void board::defaults()
+void Board::defaults()
 {
 	whitePawnBitboard = rank1;
 	whiteRookBitboard = 129; //2^0 + 2^7
@@ -22,7 +35,7 @@ void board::defaults()
 	blackKingBitboard = 1152921504606846976; //2^60
 }
 
-void board::printBoard()
+void Board::printBoard()
 {
 	int counter = 56;
 	for (int x = 0; x < 8; x++)
@@ -92,7 +105,15 @@ void board::printBoard()
 		std::cout << "|\n";
 		counter -= 16;
 	}
-
 }
 
-
+int bitSum(int64_t bitboard)
+{
+	int count = 0;
+	while (bitboard)
+	{
+		count++;
+		bitboard &= bitboard - 1;
+	}
+	return count;
+}

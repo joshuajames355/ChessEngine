@@ -45,15 +45,18 @@ void pieceSquare::loadFromFile(std::string filename)
 
 }
 
-int pieceSquare::calcScore(std::array<std::array<piece, 8>, 8> board, colours targetColour)
+int pieceSquare::calcScore(int64_t bitboard,colours targetColour)
 {
 	int score = 0;
-	for (int x = 0; x < 8; x++)
+	int counter = 0;
+	for (int y = 7; y >= 0; y--)
 	{
-		for (int y = 0; y < 8; y++)
+		for (int x = 0; x < 8; x++)
 		{
-			if (board[x][y].type== type && board[x][y].colour == targetColour)
+			int64_t currentPosBitboard = (int64_t)1 << counter;
+			if ((bitboard & currentPosBitboard) != 0)
 			{
+				std::cout << "x: " << x << " y: " << y << "\n";
 				if (targetColour == defaultColour) // Colour is correct
 				{
 					score += square[x][y];
@@ -63,6 +66,7 @@ int pieceSquare::calcScore(std::array<std::array<piece, 8>, 8> board, colours ta
 					score += square[x][7 - y];
 				}
 			}
+			counter++;
 		}
 	}
 	return score;

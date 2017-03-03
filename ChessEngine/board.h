@@ -24,10 +24,10 @@
 #define fileG 144680345676153346
 #define fileH 72340172838076673
 
-class board
+class Board
 {
 public:
-	board();
+	Board();
 	void defaults();
 	void printBoard();
 
@@ -50,3 +50,4 @@ public:
 	int64_t allPieces;
 };
 
+int bitSum(int64_t bitboard);
