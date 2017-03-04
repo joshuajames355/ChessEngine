@@ -9,4 +9,4 @@ buildJob:
 testing:
   stage: test
   script:
-    cd Build/UnitTesting/; ./UnitTests
+    cd build/UnitTesting/; ./UnitTests
