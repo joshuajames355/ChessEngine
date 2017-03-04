@@ -16,6 +16,8 @@ Board::Board()
 	blackBishopBitboard = emptyBitboard;
 	blackQueenBitboard = emptyBitboard; 
 	blackKingBitboard = emptyBitboard; 
+
+	update();
 }
 
 void Board::defaults()
@@ -33,6 +35,8 @@ void Board::defaults()
 	blackBishopBitboard = 2594073385365405696; //2^58 + 2^61
 	blackQueenBitboard = 576460752303423488; //2^59
 	blackKingBitboard = 1152921504606846976; //2^60
+
+	update();
 }
 
 void Board::printBoard()
@@ -107,6 +111,14 @@ void Board::printBoard()
 	}
 }
 
+void Board::update()
+{
+	blackPieces = blackPawnBitboard | blackRookBitboard | blackKnightBitboard | blackBishopBitboard | blackKingBitboard | blackQueenBitboard;
+	whitePieces = whitePawnBitboard | whiteRookBitboard | whiteKnightBitboard | whiteBishopBitboard | whiteKingBitboard | whiteQueenBitboard;
+
+	allPieces = whitePieces | blackPieces;
+}
+
 int bitSum(int64_t bitboard)
 {
 	int count = 0;
@@ -116,4 +128,11 @@ int bitSum(int64_t bitboard)
 		bitboard &= bitboard - 1;
 	}
 	return count;
+}
+
+int64_t pop(int64_t& bitboard)
+{
+	int64_t lsb = bitboard & -bitboard;
+	bitboard -= lsb;
+	return lsb;
 }

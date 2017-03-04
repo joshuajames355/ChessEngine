@@ -22,6 +22,7 @@ void moveTreeNode::fillTree(colours aiColour, colours nodeColour , bool first)
 
 	if (aiColour == nodeColour) //If maximizer
 	{
+		/*
 		std::vector<std::array<std::array<piece, 8>, 8>> moves = searchForMoves(move, nodeColour);
 		score = -10000;
 		for (int x = 0; x < moves.size(); x++)
@@ -81,5 +82,6 @@ void moveTreeNode::fillTree(colours aiColour, colours nodeColour , bool first)
 				return;
 			}
 		}
+		*/
 	}
 }

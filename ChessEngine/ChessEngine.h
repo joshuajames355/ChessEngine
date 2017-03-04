@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "pieceSquare.h"
+#include "board.h"
 #include "piece.h"
 #include "moveTree.h"
 #include "moveGeneration.h"

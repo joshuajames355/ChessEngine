@@ -30,6 +30,7 @@ public:
 	Board();
 	void defaults();
 	void printBoard();
+	void update();
 
 	int64_t whitePawnBitboard;
 	int64_t whiteKnightBitboard;
@@ -51,3 +52,4 @@ public:
 };
 
 int bitSum(int64_t bitboard);
+int64_t pop(int64_t& bitboard);

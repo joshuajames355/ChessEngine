@@ -6,7 +6,6 @@
 #include <array>
 #include <stdint.h>
 
-#include "ChessEngine.h"
 #include "piece.h"
 
 

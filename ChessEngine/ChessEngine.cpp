@@ -5,7 +5,16 @@
 
 int main(int argc, char *argv[])
 {
-	engineLoop();
+
+	Board newBoard;
+	newBoard.blackRookBitboard = 1152921504606846976;
+	std::cout << calculateScoreDiff(&newBoard, white) << "\n";
+	newBoard.printBoard();
+
+	int test;
+	std::cin >> test;
+
+	//engineLoop();
 
 	/*
 	const int SEARCHDEPTH = 4;
