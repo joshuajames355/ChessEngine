@@ -5,3 +5,7 @@ buildJob:
   artifacts:
     paths: 
       - build/ChessEngine/ChessEngine
+testing:
+  stage: test
+  script:
+    cd UnitTesting/; ./UnitTests
