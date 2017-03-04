@@ -8,4 +8,4 @@ buildJob:
 testing:
   stage: test
   script:
-    cd UnitTesting/; ./UnitTests
+    cd Build/UnitTesting/; ./UnitTests
