@@ -32,24 +32,24 @@ public:
 	void printBoard();
 	void update();
 
-	int64_t whitePawnBitboard;
-	int64_t whiteKnightBitboard;
-	int64_t whiteBishopBitboard;
-	int64_t whiteRookBitboard;
-	int64_t whiteQueenBitboard;
-	int64_t whiteKingBitboard;
+	uint64_t whitePawnBitboard;
+	uint64_t whiteKnightBitboard;
+	uint64_t whiteBishopBitboard;
+	uint64_t whiteRookBitboard;
+	uint64_t whiteQueenBitboard;
+	uint64_t whiteKingBitboard;
 	
-	int64_t blackPawnBitboard;
-	int64_t blackKnightBitboard;
-	int64_t blackBishopBitboard;
-	int64_t blackRookBitboard;
-	int64_t blackQueenBitboard;
-	int64_t blackKingBitboard;
+	uint64_t blackPawnBitboard;
+	uint64_t blackKnightBitboard;
+	uint64_t blackBishopBitboard;
+	uint64_t blackRookBitboard;
+	uint64_t blackQueenBitboard;
+	uint64_t blackKingBitboard;
 
-	int64_t whitePieces;
-	int64_t blackPieces;
-	int64_t allPieces;
+	uint64_t whitePieces;
+	uint64_t blackPieces;
+	uint64_t allPieces;
 };
 
-int bitSum(int64_t bitboard);
-int64_t pop(int64_t& bitboard);
+int bitSum(uint64_t bitboard);
+uint64_t pop(uint64_t& bitboard);

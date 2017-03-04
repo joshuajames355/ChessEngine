@@ -45,7 +45,7 @@ void pieceSquare::loadFromFile(std::string filename)
 
 }
 
-int pieceSquare::calcScore(int64_t bitboard,colours targetColour)
+int pieceSquare::calcScore(uint64_t bitboard,colours targetColour)
 {
 	int score = 0;
 	int counter = 0;
@@ -53,7 +53,7 @@ int pieceSquare::calcScore(int64_t bitboard,colours targetColour)
 	{
 		for (int x = 0; x < 8; x++)
 		{
-			int64_t currentPosBitboard = (int64_t)1 << counter;
+			uint64_t currentPosBitboard = (uint64_t)1 << counter;
 			if ((bitboard & currentPosBitboard) != 0)
 			{
 				std::cout << "x: " << x << " y: " << y << "\n";

@@ -53,7 +53,7 @@ TEST(BitboardTest, bitsum)
 
 TEST(BitboardTest, pop)
 {
-	int64_t b = 15;
+	uint64_t b = 15;
 	ASSERT_EQ(pop(b), 1);
 	ASSERT_EQ(pop(b), 2);
 	ASSERT_EQ(pop(b), 4);
@@ -93,14 +93,15 @@ TEST(ScoringTest, material)
 TEST(ScoringTest, positionalScore)
 {
 	Board board;
-	board.whiteQueenBitboard = 2;
-	ASSERT_EQ(calculatePositionalScore(&board, white), -10);
-	ASSERT_EQ(calculatePositionalScore(&board, black), 10);
+	board.whiteRookBitboard = 1;
+	board.update();
+	ASSERT_EQ(calculatePositionalScore(&board, white), 0);
+	ASSERT_EQ(calculatePositionalScore(&board, black), 0);
 	
 	board.whiteQueenBitboard = 0;
-	board.blackPawnBitboard = 512;
-	ASSERT_EQ(calculatePositionalScore(&board, black) , 50);
-	ASSERT_EQ(calculatePositionalScore(&board, white), -50);
+	board.whitePawnBitboard = 512;
+	ASSERT_EQ(calculatePositionalScore(&board, black) , -10);
+	ASSERT_EQ(calculatePositionalScore(&board, white), 10);
 	
 }
 

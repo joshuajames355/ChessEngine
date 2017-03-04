@@ -16,7 +16,7 @@ public:
 	pieceSquare(std::string filename , pieceType typeNew , colours defaultColourNew);
 	void loadFromFile(std::string filename);
 
-	int calcScore(int64_t bitboard, colours targetColour);
+	int calcScore(uint64_t bitboard, colours targetColour);
 
 	int square[8][8];
 	colours defaultColour;

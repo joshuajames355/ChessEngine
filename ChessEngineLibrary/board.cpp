@@ -47,7 +47,7 @@ void Board::printBoard()
 		for (int y = 0; y < 8; y++)
 		{
 
-			int64_t currentPosBitboard = (int64_t)1 << counter;
+			uint64_t currentPosBitboard = (uint64_t)1 << counter;
 
 			//Checking for white pieces
 			if ((whitePawnBitboard & currentPosBitboard) != 0) //If the piece is a white pawn;
@@ -119,7 +119,7 @@ void Board::update()
 	allPieces = whitePieces | blackPieces;
 }
 
-int bitSum(int64_t bitboard)
+int bitSum(uint64_t bitboard)
 {
 	int count = 0;
 	while (bitboard)
@@ -130,9 +130,9 @@ int bitSum(int64_t bitboard)
 	return count;
 }
 
-int64_t pop(int64_t& bitboard)
+uint64_t pop(uint64_t& bitboard)
 {
-	int64_t lsb = bitboard & -bitboard;
+	uint64_t lsb = bitboard & -bitboard;
 	bitboard -= lsb;
 	return lsb;
 }
