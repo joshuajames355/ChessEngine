@@ -4,7 +4,8 @@ buildJob:
     mkdir build; cd build; cmake -G "Unix Makefiles" .. ; make
   artifacts:
     paths: 
-      - build/ChessEngine/ChessEngine
+      - build/UnitTesting/UnitTests
+    expire_in: 30 min
 testing:
   stage: test
   script:
