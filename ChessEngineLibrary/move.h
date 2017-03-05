@@ -4,16 +4,17 @@
 #include "piece.h"
 #include "board.h"
 
-enum MoveType{quietMove,pawnCapture,pawnDoubleMove};
+enum MoveType{quietMove,capture};
 
-class move
+struct Move
 {
-public:
-	move(int newFrom , int newTo , MoveType newMoveType , pieceType pieceType, Board* baseBoard);
+	Move(int newFrom , int newTo , MoveType newMoveType,pieceType newPieceType);
 	int from;
 	int to;
+	pieceType piece;
 	MoveType moveType;
-	Board board;
+	
+	Board applyMove(Board* board , colours colour);
 };
 
 

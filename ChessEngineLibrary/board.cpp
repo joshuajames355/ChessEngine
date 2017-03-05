@@ -119,6 +119,165 @@ void Board::update()
 	allPieces = whitePieces | blackPieces;
 }
 
+uint64_t Board::findBitboard(colours colour, pieceType piece)
+{
+	if (colour == white)
+	{
+		switch (piece)
+		{
+		case pawn:
+			return whitePawnBitboard;
+		case knight:
+			return whiteKnightBitboard;
+		case bishop:
+			return whiteBishopBitboard;
+		case rook:
+			return whiteRookBitboard;
+		case queen:
+			return whiteQueenBitboard;
+		case king:
+			return whiteKingBitboard;
+		}
+	}
+	else
+	{
+		switch (piece)
+		{
+		case pawn:
+			return blackPawnBitboard;
+		case knight:
+			return blackKnightBitboard;
+		case bishop:
+			return blackBishopBitboard;
+		case rook:
+			return blackRookBitboard;
+		case queen:
+			return blackQueenBitboard;
+		case king:
+			return blackKingBitboard;
+		}
+	}
+}
+
+void Board::setBitboard(colours colour, pieceType piece, uint64_t bitboard)
+{
+	if (colour == white)
+	{
+		switch (piece)
+		{
+		case pawn:
+			whitePawnBitboard = bitboard;
+			break;
+		case knight:
+			whiteKnightBitboard = bitboard;
+			break;
+		case bishop:
+			whiteBishopBitboard = bitboard;
+			break;
+		case rook:
+			whiteRookBitboard = bitboard;
+			break;
+		case queen:
+			whiteQueenBitboard = bitboard;
+			break;
+		case king:
+			whiteKingBitboard = bitboard;
+			break;
+		}
+	}
+	else
+	{
+		switch (piece)
+		{
+		case pawn:
+			blackPawnBitboard = bitboard;
+			break;
+		case knight:
+			blackKnightBitboard = bitboard;
+			break;
+		case bishop:
+			blackBishopBitboard = bitboard;
+			break;
+		case rook:
+			blackRookBitboard = bitboard;
+			break;
+		case queen:
+			blackQueenBitboard = bitboard;
+			break;
+		case king:
+			blackKingBitboard = bitboard;
+			break;
+		}
+	}
+}
+
+void Board::removePiece(uint64_t bitboard)
+{
+	if (whitePawnBitboard & bitboard != 0)
+	{
+		whitePawnBitboard = whitePawnBitboard & ~bitboard;
+		return;
+	}
+	if (whiteKnightBitboard & bitboard != 0)
+	{
+		whiteKnightBitboard = whiteKnightBitboard & ~bitboard;
+		return;
+	}
+	if (whiteBishopBitboard & bitboard != 0)
+	{
+		whiteBishopBitboard = whiteBishopBitboard & ~bitboard;
+		return;
+	}
+	if (whiteRookBitboard & bitboard != 0)
+	{
+		whiteRookBitboard = whiteRookBitboard & ~bitboard;
+		return;
+	}
+	if (whiteQueenBitboard & bitboard != 0)
+	{
+		whiteQueenBitboard = whiteQueenBitboard & ~bitboard;
+		return;
+	}
+	if (whiteKingBitboard & bitboard != 0)
+	{
+		whiteKingBitboard = whiteKingBitboard & ~bitboard;
+		return;
+	}
+
+
+
+	if (blackPawnBitboard & bitboard != 0)
+	{
+		blackPawnBitboard = blackPawnBitboard & ~bitboard;
+		return;
+	}
+	if (blackKnightBitboard & bitboard != 0)
+	{
+		blackKnightBitboard = blackKnightBitboard & ~bitboard;
+		return;
+	}
+	if (blackBishopBitboard & bitboard != 0)
+	{
+		blackBishopBitboard = blackBishopBitboard & ~bitboard;
+		return;
+	}
+	if (blackRookBitboard & bitboard != 0)
+	{
+		blackRookBitboard = blackRookBitboard & ~bitboard;
+		return;
+	}
+	if (blackQueenBitboard & bitboard != 0)
+	{
+		blackQueenBitboard = blackQueenBitboard & ~bitboard;
+		return;
+	}
+	if (blackKingBitboard & bitboard != 0)
+	{
+		blackKingBitboard = blackKingBitboard & ~bitboard;
+		return;
+	}
+}
+
 int bitSum(uint64_t bitboard)
 {
 	int count = 0;

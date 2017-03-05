@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <cmath>
 #include <iostream>
+#include "piece.h"
 
 #define emptyBitboard 0
 #define universalBitboard 18446744073709551615 //2**64 - 1
@@ -31,6 +32,10 @@ public:
 	void defaults();
 	void printBoard();
 	void update();
+
+	uint64_t findBitboard(colours colour , pieceType piece);
+	void setBitboard(colours colour, pieceType piece, uint64_t bitboard);
+	void removePiece(uint64_t bitboard);
 
 	uint64_t whitePawnBitboard;
 	uint64_t whiteKnightBitboard;

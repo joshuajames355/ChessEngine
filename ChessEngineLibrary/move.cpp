@@ -1,13 +1,36 @@
 #include "move.h"
 
-move::move(int newFrom, int newTo, MoveType newMoveType, pieceType pieceType, Board* baseBoard)
+Move::Move(int newFrom, int newTo, MoveType newMoveType, pieceType newPieceType)
 {
 	moveType = newMoveType;
-	board = *baseBoard;
-	switch (pieceType)
+	to = newTo;
+	from = newFrom;
+	piece = newPieceType;
+}
+
+Board Move::applyMove(Board * board, colours colour)
+{
+	switch (moveType)
 	{
-	case pawn:
-		board.whitePawnBitboard -= 1 << newFrom;
-		board.whitePawnBitboard += 1 << newTo;
+	case quietMove:
+	{
+		Board newBoard = *board;  //Moves the piece
+		uint64_t bitboard = newBoard.findBitboard(colour, piece);
+		bitboard = (bitboard & ~(1 << from)) | 1 << to;
+		newBoard.setBitboard(colour, piece, bitboard);
+		newBoard.update();
+		return newBoard;
+	}
+	case capture:
+	{
+		Board newBoard = *board;
+		newBoard.removePiece(1 << to); //Removes the captued piece
+
+		uint64_t bitboard = newBoard.findBitboard(colour, piece); //Moves the piece
+		bitboard = (bitboard & ~(1 << from)) | 1 << to;
+		newBoard.setBitboard(colour, piece, bitboard);
+		newBoard.update();
+		return newBoard;
+	}
 	}
 }
