@@ -145,14 +145,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Text Include="..\Resources\WBSquareTable.txt" />
+    <Text Include="..\Resources\WKEndSquareTable.txt" />
+    <Text Include="..\Resources\WKMiddleSquareTable.txt" />
+    <Text Include="..\Resources\WNSquareTable.txt" />
+    <Text Include="..\Resources\WPSquareTable.txt" />
+    <Text Include="..\Resources\WQSquareTable.txt" />
+    <Text Include="..\Resources\WRSquareTable.txt" />
     <Text Include="ReadMe.txt" />
-    <Text Include="WBSquareTable.txt" />
-    <Text Include="WKEndSquareTable.txt" />
-    <Text Include="WKMiddleSquareTable.txt" />
-    <Text Include="WNSquareTable.txt" />
-    <Text Include="WPSquareTable.txt" />
-    <Text Include="WQSquareTable.txt" />
-    <Text Include="WRSquareTable.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ChessEngine.h" />

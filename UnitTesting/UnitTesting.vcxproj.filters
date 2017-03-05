@@ -19,4 +19,27 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\Resources\WBSquareTable.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\Resources\WKEndSquareTable.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\Resources\WKMiddleSquareTable.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\Resources\WNSquareTable.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\Resources\WPSquareTable.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\Resources\WQSquareTable.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\Resources\WRSquareTable.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+  </ItemGroup>
 </Project>

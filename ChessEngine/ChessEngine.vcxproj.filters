@@ -16,25 +16,25 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
-    <Text Include="WNSquareTable.txt">
+    <Text Include="..\Resources\WBSquareTable.txt">
       <Filter>Resource Files</Filter>
     </Text>
-    <Text Include="WPSquareTable.txt">
+    <Text Include="..\Resources\WKEndSquareTable.txt">
       <Filter>Resource Files</Filter>
     </Text>
-    <Text Include="WQSquareTable.txt">
+    <Text Include="..\Resources\WKMiddleSquareTable.txt">
       <Filter>Resource Files</Filter>
     </Text>
-    <Text Include="WRSquareTable.txt">
+    <Text Include="..\Resources\WNSquareTable.txt">
       <Filter>Resource Files</Filter>
     </Text>
-    <Text Include="WBSquareTable.txt">
+    <Text Include="..\Resources\WPSquareTable.txt">
       <Filter>Resource Files</Filter>
     </Text>
-    <Text Include="WKEndSquareTable.txt">
+    <Text Include="..\Resources\WQSquareTable.txt">
       <Filter>Resource Files</Filter>
     </Text>
-    <Text Include="WKMiddleSquareTable.txt">
+    <Text Include="..\Resources\WRSquareTable.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>

@@ -98,10 +98,11 @@ TEST(ScoringTest, positionalScore)
 	ASSERT_EQ(calculatePositionalScore(&board, white), 0);
 	ASSERT_EQ(calculatePositionalScore(&board, black), 0);
 	
-	board.whiteQueenBitboard = 0;
+	board = Board();
 	board.whitePawnBitboard = 512;
-	ASSERT_EQ(calculatePositionalScore(&board, black) , -10);
-	ASSERT_EQ(calculatePositionalScore(&board, white), 10);
+	board.update();
+	ASSERT_EQ(calculatePositionalScore(&board, white) , 10);
+	ASSERT_EQ(calculatePositionalScore(&board, black), -10);
 	
 }
 

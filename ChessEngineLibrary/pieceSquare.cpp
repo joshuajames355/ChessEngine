@@ -40,13 +40,18 @@ void pieceSquare::loadFromFile(std::string filename)
 			}
 			lineNum++;
 		}
-	tableFile.close();
+		tableFile.close();
+	}
+	else
+	{
+		std::cout << "Failed to find " + filename + "\n";
 	}
 
 }
 
 int pieceSquare::calcScore(uint64_t bitboard,colours targetColour)
 {
+
 	int score = 0;
 	int counter = 0;
 	for (int y = 7; y >= 0; y--)
@@ -56,7 +61,6 @@ int pieceSquare::calcScore(uint64_t bitboard,colours targetColour)
 			uint64_t currentPosBitboard = (uint64_t)1 << counter;
 			if ((bitboard & currentPosBitboard) != 0)
 			{
-				std::cout << "x: " << x << " y: " << y << "\n";
 				if (targetColour == defaultColour) // Colour is correct
 				{
 					score += square[x][y];
