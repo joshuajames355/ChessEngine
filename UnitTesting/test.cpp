@@ -4,125 +4,229 @@
 #include "board.h"
 #include "scoring.h"
 #include "move.h"
+#include "moveGeneration.h"
 
 #include <iostream>
 #include <stdint.h>
 
 
-TEST(BoardTest, UpdateFunction)
+TEST(Board, UpdateFunction)
 {
 	Board board;
 	board.whitePawnBitboard = 2;
 	board.whiteBishopBitboard = 4;
 	board.update();
-	ASSERT_EQ(board.allPieces, 6);
+	EXPECT_EQ(board.allPieces, 6);
 
 	board.blackBishopBitboard = 8;
 	board.update();
-	ASSERT_EQ(board.allPieces, 14);
-	ASSERT_EQ(board.whitePieces, 6);
-	ASSERT_EQ(board.blackPieces, 8);
+	EXPECT_EQ(board.allPieces, 14);
+	EXPECT_EQ(board.whitePieces, 6);
+	EXPECT_EQ(board.blackPieces, 8);
 }
-TEST(BoardTest, Defaults)
+TEST(Board, Defaults)
 {
 	Board board;
 	board.defaults();
-	ASSERT_EQ(board.whitePawnBitboard, 65280);
-	ASSERT_EQ(board.whiteRookBitboard, 129);
-	ASSERT_EQ(board.whiteKnightBitboard, 66);
-	ASSERT_EQ(board.whiteBishopBitboard, 36);
-	ASSERT_EQ(board.whiteQueenBitboard, 8);
-	ASSERT_EQ(board.whiteKingBitboard, 16);
+	EXPECT_EQ(board.whitePawnBitboard, 65280);
+	EXPECT_EQ(board.whiteRookBitboard, 129);
+	EXPECT_EQ(board.whiteKnightBitboard, 66);
+	EXPECT_EQ(board.whiteBishopBitboard, 36);
+	EXPECT_EQ(board.whiteQueenBitboard, 8);
+	EXPECT_EQ(board.whiteKingBitboard, 16);
 
-	ASSERT_EQ(board.blackPawnBitboard, 71776119061217280);
-	ASSERT_EQ(board.blackRookBitboard, 9295429630892703744);
-	ASSERT_EQ(board.blackKnightBitboard, 4755801206503243776);
-	ASSERT_EQ(board.blackBishopBitboard, 2594073385365405696);
-	ASSERT_EQ(board.blackQueenBitboard, 576460752303423488);
-	ASSERT_EQ(board.blackKingBitboard, 1152921504606846976);
+	EXPECT_EQ(board.blackPawnBitboard, 71776119061217280);
+	EXPECT_EQ(board.blackRookBitboard, 9295429630892703744);
+	EXPECT_EQ(board.blackKnightBitboard, 4755801206503243776);
+	EXPECT_EQ(board.blackBishopBitboard, 2594073385365405696);
+	EXPECT_EQ(board.blackQueenBitboard, 576460752303423488);
+	EXPECT_EQ(board.blackKingBitboard, 1152921504606846976);
 
 }
 
-TEST(BitboardTest, bitsum)
+TEST(Bitboard, bitsum)
 {
-	ASSERT_EQ(bitSum(15), 4);
-	ASSERT_EQ(bitSum(17), 2);
-	ASSERT_EQ(bitSum(emptyBitboard), 0);
-	ASSERT_EQ(bitSum(universalBitboard), 64);
-	ASSERT_EQ(bitSum(255), 8);
+	EXPECT_EQ(bitSum(15), 4);
+	EXPECT_EQ(bitSum(17), 2);
+	EXPECT_EQ(bitSum(emptyBitboard), 0);
+	EXPECT_EQ(bitSum(universalBitboard), 64);
+	EXPECT_EQ(bitSum(255), 8);
 }
 
-TEST(BitboardTest, pop)
+TEST(Bitboard, pop)
 {
 	uint64_t b = 15;
-	ASSERT_EQ(pop(b), 1);
-	ASSERT_EQ(pop(b), 2);
-	ASSERT_EQ(pop(b), 4);
-	ASSERT_EQ(pop(b), 8);
-	ASSERT_EQ(pop(b), 0);
+	EXPECT_EQ(pop(b), 1);
+	EXPECT_EQ(pop(b), 2);
+	EXPECT_EQ(pop(b), 4);
+	EXPECT_EQ(pop(b), 8);
+	EXPECT_EQ(pop(b), 0);
 
 	b = 263;
-	ASSERT_EQ(pop(b), 1);
-	ASSERT_EQ(pop(b), 2);
-	ASSERT_EQ(pop(b), 4);
-	ASSERT_EQ(pop(b), 256);
-	ASSERT_EQ(pop(b), 0);
+	EXPECT_EQ(pop(b), 1);
+	EXPECT_EQ(pop(b), 2);
+	EXPECT_EQ(pop(b), 4);
+	EXPECT_EQ(pop(b), 256);
+	EXPECT_EQ(pop(b), 0);
 }
 
-TEST(ScoringTest, material)
+TEST(Bitboard, bitScanForward)
+{
+	EXPECT_EQ(bitScanForward(2), 1);
+	EXPECT_EQ(bitScanForward(256), 8);
+	EXPECT_EQ(bitScanForward(64), 6);
+}
+
+TEST(Scoring, material)
 {
 	Board board;
 	board.whitePawnBitboard = 1;
-	ASSERT_EQ(calculateMaterialScore(&board, white), 100);
-	ASSERT_EQ(calculateMaterialScore(&board, black), -100);
+	EXPECT_EQ(calculateMaterialScore(&board, white), 100);
+	EXPECT_EQ(calculateMaterialScore(&board, black), -100);
 
 	board.whitePawnBitboard = 0;
 	board.blackKnightBitboard = 5;
-	ASSERT_EQ(calculateMaterialScore(&board, white), -640);
-	ASSERT_EQ(calculateMaterialScore(&board, black), 640);
+	EXPECT_EQ(calculateMaterialScore(&board, white), -640);
+	EXPECT_EQ(calculateMaterialScore(&board, black), 640);
 
 	board.blackKnightBitboard = 0;
 	board.whiteQueenBitboard= 8;
-	ASSERT_EQ(calculateMaterialScore(&board, white), 900);
-	ASSERT_EQ(calculateMaterialScore(&board, black), -900);
+	EXPECT_EQ(calculateMaterialScore(&board, white), 900);
+	EXPECT_EQ(calculateMaterialScore(&board, black), -900);
 
 	board.defaults();
-	ASSERT_EQ(calculateMaterialScore(&board, black), 0);
-	ASSERT_EQ(calculateMaterialScore(&board, white), 0);
+	EXPECT_EQ(calculateMaterialScore(&board, black), 0);
+	EXPECT_EQ(calculateMaterialScore(&board, white), 0);
 }
 
-TEST(ScoringTest, positionalScore)
+TEST(Scoring, positionalScore)
 {
 	Board board;
 	board.whiteRookBitboard = 1;
 	board.update();
-	ASSERT_EQ(calculatePositionalScore(&board, white), 0);
-	ASSERT_EQ(calculatePositionalScore(&board, black), 0);
+	EXPECT_EQ(calculatePositionalScore(&board, white), 0);
+	EXPECT_EQ(calculatePositionalScore(&board, black), 0);
 	
 	board = Board();
 	board.whitePawnBitboard = 512;
 	board.update();
-	ASSERT_EQ(calculatePositionalScore(&board, white) , 10);
-	ASSERT_EQ(calculatePositionalScore(&board, black), -10);
+	EXPECT_EQ(calculatePositionalScore(&board, white) , 10);
+	EXPECT_EQ(calculatePositionalScore(&board, black), -10);
 	
 }
 
-TEST(MoveTest, ApplyMove)
+TEST(Move, ApplyMove)
 {
 	Move move = Move(1, 9, quietMove, pawn);
 	Board board;
 	board.whitePawnBitboard = 2;
 	Board moveBoard = move.applyMove(&board, white);
-	ASSERT_EQ(moveBoard.whitePawnBitboard, 1 << 9);
-	ASSERT_EQ(moveBoard.allPieces, 1 << 9);
+	EXPECT_EQ(moveBoard.whitePawnBitboard, 1 << 9);
+	EXPECT_EQ(moveBoard.allPieces, 1 << 9);
 
 	board = Board();
 	move = Move(1, 7, quietMove, queen);
 	board.whiteQueenBitboard = 2;
 	moveBoard = move.applyMove(&board, white);
-	ASSERT_EQ(moveBoard.whiteQueenBitboard, 1 << 7);
-	ASSERT_EQ(moveBoard.allPieces, 1 << 7);
+	EXPECT_EQ(moveBoard.whiteQueenBitboard, 1 << 7);
+	EXPECT_EQ(moveBoard.allPieces, 1 << 7);
 
+
+	board = Board();
+	move = Move(1, 7, capture, queen);
+	board.whiteQueenBitboard = 2;
+	board.blackPawnBitboard = 128;
+	board.update();
+	moveBoard = move.applyMove(&board, white);
+	EXPECT_EQ(moveBoard.whiteQueenBitboard, 1 << 7);
+	EXPECT_EQ(moveBoard.allPieces, 1 << 7);
+
+	board = Board();
+	move = Move(1, 8, capture, pawn);
+	board.whitePawnBitboard = 2;
+	board.blackPawnBitboard = 256;
+	board.update();
+	moveBoard = move.applyMove(&board, white);
+	EXPECT_EQ(moveBoard.whitePawnBitboard, 1 << 8);
+	EXPECT_EQ(moveBoard.allPieces, 1 << 8);
+}
+
+TEST(MoveGeneration, PawnMoves)
+{
+	Board board = Board();
+	board.whitePawnBitboard = 2;
+	board.update();
+	std::vector<Move> Movelist = searchForMoves(&board, white);
+	EXPECT_EQ(Movelist.size(), 1);
+	EXPECT_EQ(Movelist[0].from, 1);
+	EXPECT_EQ(Movelist[0].to, 9);
+	EXPECT_EQ(Movelist[0].piece, pawn);
+	EXPECT_EQ(Movelist[0].moveType, quietMove);
+
+	board = Board();
+	board.whitePawnBitboard = 256;
+	board.update();
+	Movelist = searchForMoves(&board, white);
+	EXPECT_EQ(Movelist.size(), 2);
+	EXPECT_EQ(Movelist[0].from, 8);
+	EXPECT_EQ(Movelist[0].to + Movelist[1].to, 40); 
+	EXPECT_EQ(Movelist[0].piece, pawn);
+	EXPECT_EQ(Movelist[0].moveType, quietMove);
+
+	board = Board();
+	board.whitePawnBitboard = 1;
+	board.blackKingBitboard = 256;
+	board.blackPawnBitboard = 512;
+	board.update();
+	Movelist = searchForMoves(&board, white);
+	EXPECT_EQ(Movelist.size(), 1);
+	EXPECT_EQ(Movelist[0].from, 0);
+	EXPECT_EQ(Movelist[0].to, 9);
+	EXPECT_EQ(Movelist[0].piece, pawn);
+	EXPECT_EQ(Movelist[0].moveType, capture);
+}
+
+TEST(MoveGeneration, KingMoves)
+{
+	std::vector<Move> movelist = std::vector<Move>();
+	Board board = Board();
+	board.whiteKingBitboard = 1;
+	board.whitePawnBitboard = 768;
+	board.blackPawnBitboard = 2;
+	board.update();
+	generateKingMoves(&board, white, movelist);
+
+	EXPECT_EQ(movelist.size(), 1);
+	EXPECT_EQ(movelist[0].from, 0);
+	EXPECT_EQ(movelist[0].to, 1);
+	EXPECT_EQ(movelist[0].piece, king);
+	EXPECT_EQ(movelist[0].moveType, capture);
+
+	movelist = std::vector<Move>();
+	board = Board();
+	board.whiteKingBitboard = 1;
+	board.whitePawnBitboard = 512;
+	board.whiteRookBitboard = 2;
+	board.update();
+	generateKingMoves(&board, white, movelist);
+	EXPECT_EQ(movelist.size(), 1);
+	EXPECT_EQ(movelist[0].from, 0);
+	EXPECT_EQ(movelist[0].to, 8);
+	EXPECT_EQ(movelist[0].piece, king);
+	EXPECT_EQ(movelist[0].moveType, quietMove);
+
+	movelist = std::vector<Move>();
+	board = Board();
+	board.blackKingBitboard = 9223372036854775808;
+	board.blackPawnBitboard = 4647714815446351872;
+	board.whiteRookBitboard = 18014398509481984;
+	board.update();
+	generateKingMoves(&board, black, movelist);
+	EXPECT_EQ(movelist.size(), 1);
+	EXPECT_EQ(movelist[0].from, 63);
+	EXPECT_EQ(movelist[0].to, 54);
+	EXPECT_EQ(movelist[0].piece, king);
+	EXPECT_EQ(movelist[0].moveType, capture);
 }
 
 int main(int argc, char **argv) {
