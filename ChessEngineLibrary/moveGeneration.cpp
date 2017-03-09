@@ -96,6 +96,45 @@ void generateKingMoves(Board * board, colours aiColour, std::vector<Move>& Movel
 
 }
 
+void generateKnightMoves(Board * board, colours aiColour, std::vector<Move>& Movelist)
+{
+	uint64_t knightBitboard , friendlyPieces;
+	if (aiColour == white)
+	{
+		knightBitboard = board->whiteKnightBitboard;
+		friendlyPieces = board->whitePieces;
+	}
+	else
+	{
+		knightBitboard = board->blackKnightBitboard;
+		friendlyPieces = board->blackPieces;
+	}
+	
+    while(knightBitboard)
+    {
+        uint64_t currentKnight = pop(knightBitboard);
+        uint64_t moveBitboard;
+        
+        moveBitboard |= (currentKnight << 15) & ~ fileA; //2 up 1 left
+        moveBitboard |= (currentKnight << 17) & ~ fileH; //2 up 1 Right
+        moveBitboard |= (currentKnight << 6) & ~fileA & ~fileB;//1 up 2 left
+        moveBitboard |= (currentKnight << 10) & ~fileH & ~fileG;//1 up 2 right
+        moveBitboard |= (currentKnight >> 10) & ~fileA & ~fileB;//1 down 2 left
+        moveBitboard |= (currentKnight >> 6) & ~fileH & ~fileG;//1 down 2 right
+        moveBitboard |= (currentKnight >> 17) & ~fileA & ~fileB;//2 down 1 left
+        moveBitboard |= (currentKnight >> 15) & ~fileH & ~fileG;//2 down 1 right
+        
+	    int knightPosIndex = bitScanForward(currentKnight);
+    	while (moveBitboard)
+	    {
+	       	uint64_t knightPos = pop(moveBitboard);
+	    	addMoves(knightPosIndex, bitScanForward(knightPos), aiColour, knight, Movelist, board);
+    	}
+    }
+
+
+}
+
 void addMoves(int start, int end, colours aiColour, pieceType piece, std::vector<Move>& Movelist, Board* board)
 {
 	uint64_t enemyPieces;
