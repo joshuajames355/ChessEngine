@@ -194,7 +194,7 @@ TEST(MoveGeneration, KingMoves)
 	board.whitePawnBitboard = 768;
 	board.blackPawnBitboard = 2;
 	board.update();
-	generateKingMoves(&board, white, movelist);
+	generateKingMoves(&board, white, movelist,board.whitePieces, board.blackPieces);
 
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 0);
@@ -208,7 +208,7 @@ TEST(MoveGeneration, KingMoves)
 	board.whitePawnBitboard = 512;
 	board.whiteRookBitboard = 2;
 	board.update();
-	generateKingMoves(&board, white, movelist);
+	generateKingMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 0);
 	EXPECT_EQ(movelist[0].to, 8);
@@ -221,7 +221,7 @@ TEST(MoveGeneration, KingMoves)
 	board.blackPawnBitboard = 4647714815446351872;
 	board.whiteRookBitboard = 18014398509481984;
 	board.update();
-	generateKingMoves(&board, black, movelist);
+	generateKingMoves(&board, black, movelist, board.blackPieces, board.whitePieces);
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 63);
 	EXPECT_EQ(movelist[0].to, 54);
@@ -236,7 +236,7 @@ TEST(MoveGeneration, KnightMoves)
 	board.whiteKnightBitboard = 1;
 	board.whitePawnBitboard = 1024;
 	board.update();
-	generateKnightMoves(&board, white, movelist);
+	generateKnightMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 0);
 	EXPECT_EQ(movelist[0].to, 17);
@@ -249,7 +249,7 @@ TEST(MoveGeneration, KnightMoves)
 	board.whitePawnBitboard = 70368744177664;
 	board.blackRookBitboard = 9007199254740992;
 	board.update();
-	generateKnightMoves(&board, white, movelist);
+	generateKnightMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 63);
 	EXPECT_EQ(movelist[0].to, 53);
