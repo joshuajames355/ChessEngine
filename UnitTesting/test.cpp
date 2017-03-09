@@ -240,9 +240,21 @@ TEST(MoveGeneration, KnightMoves)
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 0);
 	EXPECT_EQ(movelist[0].to, 17);
-	EXPECT_EQ(movelist[0].piece, king);
+	EXPECT_EQ(movelist[0].piece, knight);
 	EXPECT_EQ(movelist[0].moveType, quietMove);
 
+	movelist = std::vector<Move>();
+	board = Board();
+	board.whiteKnightBitboard = 9223372036854775808;
+	board.whitePawnBitboard = 70368744177664;
+	board.blackRookBitboard = 9007199254740992;
+	board.update();
+	generateKnightMoves(&board, white, movelist);
+	EXPECT_EQ(movelist.size(), 1);
+	EXPECT_EQ(movelist[0].from, 63);
+	EXPECT_EQ(movelist[0].to, 53);
+	EXPECT_EQ(movelist[0].piece, knight);
+	EXPECT_EQ(movelist[0].moveType, capture);
 }
 
 int main(int argc, char **argv) {

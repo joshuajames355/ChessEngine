@@ -113,17 +113,17 @@ void generateKnightMoves(Board * board, colours aiColour, std::vector<Move>& Mov
     while(knightBitboard)
     {
         uint64_t currentKnight = pop(knightBitboard);
-        uint64_t moveBitboard;
+		uint64_t moveBitboard = 0;
         
-        moveBitboard |= (currentKnight << 15) & ~ fileA; //2 up 1 left
-        moveBitboard |= (currentKnight << 17) & ~ fileH; //2 up 1 Right
-        moveBitboard |= (currentKnight << 6) & ~fileA & ~fileB;//1 up 2 left
-        moveBitboard |= (currentKnight << 10) & ~fileH & ~fileG;//1 up 2 right
-        moveBitboard |= (currentKnight >> 10) & ~fileA & ~fileB;//1 down 2 left
-        moveBitboard |= (currentKnight >> 6) & ~fileH & ~fileG;//1 down 2 right
-        moveBitboard |= (currentKnight >> 17) & ~fileA & ~fileB;//2 down 1 left
-        moveBitboard |= (currentKnight >> 15) & ~fileH & ~fileG;//2 down 1 right
-        
+        moveBitboard |= (currentKnight << 15) & ~friendlyPieces & ~ fileH; //2 up 1 left
+        moveBitboard |= (currentKnight << 17) & ~friendlyPieces & ~ fileA; //2 up 1 Right
+        moveBitboard |= (currentKnight << 06) & ~friendlyPieces & ~fileH & ~fileG;//1 up 2 left
+        moveBitboard |= (currentKnight << 10) & ~friendlyPieces & ~fileA & ~fileB;//1 up 2 right
+        moveBitboard |= (currentKnight >> 10) & ~friendlyPieces & ~fileH & ~fileH;//1 down 2 left
+        moveBitboard |= (currentKnight >> 06) & ~friendlyPieces & ~fileA & ~fileB;//1 down 2 right
+        moveBitboard |= (currentKnight >> 17) & ~friendlyPieces & ~fileH;//2 down 1 left
+        moveBitboard |= (currentKnight >> 15) & ~friendlyPieces & ~fileA;//2 down 1 right
+       
 	    int knightPosIndex = bitScanForward(currentKnight);
     	while (moveBitboard)
 	    {
