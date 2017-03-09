@@ -229,6 +229,22 @@ TEST(MoveGeneration, KingMoves)
 	EXPECT_EQ(movelist[0].moveType, capture);
 }
 
+TEST(MoveGeneration, KnightMoves)
+{
+	std::vector<Move> movelist = std::vector<Move>();
+	Board board = Board();
+	board.whiteKnightBitboard = 1;
+	board.whitePawnBitboard = 1024;
+	board.update();
+	generateKnightMoves(&board, white, movelist);
+	EXPECT_EQ(movelist.size(), 1);
+	EXPECT_EQ(movelist[0].from, 0);
+	EXPECT_EQ(movelist[0].to, 17);
+	EXPECT_EQ(movelist[0].piece, king);
+	EXPECT_EQ(movelist[0].moveType, quietMove);
+
+}
+
 int main(int argc, char **argv) {
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
