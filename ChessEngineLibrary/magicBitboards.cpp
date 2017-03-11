@@ -52,7 +52,7 @@ void magicBitboards::generateMagicMovesRook()
 					break;
 				}
 			}
-			for (int x = square -1; (x % 8) != 0; x--) //Move left
+			for (int x = square -1; (x % 8) != 7 && x > 0; x--) //Move left
 			{
 				possibleMoves |= (uint64_t)1 << x;
 				if ((variation & (uint64_t)1 << x) > 0) //If Their is a blocker on this square;
@@ -60,7 +60,7 @@ void magicBitboards::generateMagicMovesRook()
 					break;
 				}
 			}
-			for (int x = square + 1; ((x + 1) % 8) != 0; x++) //Move right
+			for (int x = square + 1; x % 8 != 7; x++) //Move right
 			{
 				possibleMoves |= (uint64_t)1 << x;
 				if ((variation & (uint64_t)1 << x) > 0) //If Their is a blocker on this square;
