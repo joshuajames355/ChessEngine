@@ -69,7 +69,7 @@ void magicBitboards::generateMagicMovesRook()
 				}
 			}
 
-			int magicIndex = (int)((variation * magicNumberRook[square]) >> magicNumberShiftRook[square]);
+			int magicIndex = (int)((uint64_t)(variation * magicNumberRook[square]) >> magicNumberShiftRook[square]);
 
 			magicMovesRook[square][magicIndex] = possibleMoves;
 
