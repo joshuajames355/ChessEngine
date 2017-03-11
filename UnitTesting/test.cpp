@@ -288,6 +288,48 @@ TEST(MoveGeneration, RookMoves)
 	EXPECT_EQ(movelist[0].moveType, capture);
 }
 
+TEST(MoveGeneration, BishopMoves)
+{
+	magicBitboards temp = magicBitboards();
+
+	std::vector<Move> movelist = std::vector<Move>();
+	Board board = Board();
+	board.whiteBishopBitboard = 1;
+	board.whitePawnBitboard = 262144;
+	board.update();
+	generateBishopMoves(&board, white, movelist, board.whitePieces, board.blackPieces, &temp);
+	EXPECT_EQ(movelist.size(), 1);
+	EXPECT_EQ(movelist[0].from, 0);
+	EXPECT_EQ(movelist[0].to, 9);
+	EXPECT_EQ(movelist[0].piece, bishop);
+	EXPECT_EQ(movelist[0].moveType, quietMove);
+
+	movelist = std::vector<Move>();
+	board = Board();
+	board.whiteBishopBitboard = 128;
+	board.whitePawnBitboard = 2097216;
+	board.update();
+	generateBishopMoves(&board, white, movelist, board.whitePieces, board.blackPieces, &temp);
+	EXPECT_EQ(movelist.size(), 1);
+	EXPECT_EQ(movelist[0].from, 7);
+	EXPECT_EQ(movelist[0].to, 14);
+	EXPECT_EQ(movelist[0].piece, bishop);
+	EXPECT_EQ(movelist[0].moveType, quietMove);
+
+	movelist = std::vector<Move>();
+	board = Board();
+	board.whiteBishopBitboard = 134217728;
+	board.whitePawnBitboard = 68720787456;
+	board.blackPawnBitboard = 17179869184; 
+	board.update();
+	generateBishopMoves(&board, white, movelist, board.whitePieces, board.blackPieces, &temp);
+	EXPECT_EQ(movelist.size(), 1);
+	EXPECT_EQ(movelist[0].from, 27);
+	EXPECT_EQ(movelist[0].to, 34);
+	EXPECT_EQ(movelist[0].piece, bishop);
+	EXPECT_EQ(movelist[0].moveType, capture);
+}
+
 int main(int argc, char **argv) {
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();

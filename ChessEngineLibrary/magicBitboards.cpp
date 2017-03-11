@@ -14,6 +14,7 @@ magicBitboards::magicBitboards()
 	magicNumberRook = {0xa180022080400230, 0x40100040022000, 0x80088020001002, 0x80080280841000, 0x4200042010460008, 0x4800a0003040080, 0x400110082041008, 0x8000a041000880, 0x10138001a080c010, 0x804008200480, 0x10011012000c0, 0x22004128102200, 0x200081201200c, 0x202a001048460004, 0x81000100420004, 0x4000800380004500, 0x208002904001, 0x90004040026008, 0x208808010002001, 0x2002020020704940, 0x8048010008110005, 0x6820808004002200, 0xa80040008023011, 0xb1460000811044, 0x4204400080008ea0, 0xb002400180200184, 0x2020200080100380, 0x10080080100080, 0x2204080080800400, 0xa40080360080, 0x2040604002810b1, 0x8c218600004104, 0x8180004000402000, 0x488c402000401001, 0x4018a00080801004, 0x1230002105001008, 0x8904800800800400, 0x42000c42003810, 0x8408110400b012, 0x18086182000401, 0x2240088020c28000, 0x1001201040c004, 0xa02008010420020, 0x10003009010060, 0x4008008008014, 0x80020004008080, 0x282020001008080, 0x50000181204a0004, 0x102042111804200, 0x40002010004001c0, 0x19220045508200, 0x20030010060a900, 0x8018028040080, 0x88240002008080, 0x10301802830400, 0x332a4081140200, 0x8080010a601241, 0x1008010400021, 0x4082001007241, 0x211009001200509, 0x8015001002441801, 0x801000804000603, 0xc0900220024a401, 0x1000200608243};
 
 	generateMagicMovesRook();
+	generateMagicMovesBishop();
 }
 
 void magicBitboards::generateMagicMovesRook()
@@ -33,7 +34,6 @@ void magicBitboards::generateMagicMovesRook()
 			{
 				variation |= ((uint64_t)1 << setBitsInMask[setBitsInIndex[j]]);
 			}
-			variations.push_back(variation);
 
 			uint64_t possibleMoves = 0;
 			for (int x = square + 8; x <= 63; x += 8) //Move up
@@ -72,6 +72,66 @@ void magicBitboards::generateMagicMovesRook()
 			int magicIndex = (int)((uint64_t)(variation * magicNumberRook[square]) >> magicNumberShiftRook[square]);
 
 			magicMovesRook[square][magicIndex] = possibleMoves;
+
+		}
+	}
+}
+
+void magicBitboards::generateMagicMovesBishop()
+{
+	for (int square = 0; square < 64; square++)
+	{
+		uint64_t mask = bishopMask[square];
+		std::vector<int> setBitsInMask = getSetBits(mask);
+		int variationCount = 1 << bitSum(mask);
+		std::vector<uint64_t> variations;
+
+		for (int i = 0; i < variationCount; i++) //Generation Occupancy Variations
+		{
+			uint64_t variation = 0;
+			std::vector<int> setBitsInIndex = getSetBits(i);
+			for (int j = 0; j < setBitsInIndex.size(); j++)
+			{
+				variation |= ((uint64_t)1 << setBitsInMask[setBitsInIndex[j]]);
+			}
+
+			uint64_t possibleMoves = 0;
+			for (int x = square + 9; x % 8 != 0 && x <= 63; x += 9) //Move Top-Right
+			{
+				possibleMoves |= (uint64_t)1 << x;
+				if ((variation & (uint64_t)1 << x) > 0) //If Their is a blocker on this square;
+				{
+					break;
+				}
+			}
+			for (int x = square - 9; x % 8 != 7 && x >= 0; x -= 9) //Move Bottom-Left
+			{
+				possibleMoves |= (uint64_t)1 << x;
+				if ((variation & (uint64_t)1 << x) > 0) //If Their is a blocker on this square;
+				{
+					break;
+				}
+			}
+			for (int x = square +7 ; x % 8 != 7 && x <= 63; x += 7) //Move Top-Left
+			{
+				possibleMoves |= (uint64_t)1 << x;
+				if ((variation & (uint64_t)1 << x) > 0) //If Their is a blocker on this square;
+				{
+					break;
+				}
+			}
+			for (int x = square - 7; x % 8 != 0 && x >=0; x -= 7) //Move Bottom-Right
+			{
+				possibleMoves |= (uint64_t)1 << x;
+				if ((variation & (uint64_t)1 << x) > 0) //If Their is a blocker on this square;
+				{
+					break;
+				}
+			}
+
+			int magicIndex = (int)((uint64_t)(variation * magicNumberBishop[square]) >> magicNumberShiftBishop[square]);
+
+			magicMovesBishop[square][magicIndex] = possibleMoves;
 
 		}
 	}

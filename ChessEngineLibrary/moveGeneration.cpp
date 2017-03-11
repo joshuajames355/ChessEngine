@@ -163,11 +163,39 @@ void generateRookMoves(Board * board, colours aiColour, std::vector<Move>& Movel
 		int arrayIndex = magicResult >> magicData->magicNumberShiftRook[currentPos];
 		uint64_t moves = magicData->magicMovesRook[currentPos][arrayIndex] & ~friendlyPieces;
 
-		int rookPosIndex = bitScanForward(currentPos);
 		while (moves)
 		{
 			uint64_t rookPos = pop(moves);
-			addMoves(rookPosIndex, bitScanForward(rookPos), rook, Movelist, enemyPieces);
+			addMoves(currentPos, bitScanForward(rookPos), rook, Movelist, enemyPieces);
+		}
+	}
+}
+
+void generateBishopMoves(Board * board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, magicBitboards* magicData)
+{
+	uint64_t bishopBitboard;
+	if (aiColour == white)
+	{
+		bishopBitboard = board->whiteBishopBitboard;
+	}
+	else
+	{
+		bishopBitboard = board->blackBishopBitboard;
+	}
+	while (bishopBitboard)
+	{
+		uint64_t currentBishop = pop(bishopBitboard);
+		int currentPos = bitScanForward(currentBishop);
+
+		uint64_t occupancy = magicData->bishopMask[currentPos] & board->allPieces;
+		uint64_t magicResult = occupancy * magicData->magicNumberBishop[currentPos];
+		int arrayIndex = magicResult >> magicData->magicNumberShiftBishop[currentPos];
+		uint64_t moves = magicData->magicMovesBishop[currentPos][arrayIndex] & ~friendlyPieces;
+
+		while (moves)
+		{
+			uint64_t bishopPos = pop(moves);
+			addMoves(currentPos, bitScanForward(bishopPos), bishop, Movelist, enemyPieces);
 		}
 	}
 }

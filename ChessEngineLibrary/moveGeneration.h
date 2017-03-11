@@ -14,5 +14,6 @@ void generatePawnMoves(Board* board ,colours aiColour, std::vector<Move>& Moveli
 void generateKingMoves(Board* board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces);
 void generateKnightMoves(Board * board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces);
 void generateRookMoves(Board* board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces , magicBitboards* magicData);
+void generateBishopMoves(Board * board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, magicBitboards* magicData);
 
 void addMoves(int start, int end, pieceType piece , std::vector<Move>& Movelist , uint64_t enemyPieces);
