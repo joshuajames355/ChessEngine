@@ -3,8 +3,26 @@
 std::vector<Move> searchForMoves(Board * board, colours aiColour)
 {
 	std::vector<Move> moveList;
+	magicBitboards magicData;
+
+	uint64_t friendlyPieces, enemyPieces;
+	if (aiColour == white)
+	{
+		friendlyPieces = board->whitePieces;
+		enemyPieces = board->blackPieces;
+	}
+	else
+	{
+		friendlyPieces = board->blackPieces;
+		enemyPieces = board->whitePieces;
+	}
 
 	generatePawnMoves(board, aiColour, moveList);
+	generateKingMoves(board, aiColour, moveList,  friendlyPieces,  enemyPieces);
+	generateKnightMoves(board, aiColour, moveList,  friendlyPieces,  enemyPieces);
+	generateRookMoves(board, aiColour, moveList,  friendlyPieces,  enemyPieces);
+	generateBishopMoves(board, aiColour, moveList,  friendlyPieces,  enemyPieces);
+	generateQueenMoves(board, aiColour, moveList,  friendlyPieces,  enemyPieces);
 
 	return moveList;
 }
@@ -65,18 +83,16 @@ void generatePawnMoves(Board* board, colours aiColour, std::vector<Move>& Moveli
 	}
 }
 
-void generateKingMoves(Board * board, colours aiColour, std::vector<Move>& Movelist)
+void generateKingMoves(Board * board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
 {
-	uint64_t kingBitboard , friendlyPieces;
+	uint64_t kingBitboard;
 	if (aiColour == white)
 	{
 		kingBitboard = board->whiteKingBitboard;
-		friendlyPieces = board->whitePieces;
 	}
 	else
 	{
 		kingBitboard = board->blackKingBitboard;
-		friendlyPieces = board->blackPieces;
 	}
 	uint64_t moves = kingBitboard << 8 & ~friendlyPieces;
 	moves |= kingBitboard << 9 & ~friendlyPieces & ~fileA;
@@ -91,23 +107,20 @@ void generateKingMoves(Board * board, colours aiColour, std::vector<Move>& Movel
 	while (moves)
 	{
 		uint64_t kingPos = pop(moves);
-		addMoves(kingPosIndex, bitScanForward(kingPos), aiColour, king, Movelist, board);
+		addMoves(kingPosIndex, bitScanForward(kingPos), king, Movelist, enemyPieces);
 	}
-
 }
 
-void generateKnightMoves(Board * board, colours aiColour, std::vector<Move>& Movelist)
+void generateKnightMoves(Board * board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
 {
-	uint64_t knightBitboard , friendlyPieces;
+	uint64_t knightBitboard;
 	if (aiColour == white)
 	{
 		knightBitboard = board->whiteKnightBitboard;
-		friendlyPieces = board->whitePieces;
 	}
 	else
 	{
 		knightBitboard = board->blackKnightBitboard;
-		friendlyPieces = board->blackPieces;
 	}
 	
     while(knightBitboard)
@@ -128,24 +141,109 @@ void generateKnightMoves(Board * board, colours aiColour, std::vector<Move>& Mov
     	while (moveBitboard)
 	    {
 	       	uint64_t knightPos = pop(moveBitboard);
-	    	addMoves(knightPosIndex, bitScanForward(knightPos), aiColour, knight, Movelist, board);
+	    	addMoves(knightPosIndex, bitScanForward(knightPos), knight, Movelist, enemyPieces);
     	}
     }
 
 
 }
 
-void addMoves(int start, int end, colours aiColour, pieceType piece, std::vector<Move>& Movelist, Board* board)
+void generateRookMoves(Board * board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
 {
-	uint64_t enemyPieces;
+	uint64_t rookBitboard;
 	if (aiColour == white)
 	{
-		enemyPieces = board->blackPieces;
+		rookBitboard = board->whiteRookBitboard;
 	}
 	else
 	{
-		enemyPieces = board->whitePieces;
+		rookBitboard = board->blackRookBitboard;
 	}
+	while (rookBitboard)
+	{
+		uint64_t currentRook = pop(rookBitboard);
+		int currentPos = bitScanForward(currentRook);
+
+		uint64_t occupancy = magicBitboards::rookMask[currentPos] & board->allPieces;
+		uint64_t magicResult = occupancy * magicBitboards::magicNumberRook[currentPos];
+		int arrayIndex = magicResult >> magicBitboards::magicNumberShiftRook[currentPos];
+		uint64_t moves = magicBitboards::magicMovesRook[currentPos][arrayIndex] & ~friendlyPieces;
+
+		while (moves)
+		{
+			uint64_t rookPos = pop(moves);
+			addMoves(currentPos, bitScanForward(rookPos), rook, Movelist, enemyPieces);
+		}
+	}
+}
+
+void generateBishopMoves(Board * board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
+{
+	uint64_t bishopBitboard;
+	if (aiColour == white)
+	{
+		bishopBitboard = board->whiteBishopBitboard;
+	}
+	else
+	{
+		bishopBitboard = board->blackBishopBitboard;
+	}
+	while (bishopBitboard)
+	{
+		uint64_t currentBishop = pop(bishopBitboard);
+		int currentPos = bitScanForward(currentBishop);
+
+		uint64_t occupancy = magicBitboards::bishopMask[currentPos] & board->allPieces;
+		uint64_t magicResult = occupancy * magicBitboards::magicNumberBishop[currentPos];
+		int arrayIndex = magicResult >> magicBitboards::magicNumberShiftBishop[currentPos];
+		uint64_t moves = magicBitboards::magicMovesBishop[currentPos][arrayIndex] & ~friendlyPieces;
+
+		while (moves)
+		{
+			uint64_t bishopPos = pop(moves);
+			addMoves(currentPos, bitScanForward(bishopPos), bishop, Movelist, enemyPieces);
+		}
+	}
+}
+
+void generateQueenMoves(Board * board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
+{
+	uint64_t queenBitboard;
+	if (aiColour == white)
+	{
+		queenBitboard = board->whiteQueenBitboard;
+	}
+	else
+	{
+		queenBitboard = board->blackQueenBitboard;
+	}
+	while (queenBitboard)
+	{
+		uint64_t currentQueen = pop(queenBitboard);
+		int currentPos = bitScanForward(currentQueen);
+
+		//Moves bishop moves
+		uint64_t occupancy = magicBitboards::bishopMask[currentPos] & board->allPieces;
+		uint64_t magicResult = occupancy * magicBitboards::magicNumberBishop[currentPos];
+		int arrayIndex = magicResult >> magicBitboards::magicNumberShiftBishop[currentPos];
+		uint64_t moves = magicBitboards::magicMovesBishop[currentPos][arrayIndex] & ~friendlyPieces;
+
+		//Rook moves
+		occupancy = magicBitboards::rookMask[currentPos] & board->allPieces;
+		magicResult = occupancy * magicBitboards::magicNumberRook[currentPos];
+		arrayIndex = magicResult >> magicBitboards::magicNumberShiftRook[currentPos];
+		moves |= magicBitboards::magicMovesRook[currentPos][arrayIndex] & ~friendlyPieces;
+
+		while (moves)
+		{
+			uint64_t queenPos = pop(moves);
+			addMoves(currentPos, bitScanForward(queenPos), queen, Movelist, enemyPieces);
+		}
+	}
+}
+
+void addMoves(int start, int end, pieceType piece, std::vector<Move>& Movelist, uint64_t enemyPieces)
+{
 	if ((((uint64_t)1 << end) & enemyPieces )!= 0) //If the move is a capture
 	{
 		Movelist.push_back(Move(start, end, capture, piece));

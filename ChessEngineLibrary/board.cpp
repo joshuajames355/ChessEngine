@@ -307,18 +307,18 @@ const int index64[64] = {
 	25, 14, 19,  9, 13,  8,  7,  6
 };
 
-/**
-* bitScanForward
-* @author Martin Läuter (1997)
-*         Charles E. Leiserson
-*         Harald Prokop
-*         Keith H. Randall
-* "Using de Bruijn Sequences to Index a 1 in a Computer Word"
-* @param bb bitboard to scan
-* @precondition bb != 0
-* @return index (0..63) of least significant one bit
-*/
 int bitScanForward(uint64_t bitboard) {
 	const uint64_t debruijn64 = 285870213051386505;
 	return index64[((bitboard & -bitboard) * debruijn64) >> 58];
+}
+
+std::vector<int> getSetBits(uint64_t bitboard)
+{
+	std::vector<int> setBits;
+	while (bitboard)
+	{
+		uint64_t pos = pop(bitboard);
+		setBits.push_back(bitScanForward(pos));
+	}
+	return setBits;
 }
