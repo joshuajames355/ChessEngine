@@ -9,22 +9,22 @@
 class magicBitboards
 {
 public:
-	magicBitboards();
+	static std::array<uint64_t, 64> bishopMask;
+	static std::array<uint64_t, 64> rookMask;
 
+	static std::array<int, 64> magicNumberShiftBishop;
+	static std::array<int, 64> magicNumberShiftRook;
 
-	std::array<uint64_t, 64> bishopMask;
-	std::array<uint64_t, 64> rookMask;
+	static std::array<uint64_t, 64> magicNumberRook;
+	static std::array<uint64_t, 64> magicNumberBishop;
 
-	std::array<int, 64> magicNumberShiftBishop;
-	std::array<int, 64> magicNumberShiftRook;
+	static std::array<std::unordered_map<int, uint64_t>, 64> magicMovesRook;
+	static std::array<std::unordered_map<int, uint64_t>, 64> magicMovesBishop;
 
-	std::array<uint64_t, 64> magicNumberRook;
-	std::array<uint64_t, 64> magicNumberBishop;
+	static void setupMagicBitboards();
 
-	std::array<std::unordered_map<int, uint64_t>, 64> magicMovesRook;
-	std::array<std::unordered_map<int, uint64_t>, 64> magicMovesBishop;
-
-	void generateMagicMovesRook();
-	void generateMagicMovesBishop();
+private:
+	static void generateMagicMovesRook();
+	static void generateMagicMovesBishop();
 };
 

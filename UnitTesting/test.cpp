@@ -260,14 +260,14 @@ TEST(MoveGeneration, KnightMoves)
 
 TEST(MoveGeneration, RookMoves)
 {
-	magicBitboards temp = magicBitboards();
+	
 
 	std::vector<Move> movelist = std::vector<Move>();
 	Board board = Board();
 	board.whiteRookBitboard = 1;
 	board.whitePawnBitboard = 260;
 	board.update();
-	generateRookMoves(&board, white, movelist, board.whitePieces, board.blackPieces,&temp);
+	generateRookMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 0);
 	EXPECT_EQ(movelist[0].to, 1);
@@ -280,7 +280,7 @@ TEST(MoveGeneration, RookMoves)
 	board.whitePawnBitboard = 2;
 	board.blackPawnBitboard = 256;
 	board.update();
-	generateRookMoves(&board, white, movelist, board.whitePieces, board.blackPieces, &temp);
+	generateRookMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 0);
 	EXPECT_EQ(movelist[0].to, 8);
@@ -290,14 +290,12 @@ TEST(MoveGeneration, RookMoves)
 
 TEST(MoveGeneration, BishopMoves)
 {
-	magicBitboards temp = magicBitboards();
-
 	std::vector<Move> movelist = std::vector<Move>();
 	Board board = Board();
 	board.whiteBishopBitboard = 1;
 	board.whitePawnBitboard = 262144;
 	board.update();
-	generateBishopMoves(&board, white, movelist, board.whitePieces, board.blackPieces, &temp);
+	generateBishopMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 0);
 	EXPECT_EQ(movelist[0].to, 9);
@@ -309,7 +307,7 @@ TEST(MoveGeneration, BishopMoves)
 	board.whiteBishopBitboard = 128;
 	board.whitePawnBitboard = 2097216;
 	board.update();
-	generateBishopMoves(&board, white, movelist, board.whitePieces, board.blackPieces, &temp);
+	generateBishopMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 7);
 	EXPECT_EQ(movelist[0].to, 14);
@@ -322,7 +320,7 @@ TEST(MoveGeneration, BishopMoves)
 	board.whitePawnBitboard = 68720787456;
 	board.blackPawnBitboard = 17179869184; 
 	board.update();
-	generateBishopMoves(&board, white, movelist, board.whitePieces, board.blackPieces, &temp);
+	generateBishopMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 27);
 	EXPECT_EQ(movelist[0].to, 34);
@@ -330,7 +328,62 @@ TEST(MoveGeneration, BishopMoves)
 	EXPECT_EQ(movelist[0].moveType, capture);
 }
 
-int main(int argc, char **argv) {
+TEST(MoveGeneration, QueenMoves)
+{
+	std::vector<Move> movelist = std::vector<Move>();
+	Board board = Board();
+	board.whiteQueenBitboard = 1;
+	board.whitePawnBitboard = 262402;
+	board.update();
+	generateQueenMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
+	EXPECT_EQ(movelist.size(), 1);
+	EXPECT_EQ(movelist[0].from, 0);
+	EXPECT_EQ(movelist[0].to, 9);
+	EXPECT_EQ(movelist[0].piece, queen);
+	EXPECT_EQ(movelist[0].moveType, quietMove);
+
+	movelist = std::vector<Move>();
+	board = Board();
+	board.whiteQueenBitboard = 128;
+	board.whitePawnBitboard = 2129984;
+	board.update();
+	generateQueenMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
+	EXPECT_EQ(movelist.size(), 1);
+	EXPECT_EQ(movelist[0].from, 7);
+	EXPECT_EQ(movelist[0].to, 14);
+	EXPECT_EQ(movelist[0].piece, queen);
+	EXPECT_EQ(movelist[0].moveType, quietMove);
+
+	movelist = std::vector<Move>();
+	board = Board();
+	board.whiteQueenBitboard = 1;
+	board.whitePawnBitboard = 772;
+	board.update();
+	generateQueenMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
+	EXPECT_EQ(movelist.size(), 1);
+	EXPECT_EQ(movelist[0].from, 0);
+	EXPECT_EQ(movelist[0].to, 1);
+	EXPECT_EQ(movelist[0].piece, queen);
+	EXPECT_EQ(movelist[0].moveType, quietMove);
+
+	movelist = std::vector<Move>();
+	board = Board();
+	board.whiteQueenBitboard = 1;
+	board.whitePawnBitboard = 514;
+	board.blackPawnBitboard = 256;
+	board.update();
+	generateQueenMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
+	EXPECT_EQ(movelist.size(), 1);
+	EXPECT_EQ(movelist[0].from, 0);
+	EXPECT_EQ(movelist[0].to, 8);
+	EXPECT_EQ(movelist[0].piece, queen);
+	EXPECT_EQ(movelist[0].moveType, capture);
+}
+
+int main(int argc, char **argv) 
+{
+	magicBitboards temp = magicBitboards();
+	temp.setupMagicBitboards();
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
 }

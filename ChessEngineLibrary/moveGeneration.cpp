@@ -3,6 +3,7 @@
 std::vector<Move> searchForMoves(Board * board, colours aiColour)
 {
 	std::vector<Move> moveList;
+	magicBitboards magicData;
 
 	uint64_t friendlyPieces, enemyPieces;
 	if (aiColour == white)
@@ -17,6 +18,11 @@ std::vector<Move> searchForMoves(Board * board, colours aiColour)
 	}
 
 	generatePawnMoves(board, aiColour, moveList);
+	generateKingMoves(board, aiColour, moveList,  friendlyPieces,  enemyPieces);
+	generateKnightMoves(board, aiColour, moveList,  friendlyPieces,  enemyPieces);
+	generateRookMoves(board, aiColour, moveList,  friendlyPieces,  enemyPieces);
+	generateBishopMoves(board, aiColour, moveList,  friendlyPieces,  enemyPieces);
+	generateQueenMoves(board, aiColour, moveList,  friendlyPieces,  enemyPieces);
 
 	return moveList;
 }
@@ -142,7 +148,7 @@ void generateKnightMoves(Board * board, colours aiColour, std::vector<Move>& Mov
 
 }
 
-void generateRookMoves(Board * board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, magicBitboards* magicData)
+void generateRookMoves(Board * board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
 {
 	uint64_t rookBitboard;
 	if (aiColour == white)
@@ -158,10 +164,10 @@ void generateRookMoves(Board * board, colours aiColour, std::vector<Move>& Movel
 		uint64_t currentRook = pop(rookBitboard);
 		int currentPos = bitScanForward(currentRook);
 
-		uint64_t occupancy = magicData->rookMask[currentPos] & board->allPieces;
-		uint64_t magicResult = occupancy * magicData->magicNumberRook[currentPos];
-		int arrayIndex = magicResult >> magicData->magicNumberShiftRook[currentPos];
-		uint64_t moves = magicData->magicMovesRook[currentPos][arrayIndex] & ~friendlyPieces;
+		uint64_t occupancy = magicBitboards::rookMask[currentPos] & board->allPieces;
+		uint64_t magicResult = occupancy * magicBitboards::magicNumberRook[currentPos];
+		int arrayIndex = magicResult >> magicBitboards::magicNumberShiftRook[currentPos];
+		uint64_t moves = magicBitboards::magicMovesRook[currentPos][arrayIndex] & ~friendlyPieces;
 
 		while (moves)
 		{
@@ -171,7 +177,7 @@ void generateRookMoves(Board * board, colours aiColour, std::vector<Move>& Movel
 	}
 }
 
-void generateBishopMoves(Board * board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, magicBitboards* magicData)
+void generateBishopMoves(Board * board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
 {
 	uint64_t bishopBitboard;
 	if (aiColour == white)
@@ -187,15 +193,51 @@ void generateBishopMoves(Board * board, colours aiColour, std::vector<Move>& Mov
 		uint64_t currentBishop = pop(bishopBitboard);
 		int currentPos = bitScanForward(currentBishop);
 
-		uint64_t occupancy = magicData->bishopMask[currentPos] & board->allPieces;
-		uint64_t magicResult = occupancy * magicData->magicNumberBishop[currentPos];
-		int arrayIndex = magicResult >> magicData->magicNumberShiftBishop[currentPos];
-		uint64_t moves = magicData->magicMovesBishop[currentPos][arrayIndex] & ~friendlyPieces;
+		uint64_t occupancy = magicBitboards::bishopMask[currentPos] & board->allPieces;
+		uint64_t magicResult = occupancy * magicBitboards::magicNumberBishop[currentPos];
+		int arrayIndex = magicResult >> magicBitboards::magicNumberShiftBishop[currentPos];
+		uint64_t moves = magicBitboards::magicMovesBishop[currentPos][arrayIndex] & ~friendlyPieces;
 
 		while (moves)
 		{
 			uint64_t bishopPos = pop(moves);
 			addMoves(currentPos, bitScanForward(bishopPos), bishop, Movelist, enemyPieces);
+		}
+	}
+}
+
+void generateQueenMoves(Board * board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
+{
+	uint64_t queenBitboard;
+	if (aiColour == white)
+	{
+		queenBitboard = board->whiteQueenBitboard;
+	}
+	else
+	{
+		queenBitboard = board->blackQueenBitboard;
+	}
+	while (queenBitboard)
+	{
+		uint64_t currentQueen = pop(queenBitboard);
+		int currentPos = bitScanForward(currentQueen);
+
+		//Moves bishop moves
+		uint64_t occupancy = magicBitboards::bishopMask[currentPos] & board->allPieces;
+		uint64_t magicResult = occupancy * magicBitboards::magicNumberBishop[currentPos];
+		int arrayIndex = magicResult >> magicBitboards::magicNumberShiftBishop[currentPos];
+		uint64_t moves = magicBitboards::magicMovesBishop[currentPos][arrayIndex] & ~friendlyPieces;
+
+		//Rook moves
+		occupancy = magicBitboards::rookMask[currentPos] & board->allPieces;
+		magicResult = occupancy * magicBitboards::magicNumberRook[currentPos];
+		arrayIndex = magicResult >> magicBitboards::magicNumberShiftRook[currentPos];
+		moves |= magicBitboards::magicMovesRook[currentPos][arrayIndex] & ~friendlyPieces;
+
+		while (moves)
+		{
+			uint64_t queenPos = pop(moves);
+			addMoves(currentPos, bitScanForward(queenPos), queen, Movelist, enemyPieces);
 		}
 	}
 }
