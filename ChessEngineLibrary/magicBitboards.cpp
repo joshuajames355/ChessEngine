@@ -31,7 +31,7 @@ void magicBitboards::generateMagicMovesRook()
 			std::vector<int> setBitsInIndex = getSetBits(i);
 			for (int j = 0; j < setBitsInIndex.size(); j++)
 			{
-				variation |= (1L << setBitsInMask[setBitsInIndex[j]]);
+				variation |= ((uint64_t)1 << setBitsInMask[setBitsInIndex[j]]);
 			}
 			variations.push_back(variation);
 
