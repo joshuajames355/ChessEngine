@@ -5,6 +5,7 @@
 #include "scoring.h"
 #include "move.h"
 #include "moveGeneration.h"
+#include "magicBitboards.h"
 
 #include <iostream>
 #include <stdint.h>
@@ -254,6 +255,36 @@ TEST(MoveGeneration, KnightMoves)
 	EXPECT_EQ(movelist[0].from, 63);
 	EXPECT_EQ(movelist[0].to, 53);
 	EXPECT_EQ(movelist[0].piece, knight);
+	EXPECT_EQ(movelist[0].moveType, capture);
+}
+
+TEST(MoveGeneration, RookMoves)
+{
+	magicBitboards temp = magicBitboards();
+
+	std::vector<Move> movelist = std::vector<Move>();
+	Board board = Board();
+	board.whiteRookBitboard = 1;
+	board.whitePawnBitboard = 260;
+	board.update();
+	generateRookMoves(&board, white, movelist, board.whitePieces, board.blackPieces,&temp);
+	EXPECT_EQ(movelist.size(), 1);
+	EXPECT_EQ(movelist[0].from, 0);
+	EXPECT_EQ(movelist[0].to, 1);
+	EXPECT_EQ(movelist[0].piece, rook);
+	EXPECT_EQ(movelist[0].moveType, quietMove);
+
+	movelist = std::vector<Move>();
+	board = Board();
+	board.whiteRookBitboard = 1;
+	board.whitePawnBitboard = 2;
+	board.blackPawnBitboard = 256;
+	board.update();
+	generateRookMoves(&board, white, movelist, board.whitePieces, board.blackPieces, &temp);
+	EXPECT_EQ(movelist.size(), 1);
+	EXPECT_EQ(movelist[0].from, 0);
+	EXPECT_EQ(movelist[0].to, 8);
+	EXPECT_EQ(movelist[0].piece, rook);
 	EXPECT_EQ(movelist[0].moveType, capture);
 }
 

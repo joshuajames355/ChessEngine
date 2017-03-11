@@ -142,6 +142,36 @@ void generateKnightMoves(Board * board, colours aiColour, std::vector<Move>& Mov
 
 }
 
+void generateRookMoves(Board * board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, magicBitboards* magicData)
+{
+	uint64_t rookBitboard;
+	if (aiColour == white)
+	{
+		rookBitboard = board->whiteRookBitboard;
+	}
+	else
+	{
+		rookBitboard = board->blackRookBitboard;
+	}
+	while (rookBitboard)
+	{
+		uint64_t currentRook = pop(rookBitboard);
+		int currentPos = bitScanForward(currentRook);
+
+		uint64_t occupancy = magicData->rookMask[currentPos] & board->allPieces;
+		uint64_t magicResult = occupancy * magicData->magicNumberRook[currentPos];
+		int arrayIndex = magicResult >> magicData->magicNumberShiftRook[currentPos];
+		uint64_t moves = magicData->magicMovesRook[currentPos][arrayIndex] & ~friendlyPieces;
+
+		int rookPosIndex = bitScanForward(currentPos);
+		while (moves)
+		{
+			uint64_t rookPos = pop(moves);
+			addMoves(rookPosIndex, bitScanForward(rookPos), rook, Movelist, enemyPieces);
+		}
+	}
+}
+
 void addMoves(int start, int end, pieceType piece, std::vector<Move>& Movelist, uint64_t enemyPieces)
 {
 	if ((((uint64_t)1 << end) & enemyPieces )!= 0) //If the move is a capture

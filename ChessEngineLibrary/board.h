@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <cmath>
 #include <iostream>
+#include <vector>
+
 #include "piece.h"
 
 #define emptyBitboard 0
@@ -59,3 +61,4 @@ public:
 int bitSum(uint64_t bitboard);
 uint64_t pop(uint64_t& bitboard);
 int bitScanForward(uint64_t bitboard);
+std::vector<int> getSetBits(uint64_t bitboard);
