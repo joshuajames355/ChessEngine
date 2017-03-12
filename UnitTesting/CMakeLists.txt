@@ -1,4 +1,6 @@
-add_executable(UnitTests test.cpp)
+file(GLOB Sources "*.cpp")
+
+add_executable(UnitTests ${Sources})
 
 target_link_libraries (UnitTests gtest)
 target_link_libraries (UnitTests gtest_main)
