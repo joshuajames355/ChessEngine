@@ -213,32 +213,32 @@ void Board::setBitboard(colours colour, pieceType piece, uint64_t bitboard)
 
 void Board::removePiece(uint64_t bitboard)
 {
-	if (whitePawnBitboard & bitboard != 0)
+	if ((whitePawnBitboard & bitboard) != 0)
 	{
 		whitePawnBitboard = whitePawnBitboard & ~bitboard;
 		return;
 	}
-	if (whiteKnightBitboard & bitboard != 0)
+	if ((whiteKnightBitboard & bitboard) != 0)
 	{
 		whiteKnightBitboard = whiteKnightBitboard & ~bitboard;
 		return;
 	}
-	if (whiteBishopBitboard & bitboard != 0)
+	if ((whiteBishopBitboard & bitboard) != 0)
 	{
 		whiteBishopBitboard = whiteBishopBitboard & ~bitboard;
 		return;
 	}
-	if (whiteRookBitboard & bitboard != 0)
+	if ((whiteRookBitboard & bitboard) != 0)
 	{
 		whiteRookBitboard = whiteRookBitboard & ~bitboard;
 		return;
 	}
-	if (whiteQueenBitboard & bitboard != 0)
+	if ((whiteQueenBitboard & bitboard) != 0)
 	{
 		whiteQueenBitboard = whiteQueenBitboard & ~bitboard;
 		return;
 	}
-	if (whiteKingBitboard & bitboard != 0)
+	if ((whiteKingBitboard & bitboard) != 0)
 	{
 		whiteKingBitboard = whiteKingBitboard & ~bitboard;
 		return;
@@ -246,32 +246,32 @@ void Board::removePiece(uint64_t bitboard)
 
 
 
-	if (blackPawnBitboard & bitboard != 0)
+	if ((blackPawnBitboard & bitboard) != 0)
 	{
 		blackPawnBitboard = blackPawnBitboard & ~bitboard;
 		return;
 	}
-	if (blackKnightBitboard & bitboard != 0)
+	if ((blackKnightBitboard & bitboard) != 0)
 	{
 		blackKnightBitboard = blackKnightBitboard & ~bitboard;
 		return;
 	}
-	if (blackBishopBitboard & bitboard != 0)
+	if ((blackBishopBitboard & bitboard) != 0)
 	{
 		blackBishopBitboard = blackBishopBitboard & ~bitboard;
 		return;
 	}
-	if (blackRookBitboard & bitboard != 0)
+	if ((blackRookBitboard & bitboard) != 0)
 	{
 		blackRookBitboard = blackRookBitboard & ~bitboard;
 		return;
 	}
-	if (blackQueenBitboard & bitboard != 0)
+	if ((blackQueenBitboard & bitboard) != 0)
 	{
 		blackQueenBitboard = blackQueenBitboard & ~bitboard;
 		return;
 	}
-	if (blackKingBitboard & bitboard != 0)
+	if ((blackKingBitboard & bitboard) != 0)
 	{
 		blackKingBitboard = blackKingBitboard & ~bitboard;
 		return;

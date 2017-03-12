@@ -8,6 +8,7 @@ enum MoveType{quietMove,capture};
 
 struct Move
 {
+	Move();
 	Move(int newFrom , int newTo , MoveType newMoveType,pieceType newPieceType);
 	int from;
 	int to;

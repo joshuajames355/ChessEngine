@@ -16,24 +16,25 @@ void moveTreeNode::fillTree(colours aiColour, colours nodeColour , bool first)
 
 	if (recursionLayers == 0)
 	{
-		//score = calculateScoreDiff(move, aiColour);
+		score = calculateScoreDiff(&move, aiColour);
 		return;
 	}
 
 	if (aiColour == nodeColour) //If maximizer
 	{
-		/*
-		std::vector<std::array<std::array<piece, 8>, 8>> moves = searchForMoves(move, nodeColour);
+		
+		std::vector<Move> moves = searchForMoves(&move, nodeColour);
 		score = -10000;
 		for (int x = 0; x < moves.size(); x++)
 		{
 			moveTreeNode newChild;
-			newChild.move = moves[x];
+			newChild.move = moves[x].applyMove(&move , nodeColour);
 			newChild.recursionLayers = recursionLayers - 1;
 			newChild.alpha = alpha;
 			newChild.beta = beta;
 			if (first)
 			{
+				newChild.moveRaw = moves[x];
 				children.push_back(newChild);
 				children[children.size() - 1].fillTree(aiColour, newColour, false);
 				score = std::max(score, children[children.size() - 1].score);
@@ -54,12 +55,12 @@ void moveTreeNode::fillTree(colours aiColour, colours nodeColour , bool first)
 	}
 	else // If minimizer
 	{
-		std::vector<std::array<std::array<piece, 8>, 8>> moves = searchForMoves(move, nodeColour);
+		std::vector<Move> moves = searchForMoves(&move, nodeColour);
 		score = 10000;
 		for (int x = 0; x < moves.size(); x++)
 		{
 			moveTreeNode newChild;
-			newChild.move = moves[x];
+			newChild.move = moves[x].applyMove(&move, aiColour);
 			newChild.recursionLayers = recursionLayers - 1;
 			newChild.alpha = alpha;
 			newChild.beta = beta;
@@ -82,6 +83,6 @@ void moveTreeNode::fillTree(colours aiColour, colours nodeColour , bool first)
 				return;
 			}
 		}
-		*/
+		
 	}
 }

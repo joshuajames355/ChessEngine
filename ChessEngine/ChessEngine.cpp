@@ -5,103 +5,18 @@
 
 int main(int argc, char *argv[])
 {
-
-	Board newBoard;
-	newBoard.blackRookBitboard = 1152921504606846976;
-	std::cout << calculateScoreDiff(&newBoard, white) << "\n";
-	newBoard.printBoard();
-
-	int test;
-	std::cin >> test;
-
-	//engineLoop();
-
-	/*
-	const int SEARCHDEPTH = 4;
-
-	if (argc < 65)
-	{
-		std::cout << "Not Enough Arguments \n";
-		return 0;
-	}
-
-	//Imports board
-	int counter = 1;
-	std::array<std::array<piece, 8>, 8> board;
-	for (int y = 0; y < 8; y++)
-	{
-		for (int x = 0; x < 8; x++)
-		{
-			board[x][y] = piece(std::string(argv[counter]));
-			counter++;
-		}
-	}
-
-	printBoard(board);
-	std::cout << "\n\n";
-
-	//Loads in colour of AI
-	colours aiColour;
-	if (std::string(argv[65]) == "white")
-	{
-		aiColour = white;
-	}
-	else if(std::string(argv[65]) == "black")
-	{
-		aiColour = black;
-	}
-	else
-	{
-		aiColour = white;
-	}
-
-	moveTreeNode moveTree;
-	moveTree.move = board;
-	moveTree.alpha = -9999999;
-	moveTree.beta = 9999999;
-
-	moveTree.recursionLayers = SEARCHDEPTH;
-
-	time_t timer = time(NULL);
-
-	moveTree.fillTree(aiColour , aiColour,true);
-
-	int bestScore = -999999999;
-	std::array<std::array<piece, 8>, 8> bestMove;
-	for (int x = 0; x < moveTree.children.size(); x++)
-	{
-		if (moveTree.children[x].score > bestScore)
-		{
-			bestMove = moveTree.children[x].move;
-			bestScore = moveTree.children[x].score;
-		}
-	}
-
-	std::cout << "\n" << difftime(time(NULL), timer) << "\n";
-	std::cout << "Done\n\n\n\n";
-
-	printBoard(bestMove);
-
-	std::cout << "\n" << bestScore << "\n" << findNameDifference(board, bestMove);
-
-
-	int test;
-	std::cin >> test;
-	
-	*/
+	magicBitboards::setupMagicBitboards();
+	engineLoop();
 }
 
 void engineLoop()
 {
-	std::array<std::array<piece, 8>, 8> board ={ {
-	{ piece("BR"),piece("BP"),piece("  ") ,piece("  ") ,piece("  ") ,piece("  ") ,piece("WP") ,piece("WR") },
-	{ piece("BN"),piece("BP"),piece("  ") ,piece("  ") ,piece("  ") ,piece("  ") ,piece("WP") ,piece("WN") },
-	{ piece("BB"),piece("BP"),piece("  ") ,piece("  ") ,piece("  ") ,piece("  ") ,piece("WP") ,piece("WB") },
-	{ piece("BK"),piece("BP"),piece("  ") ,piece("  ") ,piece("  ") ,piece("  ") ,piece("WP") ,piece("WK") },
-	{ piece("BQ"),piece("BP"),piece("  ") ,piece("  ") ,piece("  ") ,piece("  ") ,piece("WP") ,piece("WQ") },
-	{ piece("BB"),piece("BP"),piece("  ") ,piece("  ") ,piece("  ") ,piece("  ") ,piece("WP") ,piece("WB") },
-	{ piece("BN"),piece("BP"),piece("  ") ,piece("  ") ,piece("  ") ,piece("  ") ,piece("WP") ,piece("WN") },
-	{ piece("BR"),piece("BP"),piece("  ") ,piece("  ") ,piece("  ") ,piece("  ") ,piece("WP") ,piece("WR") }} };
+
+	int SEARCHDEPTH = 4;
+
+
+	Board board = Board();
+	board.defaults();
 
 	colours aiColour = white;
 	while (true)
@@ -114,6 +29,7 @@ void engineLoop()
 		{
 			std::cout << "id name UNSR Chess System\n";
 			std::cout << "id author UNSR\n";
+			std::cout << "option name SearchDepth type spin default 4 min 2 max 20\n";
 			std::cout << "uciok\n";
 		}
 		if (response == "isready")
@@ -124,33 +40,46 @@ void engineLoop()
 		{
 			break;
 		}
-		if (words[0] == "position" && words[1] == "startpos" && words[2] == "moves")
+		if (words[0] == "setoption" && words[1] == "name")
 		{
-			board = { {
-				{ piece("BR"),piece("BP"),piece("  ") ,piece("  ") ,piece("  ") ,piece("  ") ,piece("WP") ,piece("WR") },
-				{ piece("BN"),piece("BP"),piece("  ") ,piece("  ") ,piece("  ") ,piece("  ") ,piece("WP") ,piece("WN") },
-				{ piece("BB"),piece("BP"),piece("  ") ,piece("  ") ,piece("  ") ,piece("  ") ,piece("WP") ,piece("WB") },
-				{ piece("BK"),piece("BP"),piece("  ") ,piece("  ") ,piece("  ") ,piece("  ") ,piece("WP") ,piece("WK") },
-				{ piece("BQ"),piece("BP"),piece("  ") ,piece("  ") ,piece("  ") ,piece("  ") ,piece("WP") ,piece("WQ") },
-				{ piece("BB"),piece("BP"),piece("  ") ,piece("  ") ,piece("  ") ,piece("  ") ,piece("WP") ,piece("WB") },
-				{ piece("BN"),piece("BP"),piece("  ") ,piece("  ") ,piece("  ") ,piece("  ") ,piece("WP") ,piece("WN") },
-				{ piece("BR"),piece("BP"),piece("  ") ,piece("  ") ,piece("  ") ,piece("  ") ,piece("WP") ,piece("WR") } } };
-
-			for (int x = 3; x < words.size(); x++)
+			if (words[2] == "SearchDepth" && words[3] == "value")
 			{
-				board = applyMove(board, words[x]);
+				SEARCHDEPTH = std::stoi(words[4]);
 			}
-			if ((words.size() - 3)%2 == 0)
+		}
+
+		if (words[0] == "position" && words[1] == "startpos")
+		{
+			if (words.size() == 2)
 			{
-				std::cout << "white\n";
+				std::cout << "test";
+				board.defaults();
 				aiColour = white;
 			}
-			else
+			else if (words[2] == "moves")
 			{
-				std::cout << "black\n";
-				aiColour = black;
+				board.defaults();
+
+				aiColour = white;
+				Move currentMove;
+				for (int x = 3; x < words.size(); x++)
+				{
+					currentMove = moveFromNotation(words[x], &board);
+					std::cout << "from: " << currentMove.from << " to: " << currentMove.to << "\n";
+					board = currentMove.applyMove(&board, aiColour);
+					board.update();
+					switch (aiColour)
+					{
+					case white:
+						aiColour = black;
+						break;
+					case black:
+						aiColour = white;
+						break;
+					}
+				}
+				std::cout << board.blackPawnBitboard << "\n";
 			}
-			printBoard(board);
 		}
 
 		if (words[0] == "go")
@@ -160,24 +89,34 @@ void engineLoop()
 			moveTree.alpha = -9999999;
 			moveTree.beta = 9999999;
 
-			moveTree.recursionLayers = 5;
+			switch (aiColour)
+			{
+			case white:
+				std::cout << "White\n";
+				break;
+			case black:
+				std::cout << "Black\n";
+				break;
+			}
+
+			moveTree.recursionLayers = SEARCHDEPTH;
+			board.printBoard();
 
 			moveTree.fillTree(aiColour, aiColour, true);
 
 			int bestScore = -999999999;
-			std::array<std::array<piece, 8>, 8> bestMove;
+			Move bestMove;
 			for (int x = 0; x < moveTree.children.size(); x++)
 			{
 				if (moveTree.children[x].score > bestScore)
 				{
-					bestMove = moveTree.children[x].move;
+					bestMove = moveTree.children[x].moveRaw;
 					bestScore = moveTree.children[x].score;
 				}
 			}
 
-			printBoard(bestMove);
 
-			std::cout << "\nbestmove " << findNameDifference(board, bestMove , aiColour) << "\n";
+			std::cout << "\nbestmove " << notationFromMove(bestMove) << "\n";
 		}
 	}
 
@@ -210,60 +149,3 @@ std::vector<std::string> split(std::string words)
 	return wordList;
 }
 
-std::array<std::array<piece, 8>, 8> applyMove(std::array<std::array<piece, 8>, 8> board, std::string uciCommand)
-{
-	int x1 = uciCommand[0] - 'a';
-	int y1 = 8 - (uciCommand[1] - '0');
-	int x2 = uciCommand[2] - 'a';
-	int y2 = 8 - (uciCommand[3] - '0');
-
-	board[x2][y2] = board[x1][y1];
-	board[x1][y1].type = blank;
-	return board; 
-}
-
-std::string findNameDifference(std::array<std::array<piece, 8>, 8> board1, std::array<std::array<piece, 8>, 8> board2, colours aiColour)
-{
-	int x1, x2, y1, y2;
-	for (int y = 0; y < 8; y++)
-	{
-		for (int x = 0; x < 8; x++)
-		{
-			if (board1[x][y].type == board2[x][y].type && board1[x][y].colour == board2[x][y].colour)
-			{
-				//Match
-			}
-			else if (board1[x][y].colour == aiColour)
-			{
-				if (board1[x][y].type == blank) //Moved from this piece
-				{
-					x2 = x;
-					y2 = y;
-				}
-				else //Moved to this piece
-				{
-					x1 = x;
-					y1 = y;
-				}
-			}
-		}
-	}
-
-	
-	const char charArray[5] = { x1 + 97,8 - y1 + '0' , x2 + 97 ,8 - y2 +'0',0};
-	return  std::string(charArray);
-}
-
-void printBoard(std::array<std::array<piece, 8>, 8> board)
-{
-	for (int y = 0; y < 8; y++)
-	{
-		std::cout << " | ";
-		for (int x = 0; x < 8; x++)
-		{
-			std::cout << board[x][y].toString() << " | ";
-		}
-		std::cout << "\n";
-	}
-	std::cout << "\n";
-}

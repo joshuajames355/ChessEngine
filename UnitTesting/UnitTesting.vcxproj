@@ -148,6 +148,7 @@
     <ClCompile Include="MoveGeneration.cpp" />
     <ClCompile Include="Scoring.cpp" />
     <ClCompile Include="test.cpp" />
+    <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ChessEngineLibrary\ChessEngineLibrary.vcxproj">

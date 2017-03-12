@@ -1,5 +1,9 @@
 #include "move.h"
 
+Move::Move()
+{
+}
+
 Move::Move(int newFrom, int newTo, MoveType newMoveType, pieceType newPieceType)
 {
 	moveType = newMoveType;
@@ -16,21 +20,23 @@ Board Move::applyMove(Board * board, colours colour)
 	{
 		Board newBoard = *board;  //Moves the piece
 		uint64_t bitboard = newBoard.findBitboard(colour, piece);
-		bitboard = (bitboard & ~(1 << from)) | 1 << to;
+		bitboard = (bitboard & ~((uint64_t)1 << from)) | ((uint64_t)1 << to);
 		newBoard.setBitboard(colour, piece, bitboard);
 		newBoard.update();
 		return newBoard;
 	}
+	break;
 	case capture:
 	{
 		Board newBoard = *board;
 		newBoard.removePiece(1 << to); //Removes the captued piece
 
 		uint64_t bitboard = newBoard.findBitboard(colour, piece); //Moves the piece
-		bitboard = (bitboard & ~(1 << from)) | 1 << to;
+		bitboard = (bitboard & ~((uint64_t)1 << from)) | ((uint64_t)1 << to);
 		newBoard.setBitboard(colour, piece, bitboard);
 		newBoard.update();
 		return newBoard;
 	}
+	break;
 	}
 }

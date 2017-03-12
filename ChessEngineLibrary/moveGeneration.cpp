@@ -65,7 +65,7 @@ void generatePawnMoves(Board* board, colours aiColour, std::vector<Move>& Moveli
 
 			pawnMoves = pawnPos >> 8 & ~board->allPieces; //Move forward
 			pawnMoves |= ((pawnMoves & rank3) << 8) & ~board->allPieces;  //Move twice on first turn if first is clear
-			pawnAttacks = board->blackPawnBitboard >> 9 & board->whitePieces & fileH | board->blackPawnBitboard >> 7 & board->whitePieces & ~fileA; //Attack
+			pawnAttacks = (pawnPos >> 9) & board->whitePieces & ~fileH | (pawnPos >> 7) & board->whitePieces & ~fileA; //Attack
 
 			int pawnPosIndex = bitScanForward(pawnPos);
 
