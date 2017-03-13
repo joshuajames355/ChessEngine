@@ -1,6 +1,6 @@
 #include "utils.h"
 
-std::string notationFromMove(Move & move)
+std::string notationFromMove(const Move & move)
 {
 	std::string ans;
 
