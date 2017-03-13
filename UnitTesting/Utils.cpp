@@ -32,4 +32,24 @@ TEST(Utils, moveFromNotation)
 	EXPECT_EQ(move.to, 40);
 	EXPECT_EQ(move.moveType, quietMove);
 	EXPECT_EQ(move.piece, pawn);
+
+	board = Board();
+	board.whiteBishopBitboard = 2;
+	board.blackPawnBitboard = 256;
+	board.update();
+	move = moveFromNotation("b1a2", &board);
+	EXPECT_EQ(move.from, 1);
+	EXPECT_EQ(move.to, 8);
+	EXPECT_EQ(move.moveType, capture);
+	EXPECT_EQ(move.piece, bishop);
+
+	board = Board();
+	board.blackKingBitboard = 34359738368;
+	board.whitePawnBitboard = 134217728;
+	board.update();
+	move = moveFromNotation("d5d4", &board);
+	EXPECT_EQ(move.from, 35);
+	EXPECT_EQ(move.to, 27);
+	EXPECT_EQ(move.moveType, capture);
+	EXPECT_EQ(move.piece, king);
 }

@@ -71,7 +71,7 @@ Move moveFromNotation(std::string moveNotation, Board * board)
 			piece = pawn;
 		}
 	}
-	else
+	else if ((fromBitboard & board->blackPieces) != 0)
 	{
 		aiColour = black;
 		if ((fromBitboard & board->blackBishopBitboard) != 0)
@@ -98,6 +98,10 @@ Move moveFromNotation(std::string moveNotation, Board * board)
 		{
 			piece = pawn;
 		}
+	}
+	else
+	{
+		throw std::runtime_error("moveFromNotation failed. Piece not on board.");
 	}
 	if ((((uint64_t)1 << to) & board->allPieces) != 0)//Capture
 	{
