@@ -6,5 +6,5 @@
 #include <string>
 #include <stdint.h>
 
-std::string notationFromMove(Move& move);
+std::string notationFromMove(const Move& move);
 Move moveFromNotation(std::string moveNotation, Board* board);
