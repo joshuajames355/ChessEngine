@@ -41,6 +41,7 @@ void Board::defaults()
 
 void Board::printBoard()
 {
+	update();
 	int counter = 56;
 	for (int x = 0; x < 8; x++)
 	{
@@ -49,60 +50,62 @@ void Board::printBoard()
 
 			uint64_t currentPosBitboard = (uint64_t)1 << counter;
 
+			std::cout << "|";
+
 			//Checking for white pieces
 			if ((whitePawnBitboard & currentPosBitboard) != 0) //If the piece is a white pawn;
 			{
-				std::cout << "|" << "WP";
+				std::cout << "WP";
 			}
-			else if ((whiteRookBitboard & currentPosBitboard) != 0) //If the piece is a white rook;
+			if ((whiteRookBitboard & currentPosBitboard) != 0) //If the piece is a white rook;
 			{
-				std::cout << "|" << "WR";
+				std::cout <<  "WR";
 			}
-			else if ((whiteKnightBitboard & currentPosBitboard) != 0) //If the piece is a white knight;
+			if ((whiteKnightBitboard & currentPosBitboard) != 0) //If the piece is a white knight;
 			{
-				std::cout << "|" << "WN";
+				std::cout << "WN";
 			}
-			else if ((whiteBishopBitboard & currentPosBitboard) != 0) //If the piece is a white bishop;
+			if ((whiteBishopBitboard & currentPosBitboard) != 0) //If the piece is a white bishop;
 			{
-				std::cout << "|" << "WB";
+				std::cout << "WB";
 			}
-			else if ((whiteQueenBitboard & currentPosBitboard) != 0) //If the piece is a white queen;
+			if ((whiteQueenBitboard & currentPosBitboard) != 0) //If the piece is a white queen;
 			{
-				std::cout << "|" << "WQ";
+				std::cout << "WQ";
 			}
-			else if ((whiteKingBitboard & currentPosBitboard) != 0) //If the piece is a white king;
+			if ((whiteKingBitboard & currentPosBitboard) != 0) //If the piece is a white king;
 			{
-				std::cout << "|" << "WK";
+				std::cout << "WK";
 			}
 
 			//Checking for black pieces
-			else if ((blackPawnBitboard & currentPosBitboard) != 0) //If the piece is a black pawn;
+			if ((blackPawnBitboard & currentPosBitboard) != 0) //If the piece is a black pawn;
 			{
-				std::cout << "|" << "BP";
+				std::cout << "BP";
 			}
-			else if ((blackRookBitboard & currentPosBitboard) != 0) //If the piece is a black rook;
+			if ((blackRookBitboard & currentPosBitboard) != 0) //If the piece is a black rook;
 			{
-				std::cout << "|" << "BR";
+				std::cout << "BR";
 			}
-			else if ((blackKnightBitboard & currentPosBitboard) != 0) //If the piece is a black knight;
+			if ((blackKnightBitboard & currentPosBitboard) != 0) //If the piece is a black knight;
 			{
-				std::cout << "|" << "BN";
+				std::cout << "BN";
 			}
-			else if ((blackBishopBitboard & currentPosBitboard) != 0) //If the piece is a black bishop;
+			if ((blackBishopBitboard & currentPosBitboard) != 0) //If the piece is a black bishop;
 			{
-				std::cout << "|" << "BB";
+				std::cout << "BB";
 			}
-			else if ((blackQueenBitboard & currentPosBitboard) != 0) //If the piece is a black queen;
+			if ((blackQueenBitboard & currentPosBitboard) != 0) //If the piece is a black queen;
 			{
-				std::cout << "|" << "BQ";
+				std::cout << "BQ";
 			}
-			else if ((blackKingBitboard & currentPosBitboard) != 0) //If the piece is a black king;
+			if ((blackKingBitboard & currentPosBitboard) != 0) //If the piece is a black king;
 			{
-				std::cout << "|" << "BK";
+				std::cout << "BK";
 			}
-			else
+			if ((allPieces & currentPosBitboard) == 0) //If the piece is empty
 			{
-				std::cout << "|" << "  ";
+				std::cout << "  ";
 			}
 			counter++;
 		}

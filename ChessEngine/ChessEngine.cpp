@@ -65,7 +65,7 @@ void engineLoop()
 				for (int x = 3; x < words.size(); x++)
 				{
 					currentMove = moveFromNotation(words[x], &board);
-					std::cout << "from: " << currentMove.from << " to: " << currentMove.to << "\n";
+					std::cout << "from: " << currentMove.from << " to: " << currentMove.to << " type: "  << currentMove.moveType << "\n";
 					board = currentMove.applyMove(&board, aiColour);
 					board.update();
 					switch (aiColour)
@@ -78,7 +78,6 @@ void engineLoop()
 						break;
 					}
 				}
-				std::cout << board.blackPawnBitboard << "\n";
 			}
 		}
 

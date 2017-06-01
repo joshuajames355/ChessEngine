@@ -29,7 +29,7 @@ Board Move::applyMove(Board * board, colours colour)
 	case capture:
 	{
 		Board newBoard = *board;
-		newBoard.removePiece(1 << to); //Removes the captued piece
+		newBoard.removePiece((uint64_t)1 << to); //Removes the captued piece
 
 		uint64_t bitboard = newBoard.findBitboard(colour, piece); //Moves the piece
 		bitboard = (bitboard & ~((uint64_t)1 << from)) | ((uint64_t)1 << to);

@@ -52,4 +52,14 @@ TEST(Utils, moveFromNotation)
 	EXPECT_EQ(move.to, 27);
 	EXPECT_EQ(move.moveType, capture);
 	EXPECT_EQ(move.piece, king);
+
+	board = Board();
+	board.whitePawnBitboard = 1;
+	board.blackPawnBitboard = 512;
+	board.update();
+	move = moveFromNotation("a1b2", &board);
+	EXPECT_EQ(move.from, 0);
+	EXPECT_EQ(move.to, 9);
+	EXPECT_EQ(move.moveType, capture);
+	EXPECT_EQ(move.piece, pawn);
 }
