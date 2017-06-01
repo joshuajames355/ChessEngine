@@ -3,6 +3,8 @@
 
 #include "ChessEngine.h"
 
+bool sortByScore(moveTreeNode x, moveTreeNode y) { return x.score > y.score; }
+
 int main(int argc, char *argv[])
 {
 	magicBitboards::setupMagicBitboards();
@@ -103,17 +105,25 @@ void engineLoop()
 
 			moveTree.fillTree(aiColour, aiColour, true);
 
-			int bestScore = -999999999;
-			Move bestMove;
-			for (int x = 0; x < moveTree.children.size(); x++)
+			std::vector<moveTreeNode> possibleMoves = moveTree.children;
+			std::sort(possibleMoves.begin(), possibleMoves.end(), sortByScore);
+
+			Move bestMove = possibleMoves[0].moveRaw;
+			Board bestBoard = possibleMoves[0].move;
+			int counter = 0;
+			while (isInCheck(&bestBoard, aiColour))
 			{
-				if (moveTree.children[x].score > bestScore)
+				if (counter == possibleMoves.size() - 1) //Checkmate
 				{
-					bestMove = moveTree.children[x].moveRaw;
-					bestScore = moveTree.children[x].score;
+					break;
+				}
+				else
+				{
+					counter++;
+					bestMove = possibleMoves[counter].moveRaw;
+					bestBoard = possibleMoves[counter].move;
 				}
 			}
-
 
 			std::cout << "\nbestmove " << notationFromMove(bestMove) << "\n";
 		}
