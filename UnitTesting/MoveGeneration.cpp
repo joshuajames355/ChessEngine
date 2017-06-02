@@ -179,6 +179,31 @@ TEST(MoveGeneration, BishopMoves)
 	EXPECT_EQ(movelist[0].to, 34);
 	EXPECT_EQ(movelist[0].piece, bishop);
 	EXPECT_EQ(movelist[0].moveType, capture);
+
+	movelist = std::vector<Move>();
+	board = Board();
+	board.whiteBishopBitboard = 4;
+	board.whitePawnBitboard = 1536;
+	board.blackKnightBitboard = 1048576;
+	board.update();
+	generateBishopMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
+	EXPECT_EQ(movelist.size(), 2);
+	if (movelist[0].to == 11)
+	{
+		EXPECT_EQ(movelist[1].from, 2);
+		EXPECT_EQ(movelist[1].to, 20);
+		EXPECT_EQ(movelist[1].piece, bishop);
+		EXPECT_EQ(movelist[1].moveType, capture);
+	}
+	else
+	{
+		EXPECT_EQ(movelist[0].from, 2);
+		EXPECT_EQ(movelist[0].to, 20);
+		EXPECT_EQ(movelist[0].piece, bishop);
+		EXPECT_EQ(movelist[0].moveType, capture);
+	}
+
+
 }
 
 TEST(MoveGeneration, QueenMoves)
@@ -221,14 +246,25 @@ TEST(MoveGeneration, QueenMoves)
 
 	movelist = std::vector<Move>();
 	board = Board();
-	board.whiteQueenBitboard = 1;
-	board.whitePawnBitboard = 514;
-	board.blackPawnBitboard = 256;
+	board.whiteQueenBitboard = 4194304;
+	board.whitePawnBitboard = 3768623104;
+	board.blackKingBitboard = 64;
 	board.update();
 	generateQueenMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
-	EXPECT_EQ(movelist.size(), 1);
-	EXPECT_EQ(movelist[0].from, 0);
-	EXPECT_EQ(movelist[0].to, 8);
-	EXPECT_EQ(movelist[0].piece, queen);
-	EXPECT_EQ(movelist[0].moveType, capture);
+	EXPECT_EQ(movelist.size(), 2);
+	if (movelist[0].to == 6)
+	{
+		EXPECT_EQ(movelist[0].from, 22);
+		EXPECT_EQ(movelist[0].to, 6);
+		EXPECT_EQ(movelist[0].piece, queen);
+		EXPECT_EQ(movelist[0].moveType, capture);
+	}
+	else
+	{
+		EXPECT_EQ(movelist[1].from, 22);
+		EXPECT_EQ(movelist[1].to, 6);
+		EXPECT_EQ(movelist[1].piece, queen);
+		EXPECT_EQ(movelist[1].moveType, capture);
+	}
+
 }

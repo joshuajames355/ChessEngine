@@ -17,5 +17,6 @@
 
 void engineLoop();
 std::vector<std::string> split(std::string words);
+void setupEngine();
 
 

@@ -62,6 +62,24 @@ TEST(Utils, moveFromNotation)
 	EXPECT_EQ(move.to, 9);
 	EXPECT_EQ(move.moveType, capture);
 	EXPECT_EQ(move.piece, pawn);
+
+	board = Board();
+	board.whitePawnBitboard = 281474976710656;
+	board.update();
+	move = moveFromNotation("a7a8q", &board);
+	EXPECT_EQ(move.from, 48);
+	EXPECT_EQ(move.to, 56);
+	EXPECT_EQ(move.moveType, queenPromotion);
+	EXPECT_EQ(move.piece, pawn);
+
+	board = Board();
+	board.blackPawnBitboard = 256;
+	board.update();
+	move = moveFromNotation("a2a1n", &board);
+	EXPECT_EQ(move.from, 8);
+	EXPECT_EQ(move.to, 0);
+	EXPECT_EQ(move.moveType, knightPromotion);
+	EXPECT_EQ(move.piece, pawn);
 }
 
 TEST(Utils, isInCheck)

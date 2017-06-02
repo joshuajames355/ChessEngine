@@ -107,6 +107,26 @@ Move moveFromNotation(std::string moveNotation, Board * board)
 	{
 		return Move(from, to, capture, piece);
 	}
+	else if (moveNotation.length() == 5) //Promotion moves. Format is a7a8q , where the last piece is the piece to be promoted to.
+	{
+		if (moveNotation.back() == 'q' || moveNotation.back() == 'Q')
+		{
+			return Move(from, to, queenPromotion, piece);
+		}
+		else if (moveNotation.back() == 'r' || moveNotation.back() == 'R')
+		{
+			return Move(from, to, rookPromotion, piece);
+		}
+		else if (moveNotation.back() == 'n' || moveNotation.back() == 'N')
+		{
+			return Move(from, to, knightPromotion, piece);
+		}
+		else if (moveNotation.back() == 'b' || moveNotation.back() == 'B')
+		{
+			return Move(from, to, bishopPromotion, piece);
+		}
+
+	}
 	else//Quiet Move
 	{
 		return Move(from, to, quietMove, piece);

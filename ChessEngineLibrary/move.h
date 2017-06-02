@@ -4,7 +4,7 @@
 #include "piece.h"
 #include "board.h"
 
-enum MoveType{quietMove,capture};
+enum MoveType{quietMove,capture,knightPromotion,bishopPromotion,rookPromotion,queenPromotion};
 
 struct Move
 {

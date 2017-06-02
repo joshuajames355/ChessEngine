@@ -7,7 +7,6 @@ bool sortByScore(moveTreeNode x, moveTreeNode y) { return x.score > y.score; }
 
 int main(int argc, char *argv[])
 {
-	magicBitboards::setupMagicBitboards();
 	engineLoop();
 }
 
@@ -19,6 +18,7 @@ void engineLoop()
 
 	Board board = Board();
 	board.defaults();
+	bool hasSetupEngine = false;
 
 	colours aiColour = white;
 	while (true)
@@ -36,6 +36,11 @@ void engineLoop()
 		}
 		if (response == "isready")
 		{
+			if (!hasSetupEngine)
+			{
+				hasSetupEngine = true;
+				setupEngine();
+			}
 			std::cout << "readyok\n";
 		}
 		if (response == "quit")
@@ -54,7 +59,6 @@ void engineLoop()
 		{
 			if (words.size() == 2)
 			{
-				std::cout << "test";
 				board.defaults();
 				aiColour = white;
 			}
@@ -66,10 +70,13 @@ void engineLoop()
 				Move currentMove;
 				for (int x = 3; x < words.size(); x++)
 				{
+					//Applies each move to calculate the current board.
 					currentMove = moveFromNotation(words[x], &board);
 					std::cout << "from: " << currentMove.from << " to: " << currentMove.to << " type: "  << currentMove.moveType << "\n";
 					board = currentMove.applyMove(&board, aiColour);
 					board.update();
+
+					//Calculate the colour of the AI. Even number of moves = white , odd number of moves = black
 					switch (aiColour)
 					{
 					case white:
@@ -105,23 +112,22 @@ void engineLoop()
 
 			moveTree.fillTree(aiColour, aiColour, true);
 
-			std::vector<moveTreeNode> possibleMoves = moveTree.children;
-			std::sort(possibleMoves.begin(), possibleMoves.end(), sortByScore);
+			std::sort(moveTree.children.begin(), moveTree.children.end(), sortByScore);
 
-			Move bestMove = possibleMoves[0].moveRaw;
-			Board bestBoard = possibleMoves[0].move;
+			Move bestMove = moveTree.children[0].moveRaw;
+			Board bestBoard = moveTree.children[0].move;
 			int counter = 0;
 			while (isInCheck(&bestBoard, aiColour))
 			{
-				if (counter == possibleMoves.size() - 1) //Checkmate
+				if (counter == moveTree.children.size() - 1) //Checkmate
 				{
 					break;
 				}
 				else
 				{
 					counter++;
-					bestMove = possibleMoves[counter].moveRaw;
-					bestBoard = possibleMoves[counter].move;
+					bestMove = moveTree.children[counter].moveRaw;
+					bestBoard = moveTree.children[counter].move;
 				}
 			}
 
@@ -158,3 +164,7 @@ std::vector<std::string> split(std::string words)
 	return wordList;
 }
 
+void setupEngine()
+{
+	magicBitboards::setupMagicBitboards();
+}
