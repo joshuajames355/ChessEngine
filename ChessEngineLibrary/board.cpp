@@ -122,6 +122,99 @@ void Board::update()
 	allPieces = whitePieces | blackPieces;
 }
 
+colours Board::loadFromFen(std::string fen)
+{
+	int currentPosInBoard = 56;
+	int currentCharPos = 0;
+	char currentChar = 'X';
+
+	while (!isspace(currentChar))
+	{
+		currentChar = fen[currentCharPos];
+		if (currentChar == 'p')
+		{
+			blackPawnBitboard |= (uint64_t)1 << currentPosInBoard;
+			currentPosInBoard++;
+		}
+		else if (currentChar == 'r')
+		{
+			blackRookBitboard |= (uint64_t)1 << currentPosInBoard;
+			currentPosInBoard++;
+		}
+		else if (currentChar == 'n')
+		{
+			blackKnightBitboard |= (uint64_t)1 << currentPosInBoard;
+			currentPosInBoard++;
+		}
+		else if (currentChar == 'b')
+		{
+			blackBishopBitboard |= (uint64_t)1 << currentPosInBoard;
+			currentPosInBoard++;
+		}
+		else if (currentChar == 'k')
+		{
+			blackKingBitboard |= (uint64_t)1 << currentPosInBoard;
+			currentPosInBoard++;
+		}
+		else if (currentChar == 'q')
+		{
+			blackQueenBitboard |= (uint64_t)1 << currentPosInBoard;
+			currentPosInBoard++;
+		}
+		else if (currentChar == 'P')
+		{
+			whitePawnBitboard |= (uint64_t)1 << currentPosInBoard;
+			currentPosInBoard++;
+		}
+		else if (currentChar == 'R')
+		{
+			whiteRookBitboard |= (uint64_t)1 << currentPosInBoard;
+			currentPosInBoard++;
+		}
+		else if (currentChar == 'N')
+		{
+			whiteKnightBitboard |= (uint64_t)1 << currentPosInBoard;
+			currentPosInBoard++;
+		}
+		else if (currentChar == 'B')
+		{
+			whiteBishopBitboard |= (uint64_t)1 << currentPosInBoard;
+			currentPosInBoard++;
+		}
+		else if (currentChar == 'K')
+		{
+			whiteKingBitboard |= (uint64_t)1 << currentPosInBoard;
+			currentPosInBoard++;
+		}
+		else if (currentChar == 'Q')
+		{
+			whiteQueenBitboard |= (uint64_t)1 << currentPosInBoard;
+			currentPosInBoard++;
+		}
+		else if (currentChar == '/')
+		{
+			currentPosInBoard -= 16;
+		}
+		else
+		{
+			currentPosInBoard += currentChar - '0';
+		}
+		currentCharPos++;
+	}
+	update();
+	colours activeColour;
+	if (fen[currentCharPos] == 'w')
+	{
+		activeColour = white;
+	}
+	else if (fen[currentCharPos] == 'b')
+	{
+		activeColour = black;
+	}
+	return activeColour;
+
+}
+
 uint64_t Board::findBitboard(colours colour, pieceType piece)
 {
 	if (colour == white)

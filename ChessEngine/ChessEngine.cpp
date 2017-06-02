@@ -55,36 +55,68 @@ void engineLoop()
 			}
 		}
 
-		if (words[0] == "position" && words[1] == "startpos")
+		if (words[0] == "position")
 		{
-			if (words.size() == 2)
+			if (words[1] == "startpos")
 			{
-				board.defaults();
-				aiColour = white;
-			}
-			else if (words[2] == "moves")
-			{
-				board.defaults();
-
-				aiColour = white;
-				Move currentMove;
-				for (int x = 3; x < words.size(); x++)
+				if (words.size() == 2)
 				{
-					//Applies each move to calculate the current board.
-					currentMove = moveFromNotation(words[x], &board);
-					std::cout << "from: " << currentMove.from << " to: " << currentMove.to << " type: "  << currentMove.moveType << "\n";
-					board = currentMove.applyMove(&board, aiColour);
-					board.update();
+					board.defaults();
+					aiColour = white;
+				}
+				else if (words[2] == "moves")
+				{
+					board.defaults();
 
-					//Calculate the colour of the AI. Even number of moves = white , odd number of moves = black
-					switch (aiColour)
+					aiColour = white;
+					Move currentMove;
+					for (int x = 3; x < words.size(); x++)
 					{
-					case white:
-						aiColour = black;
-						break;
-					case black:
-						aiColour = white;
-						break;
+						//Applies each move to calculate the current board.
+						currentMove = moveFromNotation(words[x], &board);
+						std::cout << "from: " << currentMove.from << " to: " << currentMove.to << " type: " << currentMove.moveType << "\n";
+						board = currentMove.applyMove(&board, aiColour);
+						board.update();
+
+						//Calculate the colour of the AI. Even number of moves = white , odd number of moves = black
+						switch (aiColour)
+						{
+						case white:
+							aiColour = black;
+							break;
+						case black:
+							aiColour = white;
+							break;
+						}
+					}
+				}
+			}
+			else if (words[1] == "fen")
+			{
+				std::string fenString = words[2] + " " + words[3] + " " + words[4] + " " + words[5] + " " + words[6] + " " + words[7];
+				board = Board();
+				aiColour = board.loadFromFen(fenString);
+
+				if (words.size() > 8 && words[8] == "moves") {
+					Move currentMove;
+					for (int x = 9; x < words.size(); x++)
+					{
+						//Applies each move to calculate the current board.
+						currentMove = moveFromNotation(words[x], &board);
+						std::cout << "from: " << currentMove.from << " to: " << currentMove.to << " type: " << currentMove.moveType << "\n";
+						board = currentMove.applyMove(&board, aiColour);
+						board.update();
+
+						//Calculate the colour of the AI. Even number of moves = white , odd number of moves = black
+						switch (aiColour)
+						{
+						case white:
+							aiColour = black;
+							break;
+						case black:
+							aiColour = white;
+							break;
+						}
 					}
 				}
 			}

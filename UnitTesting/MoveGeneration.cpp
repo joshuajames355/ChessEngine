@@ -40,6 +40,18 @@ TEST(MoveGeneration, PawnMoves)
 	EXPECT_EQ(Movelist[0].moveType, capture);
 
 	board = Board();
+	board.whitePawnBitboard = 32768;
+	board.blackKingBitboard = 4194304;
+	board.blackPawnBitboard = 8388608;
+	board.update();
+	Movelist = searchForMoves(&board, white);
+	EXPECT_EQ(Movelist.size(), 1);
+	EXPECT_EQ(Movelist[0].from, 15);
+	EXPECT_EQ(Movelist[0].to, 22);
+	EXPECT_EQ(Movelist[0].piece, pawn);
+	EXPECT_EQ(Movelist[0].moveType, capture);
+
+	board = Board();
 	board.whitePawnBitboard = 281474976710656;
 	board.update();
 	Movelist = searchForMoves(&board, white);
@@ -262,6 +274,43 @@ TEST(MoveGeneration, QueenMoves)
 	EXPECT_EQ(movelist[0].to, 1);
 	EXPECT_EQ(movelist[0].piece, queen);
 	EXPECT_EQ(movelist[0].moveType, quietMove);
+
+	movelist = std::vector<Move>();
+	board = Board();
+	board.whiteQueenBitboard = 2097152;
+	board.whitePawnBitboard = 1615884288;
+	board.blackKnightBitboard = 268435456;
+	board.update();
+	generateQueenMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
+	EXPECT_EQ(movelist.size(), 1);
+	EXPECT_EQ(movelist[0].from, 21);
+	EXPECT_EQ(movelist[0].to, 28);
+	EXPECT_EQ(movelist[0].piece, queen);
+	EXPECT_EQ(movelist[0].moveType, capture);
+
+	movelist = std::vector<Move>();
+	board = Board();
+	board.whiteQueenBitboard = 67108864;
+	board.whitePawnBitboard = 60264677376;
+	board.blackKnightBitboard = 16777216;
+	board.update();
+	generateQueenMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
+	EXPECT_EQ(movelist.size(), 2);
+	if (movelist[0].to == 24)
+	{
+		EXPECT_EQ(movelist[0].from, 26);
+		EXPECT_EQ(movelist[0].to, 24);
+		EXPECT_EQ(movelist[0].piece, queen);
+		EXPECT_EQ(movelist[0].moveType, capture);
+	}
+	else
+	{
+		EXPECT_EQ(movelist[1].from, 26);
+		EXPECT_EQ(movelist[1].to, 24);
+		EXPECT_EQ(movelist[1].piece, queen);
+		EXPECT_EQ(movelist[1].moveType, capture);
+	}
+
 
 	movelist = std::vector<Move>();
 	board = Board();

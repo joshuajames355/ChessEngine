@@ -36,6 +36,53 @@ TEST(Board, Defaults)
 
 }
 
+TEST(Board, loadFromFen)
+{
+	Board defaultBoard;
+	defaultBoard.defaults();
+	Board fenBoard;
+	fenBoard.loadFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+
+	EXPECT_EQ(defaultBoard.allPieces, fenBoard.allPieces);
+	EXPECT_EQ(defaultBoard.blackBishopBitboard, fenBoard.blackBishopBitboard);
+	EXPECT_EQ(defaultBoard.blackKingBitboard, fenBoard.blackKingBitboard);
+	EXPECT_EQ(defaultBoard.blackKnightBitboard, fenBoard.blackKnightBitboard);
+	EXPECT_EQ(defaultBoard.blackPawnBitboard, fenBoard.blackPawnBitboard);
+	EXPECT_EQ(defaultBoard.blackPieces, fenBoard.blackPieces);
+	EXPECT_EQ(defaultBoard.blackQueenBitboard, fenBoard.blackQueenBitboard);
+	EXPECT_EQ(defaultBoard.blackRookBitboard, fenBoard.blackRookBitboard);
+	EXPECT_EQ(defaultBoard.whiteBishopBitboard, fenBoard.whiteBishopBitboard);
+	EXPECT_EQ(defaultBoard.whiteKingBitboard, fenBoard.whiteKingBitboard);
+	EXPECT_EQ(defaultBoard.whiteKnightBitboard, fenBoard.whiteKnightBitboard);
+	EXPECT_EQ(defaultBoard.whitePawnBitboard, fenBoard.whitePawnBitboard);
+	EXPECT_EQ(defaultBoard.whitePieces, fenBoard.whitePieces);
+	EXPECT_EQ(defaultBoard.whiteQueenBitboard, fenBoard.whiteQueenBitboard);
+	EXPECT_EQ(defaultBoard.whiteRookBitboard, fenBoard.whiteRookBitboard);
+
+	Board board = Board();
+	board.whitePawnBitboard = 1;
+	board.update();
+	fenBoard = Board();
+	fenBoard.loadFromFen("8/8/8/8/8/8/8/P7 w KQkq - 0 1");
+
+	EXPECT_EQ(board.allPieces, fenBoard.allPieces);
+	EXPECT_EQ(board.blackBishopBitboard, fenBoard.blackBishopBitboard);
+	EXPECT_EQ(board.blackKingBitboard, fenBoard.blackKingBitboard);
+	EXPECT_EQ(board.blackKnightBitboard, fenBoard.blackKnightBitboard);
+	EXPECT_EQ(board.blackPawnBitboard, fenBoard.blackPawnBitboard);
+	EXPECT_EQ(board.blackPieces, fenBoard.blackPieces);
+	EXPECT_EQ(board.blackQueenBitboard, fenBoard.blackQueenBitboard);
+	EXPECT_EQ(board.blackRookBitboard, fenBoard.blackRookBitboard);
+	EXPECT_EQ(board.whiteBishopBitboard, fenBoard.whiteBishopBitboard);
+	EXPECT_EQ(board.whiteKingBitboard, fenBoard.whiteKingBitboard);
+	EXPECT_EQ(board.whiteKnightBitboard, fenBoard.whiteKnightBitboard);
+	EXPECT_EQ(board.whitePawnBitboard, fenBoard.whitePawnBitboard);
+	EXPECT_EQ(board.whitePieces, fenBoard.whitePieces);
+	EXPECT_EQ(board.whiteQueenBitboard, fenBoard.whiteQueenBitboard);
+	EXPECT_EQ(board.whiteRookBitboard, fenBoard.whiteRookBitboard);
+
+}
+
 TEST(Bitboard, bitsum)
 {
 	EXPECT_EQ(bitSum(15), 4);
@@ -68,3 +115,4 @@ TEST(Bitboard, bitScanForward)
 	EXPECT_EQ(bitScanForward(256), 8);
 	EXPECT_EQ(bitScanForward(64), 6);
 }
+
