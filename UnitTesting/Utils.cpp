@@ -9,6 +9,9 @@ TEST(Utils, notationFromMove)
 	EXPECT_EQ(notationFromMove(Move(3, 11, quietMove, pawn)), "d1d2");
 	EXPECT_EQ(notationFromMove(Move(32, 40, quietMove, pawn)), "a5a6");
 	EXPECT_EQ(notationFromMove(Move(54, 62, quietMove, pawn)), "g7g8");
+	EXPECT_EQ(notationFromMove(Move(48, 56, knightPromotion, pawn)), "a7a8n");
+	EXPECT_EQ(notationFromMove(Move(8, 0, queenPromotion, pawn)), "a2a1q");
+
 }
 
 TEST(Utils, moveFromNotation)

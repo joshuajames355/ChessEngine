@@ -27,6 +27,23 @@ std::string notationFromMove(const Move & move)
 	columnChar = column + 'a';
 	ans += columnChar;
 	ans += rowChar;
+
+	if (move.moveType == knightPromotion)
+	{
+		ans += "n";
+	}
+	else if (move.moveType == rookPromotion)
+	{
+		ans += "r";
+	}
+	else if (move.moveType == bishopPromotion)
+	{
+		ans += "b";
+	}
+	else if (move.moveType == queenPromotion)
+	{
+		ans += "q";
+	}
 	
 	return ans;
 }

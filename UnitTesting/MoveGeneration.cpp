@@ -38,6 +38,25 @@ TEST(MoveGeneration, PawnMoves)
 	EXPECT_EQ(Movelist[0].to, 9);
 	EXPECT_EQ(Movelist[0].piece, pawn);
 	EXPECT_EQ(Movelist[0].moveType, capture);
+
+	board = Board();
+	board.whitePawnBitboard = 281474976710656;
+	board.update();
+	Movelist = searchForMoves(&board, white);
+	EXPECT_EQ(Movelist.size(), 5);
+	EXPECT_EQ(Movelist[0].from, 48);
+	EXPECT_EQ(Movelist[0].to, 56);
+	EXPECT_EQ(Movelist[0].piece, pawn);
+
+	board = Board();
+	board.blackPawnBitboard = 256;
+	board.update();
+	Movelist = searchForMoves(&board, black);
+	EXPECT_EQ(Movelist.size(), 5);
+	EXPECT_EQ(Movelist[0].from, 8);
+	EXPECT_EQ(Movelist[0].to, 0);
+	EXPECT_EQ(Movelist[0].piece, pawn);
+
 }
 
 TEST(MoveGeneration, KingMoves)

@@ -53,6 +53,15 @@ void generatePawnMoves(Board* board, colours aiColour, std::vector<Move>& Moveli
 				uint64_t pawnAttack = pop(pawnAttacks);
 				Movelist.push_back(Move(pawnPosIndex, bitScanForward(pawnAttack), capture, pawn));
 			}
+
+			if ((pawnPos & rank7) > 0)//Pawn Promotion
+			{
+				int end = pawnPosIndex + 8;
+				Movelist.push_back(Move(pawnPosIndex, end, rookPromotion, pawn));
+				Movelist.push_back(Move(pawnPosIndex, end, knightPromotion, pawn));
+				Movelist.push_back(Move(pawnPosIndex, end, queenPromotion, pawn));
+				Movelist.push_back(Move(pawnPosIndex, end, bishopPromotion, pawn));
+			}
 		}
 	}
 	else //Colour is black
@@ -78,6 +87,15 @@ void generatePawnMoves(Board* board, colours aiColour, std::vector<Move>& Moveli
 			{
 				uint64_t pawnAttack = pop(pawnAttacks);
 				Movelist.push_back(Move(pawnPosIndex, bitScanForward(pawnAttack), capture, pawn));
+			}
+
+			if ((pawnPos & rank2) > 0)//Pawn Promotion
+			{
+				int end = pawnPosIndex - 8;
+				Movelist.push_back(Move(pawnPosIndex, end, rookPromotion, pawn));
+				Movelist.push_back(Move(pawnPosIndex, end, knightPromotion, pawn));
+				Movelist.push_back(Move(pawnPosIndex, end, queenPromotion, pawn));
+				Movelist.push_back(Move(pawnPosIndex, end, bishopPromotion, pawn));
 			}
 		}
 	}
