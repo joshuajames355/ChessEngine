@@ -147,6 +147,7 @@
     <ClInclude Include="piece.h" />
     <ClInclude Include="pieceSquare.h" />
     <ClInclude Include="scoring.h" />
+    <ClInclude Include="transpositionTable.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
@@ -158,6 +159,7 @@
     <ClCompile Include="piece.cpp" />
     <ClCompile Include="pieceSquare.cpp" />
     <ClCompile Include="scoring.cpp" />
+    <ClCompile Include="transpositionTable.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

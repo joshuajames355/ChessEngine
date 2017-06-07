@@ -2,17 +2,11 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <ctime>
-#include <sstream>
 
-#include "pieceSquare.h"
 #include "board.h"
-#include "piece.h"
 #include "moveTree.h"
-#include "moveGeneration.h"
-#include "scoring.h"
-#include "move.h"
 #include "utils.h"
+#include "transpositionTable.h"
 
 
 void engineLoop();

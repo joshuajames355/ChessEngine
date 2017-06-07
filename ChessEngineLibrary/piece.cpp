@@ -96,3 +96,14 @@ std::string piece::toString()
 	return name;
 }
 
+colours switchColour(colours colour)
+{
+	switch (colour)
+	{
+	case white:
+		return black;
+	case black:
+		return white;
+	}	
+}
+

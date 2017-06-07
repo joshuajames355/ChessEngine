@@ -3,8 +3,6 @@
 
 #include "ChessEngine.h"
 
-bool sortByScore(moveTreeNode x, moveTreeNode y) { return x.score > y.score; }
-
 int main(int argc, char *argv[])
 {
 	engineLoop();
@@ -124,46 +122,8 @@ void engineLoop()
 
 		if (words[0] == "go")
 		{
-			moveTreeNode moveTree;
-			moveTree.move = board;
-			moveTree.alpha = -9999999;
-			moveTree.beta = 9999999;
-
-			switch (aiColour)
-			{
-			case white:
-				std::cout << "White\n";
-				break;
-			case black:
-				std::cout << "Black\n";
-				break;
-			}
-
-			moveTree.recursionLayers = SEARCHDEPTH;
 			board.printBoard();
-
-			moveTree.fillTree(aiColour, aiColour, true);
-
-			std::sort(moveTree.children.begin(), moveTree.children.end(), sortByScore);
-
-			Move bestMove = moveTree.children[0].moveRaw;
-			Board bestBoard = moveTree.children[0].move;
-			int counter = 0;
-			while (isInCheck(&bestBoard, aiColour))
-			{
-				if (counter == moveTree.children.size() - 1) //Checkmate
-				{
-					break;
-				}
-				else
-				{
-					counter++;
-					bestMove = moveTree.children[counter].moveRaw;
-					bestBoard = moveTree.children[counter].move;
-				}
-			}
-
-			std::cout << "\nbestmove " << notationFromMove(bestMove) << "\n";
+			std::cout << "bestmove " << notationFromMove(startSearch(SEARCHDEPTH, board, aiColour)) << "\n";
 		}
 	}
 
@@ -199,4 +159,5 @@ std::vector<std::string> split(std::string words)
 void setupEngine()
 {
 	magicBitboards::setupMagicBitboards();
+	ZorbistKeys::initialize();
 }
