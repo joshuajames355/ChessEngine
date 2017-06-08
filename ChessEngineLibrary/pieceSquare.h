@@ -7,6 +7,7 @@
 #include <stdint.h>
 
 #include "piece.h"
+#include "board.h"
 
 
 class pieceSquare

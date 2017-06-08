@@ -13,7 +13,6 @@ void updateEngine(searchData * data, Move bestMove, int alpha)
 
 Move startSearch(int searchDepth, Board board, colours colour)
 {
-	ZorbistKeys::TranspositionTable.clear();
 	Move bestMove;
 	for (int x = 1; x <= searchDepth; x++)
 	{
@@ -38,10 +37,12 @@ Move rootSearch(int depthLeft, Board board, colours colour)
 	int alphaOriginal = alpha;
 	Move bestMove;
 	bool isBestMove = false;
-	int hash = getZorbistKey(&board, colour);
-	if (ZorbistKeys::TranspositionTable.find(hash) != ZorbistKeys::TranspositionTable.end())
+
+	uint64_t hash = getZorbistKey(&board, colour);
+	TranspositionEntry entry = ZorbistKeys::TranspositionTable[hash % TTSize];
+
+	if (entry.zorbistKey == hash)
 	{
-		TranspositionEntry entry = ZorbistKeys::TranspositionTable[hash];
 		if (entry.depth >= depthLeft)
 		{
 			if (entry.flag == Exact)
@@ -78,7 +79,7 @@ Move rootSearch(int depthLeft, Board board, colours colour)
 	}
 	colours newColour = switchColour(colour);
 	Board newBoard;
-	int newHash;
+	uint64_t newHash;
 	for (int x = 0; x < moveList.size(); x++)
 	{
 		if (isBestMove && x != 0) {
@@ -123,23 +124,26 @@ Move rootSearch(int depthLeft, Board board, colours colour)
 	}
 	newEntry.depth = depthLeft;
 	newEntry.bestMove = bestMove;
+	newEntry.zorbistKey = hash;
 
-	ZorbistKeys::TranspositionTable[hash] = newEntry;
+	ZorbistKeys::TranspositionTable[hash % TTSize] = newEntry;
 
 	updateEngine(&data, bestMove, alpha);
 
 	return bestMove;
 }
 
-int negamax(int alpha, int beta, int depthLeft, Board board, colours colour, searchData* data, int hash, bool isQuiet)
+int negamax(int alpha, int beta, int depthLeft, Board board, colours colour, searchData* data, uint64_t hash, bool isQuiet)
 {
 	data->nodes++;
 	int alphaOriginal = alpha;
 	Move bestMove;
 	bool isBestMove = false;
-	if (ZorbistKeys::TranspositionTable.find(hash) != ZorbistKeys::TranspositionTable.end())
+
+	TranspositionEntry entry = ZorbistKeys::TranspositionTable[hash % TTSize];
+
+	if (entry.zorbistKey == hash)
 	{
-		TranspositionEntry entry = ZorbistKeys::TranspositionTable[hash];
 		if (entry.depth >= depthLeft)
 		{
 			if (entry.flag == Exact)
@@ -191,7 +195,7 @@ int negamax(int alpha, int beta, int depthLeft, Board board, colours colour, sea
 	}
 	colours newColour = switchColour(colour);
 	Board newBoard;
-	int newHash;
+	uint64_t newHash;
 	for (int x = 0; x < moveList.size(); x++)
 	{
 		if (depthLeft <= 0 && moveList[x].moveType != capture) continue;
@@ -236,8 +240,9 @@ int negamax(int alpha, int beta, int depthLeft, Board board, colours colour, sea
 	}
 	newEntry.depth = depthLeft;
 	newEntry.bestMove = bestMove;
+	newEntry.zorbistKey = hash;
 
-	ZorbistKeys::TranspositionTable[hash] = newEntry;
+	ZorbistKeys::TranspositionTable[hash % TTSize] = newEntry;
 	return alpha;
 }
 

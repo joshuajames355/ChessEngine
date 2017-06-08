@@ -4,6 +4,7 @@ std::vector<Move> searchForMoves(Board * board, colours aiColour)
 {
 	std::vector<Move> moveList;
 	magicBitboards magicData;
+	moveList.reserve(150);
 
 	uint64_t friendlyPieces, enemyPieces;
 	if (aiColour == white)
@@ -23,6 +24,8 @@ std::vector<Move> searchForMoves(Board * board, colours aiColour)
 	generateRookMoves(board, aiColour, moveList,  friendlyPieces,  enemyPieces);
 	generateBishopMoves(board, aiColour, moveList,  friendlyPieces,  enemyPieces);
 	generateQueenMoves(board, aiColour, moveList,  friendlyPieces,  enemyPieces);
+
+	moveList.shrink_to_fit();
 
 	return moveList;
 }

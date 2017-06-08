@@ -53,25 +53,17 @@ int pieceSquare::calcScore(uint64_t bitboard,colours targetColour)
 {
 
 	int score = 0;
-	int counter = 0;
-	for (int y = 7; y >= 0; y--)
+	int bitPos, x, y;
+	while (bitboard)
 	{
-		for (int x = 0; x < 8; x++)
+		bitPos = bitScanForward(pop(bitboard));
+		if (targetColour == defaultColour)
 		{
-			uint64_t currentPosBitboard = (uint64_t)1 << counter;
-			if ((bitboard & currentPosBitboard) != 0)
-			{
-				if (targetColour == defaultColour) // Colour is correct
-				{
-					score += square[x][y];
-				}
-				else //Needs to flip the board to work with the other colour
-				{
-					score += square[x][7 - y];
-				}
-			}
-			counter++;
+			bitPos = 63 - bitPos;
 		}
+		x = bitPos % 8;
+		y = (bitPos - x) / 8;
+		score += square[x][y];
 	}
 	return score;
 }

@@ -15,10 +15,10 @@ void ZorbistKeys::initialize()
 	blackMoveKey = get64rand();
 }
 
-int getZorbistKey(Board * board, colours colour)
+uint64_t getZorbistKey(Board * board, colours colour)
 {
 	board->update();
-	int hash = 0;
+	uint64_t hash = 0;
 	for (int x = 0; x < 64; x++)
 	{
 		//std::cout << "current hash " << (((uint64_t)1 << x) & board->allPieces) << "\n";
@@ -82,9 +82,9 @@ int getZorbistKey(Board * board, colours colour)
 	return hash;
 }
 
-int updateHash(Move newMove, int oldHash, colours colour) //currently only works for quiet moves.
+uint64_t updateHash(Move newMove, uint64_t oldHash, colours colour) //currently only works for quiet moves.
 {
-	int newHash = oldHash ^ ZorbistKeys::blackMoveKey;
+	uint64_t newHash = oldHash ^ ZorbistKeys::blackMoveKey;
 	newHash ^= ZorbistKeys::pieceKeys[newMove.from][newMove.piece + 6 * colour];
 	newHash ^= ZorbistKeys::pieceKeys[newMove.to][newMove.piece + 6 * colour];
 	return newHash;
@@ -98,6 +98,6 @@ uint64_t get64rand() {
 		(((uint64_t)rand() << 48) & 0xFFFF000000000000ull);
 }
 
-int ZorbistKeys::pieceKeys[64][12];
-int ZorbistKeys::blackMoveKey;
-std::unordered_map<int, TranspositionEntry> ZorbistKeys::TranspositionTable;
+uint64_t ZorbistKeys::pieceKeys[64][12];
+uint64_t ZorbistKeys::blackMoveKey;
+TranspositionEntry ZorbistKeys::TranspositionTable[TTSize];

@@ -38,4 +38,16 @@ TEST(Scoring, positionalScore)
 	board.update();
 	EXPECT_EQ(calculatePositionalScore(&board, white), 10);
 	EXPECT_EQ(calculatePositionalScore(&board, black), -10);
+
+	board = Board();
+	board.whiteKnightBitboard = 2048;
+	board.update();
+	EXPECT_EQ(calculatePositionalScore(&board, white), 5);
+	EXPECT_EQ(calculatePositionalScore(&board, black), -5);
+
+	board = Board();
+	board.blackKnightBitboard = 4503599627370496;
+	board.update();
+	EXPECT_EQ(calculatePositionalScore(&board, white), -5);
+	EXPECT_EQ(calculatePositionalScore(&board, black), 5);
 }
