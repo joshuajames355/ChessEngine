@@ -16,6 +16,11 @@ struct Move
 	MoveType moveType;
 	
 	Board applyMove(Board* board , colours colour);
+
+	bool operator==(const Move& b)
+	{
+		return (from == b.from) && (to == b.to) && (piece = b.piece) && (moveType = b.moveType);
+	}
 };
 
 

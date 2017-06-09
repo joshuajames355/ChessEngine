@@ -71,10 +71,10 @@ Move rootSearch(int depthLeft, Board board, colours colour)
 	}
 
 	std::vector<Move> moveList = searchForMoves(&board, colour);
-	if (isBestMove)
+	if (isBestMove && std::find(moveList.begin(), moveList.end(), bestMove) != moveList.end())
 	{
 		//Moves bestMove to the front of the moveList.
-		//moveList.erase(std::remove(moveList.begin(), moveList.end(), bestMove), moveList.end());
+		moveList.erase(std::remove(moveList.begin(), moveList.end(), bestMove), moveList.end());
 		moveList.insert(moveList.begin(), bestMove);
 	}
 	colours newColour = switchColour(colour);
@@ -82,9 +82,6 @@ Move rootSearch(int depthLeft, Board board, colours colour)
 	uint64_t newHash;
 	for (int x = 0; x < moveList.size(); x++)
 	{
-		if (isBestMove && x != 0) {
-			if (moveList[x].from == bestMove.from && moveList[x].to == bestMove.to) continue;
-		}
 		newBoard = moveList[x].applyMove(&board, colour);
 		if (moveList[x].moveType == quietMove)
 		{
@@ -187,10 +184,10 @@ int negamax(int alpha, int beta, int depthLeft, Board board, colours colour, sea
 	}
 
 	std::vector<Move> moveList = searchForMoves(&board, colour);
-	if (isBestMove)
+	if (isBestMove && std::find(moveList.begin(), moveList.end(), bestMove) != moveList.end())
 	{
 		//Moves bestMove to the front of the moveList.
-		//moveList.erase(std::remove(moveList.begin(), moveList.end(), bestMove), moveList.end());
+		moveList.erase(std::remove(moveList.begin(), moveList.end(), bestMove), moveList.end());
 		moveList.insert(moveList.begin(), bestMove);
 	}
 	colours newColour = switchColour(colour);
@@ -199,9 +196,6 @@ int negamax(int alpha, int beta, int depthLeft, Board board, colours colour, sea
 	for (int x = 0; x < moveList.size(); x++)
 	{
 		if (depthLeft <= 0 && moveList[x].moveType != capture) continue;
-		if (isBestMove && x != 0) {
-			if (moveList[x].from == bestMove.from && moveList[x].to == bestMove.to) continue; 
-		}
 		newBoard = moveList[x].applyMove(&board, colour);
 		if (moveList[x].moveType == quietMove)
 		{
