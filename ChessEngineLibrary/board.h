@@ -34,11 +34,14 @@ public:
 	void defaults();
 	void printBoard();
 	void update();
-	colours loadFromFen(std::string fen);
+	void loadFromFen(std::string fen);
 
 	uint64_t findBitboard(colours colour , pieceType piece);
 	void setBitboard(colours colour, pieceType piece, uint64_t bitboard);
 	void removePiece(uint64_t bitboard);
+
+	int enPassantSquare;
+	colours nextColour;
 
 	uint64_t whitePawnBitboard;
 	uint64_t whiteKnightBitboard;

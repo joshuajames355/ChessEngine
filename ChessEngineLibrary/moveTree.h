@@ -19,6 +19,6 @@ struct searchData
 	time_t startTime;
 };
 
-Move startSearch(int searchDepth, Board board, colours colour);
-Move rootSearch(int depthLeft, Board board, colours colour);
-int negamax(int alpha, int beta, int depthLeft, Board board, colours colour, searchData* data, uint64_t hash, bool isQuiet);
+Move startSearch(int searchDepth, Board board);
+Move rootSearch(int depthLeft, Board board, searchData* data);
+int negamax(int alpha, int beta, int depthLeft, Board board, searchData* data, uint64_t hash, bool isQuiet);

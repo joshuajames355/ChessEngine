@@ -1,13 +1,13 @@
 #include "moveGeneration.h"
 
-std::vector<Move> searchForMoves(Board * board, colours aiColour)
+std::vector<Move> searchForMoves(Board * board)
 {
 	std::vector<Move> moveList;
 	magicBitboards magicData;
 	moveList.reserve(150);
 
 	uint64_t friendlyPieces, enemyPieces;
-	if (aiColour == white)
+	if (board->nextColour == white)
 	{
 		friendlyPieces = board->whitePieces;
 		enemyPieces = board->blackPieces;
@@ -18,21 +18,21 @@ std::vector<Move> searchForMoves(Board * board, colours aiColour)
 		enemyPieces = board->whitePieces;
 	}
 
-	generatePawnMoves(board, aiColour, moveList);
-	generateKingMoves(board, aiColour, moveList,  friendlyPieces,  enemyPieces);
-	generateKnightMoves(board, aiColour, moveList,  friendlyPieces,  enemyPieces);
-	generateRookMoves(board, aiColour, moveList,  friendlyPieces,  enemyPieces);
-	generateBishopMoves(board, aiColour, moveList,  friendlyPieces,  enemyPieces);
-	generateQueenMoves(board, aiColour, moveList,  friendlyPieces,  enemyPieces);
+	generatePawnMoves(board, moveList);
+	generateKingMoves(board, moveList,  friendlyPieces,  enemyPieces);
+	generateKnightMoves(board, moveList,  friendlyPieces,  enemyPieces);
+	generateRookMoves(board, moveList,  friendlyPieces,  enemyPieces);
+	generateBishopMoves(board, moveList,  friendlyPieces,  enemyPieces);
+	generateQueenMoves(board, moveList,  friendlyPieces,  enemyPieces);
 
 	moveList.shrink_to_fit();
 
 	return moveList;
 }
 
-void generatePawnMoves(Board* board, colours aiColour, std::vector<Move>& Movelist)
+void generatePawnMoves(Board* board, std::vector<Move>& Movelist)
 {
-	if (aiColour == white)
+	if (board->nextColour == white)
 	{
 		uint64_t pawnBitboard = board->whitePawnBitboard;
 		uint64_t pawnPos, pawnMoves, pawnAttacks;
@@ -104,10 +104,10 @@ void generatePawnMoves(Board* board, colours aiColour, std::vector<Move>& Moveli
 	}
 }
 
-void generateKingMoves(Board * board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
+void generateKingMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
 {
 	uint64_t kingBitboard;
-	if (aiColour == white)
+	if (board->nextColour == white)
 	{
 		kingBitboard = board->whiteKingBitboard;
 	}
@@ -132,10 +132,10 @@ void generateKingMoves(Board * board, colours aiColour, std::vector<Move>& Movel
 	}
 }
 
-void generateKnightMoves(Board * board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
+void generateKnightMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
 {
 	uint64_t knightBitboard;
-	if (aiColour == white)
+	if (board->nextColour == white)
 	{
 		knightBitboard = board->whiteKnightBitboard;
 	}
@@ -169,10 +169,10 @@ void generateKnightMoves(Board * board, colours aiColour, std::vector<Move>& Mov
 
 }
 
-void generateRookMoves(Board * board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
+void generateRookMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
 {
 	uint64_t rookBitboard;
-	if (aiColour == white)
+	if (board->nextColour == white)
 	{
 		rookBitboard = board->whiteRookBitboard;
 	}
@@ -198,10 +198,10 @@ void generateRookMoves(Board * board, colours aiColour, std::vector<Move>& Movel
 	}
 }
 
-void generateBishopMoves(Board * board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
+void generateBishopMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
 {
 	uint64_t bishopBitboard;
-	if (aiColour == white)
+	if (board->nextColour == white)
 	{
 		bishopBitboard = board->whiteBishopBitboard;
 	}
@@ -227,10 +227,10 @@ void generateBishopMoves(Board * board, colours aiColour, std::vector<Move>& Mov
 	}
 }
 
-void generateQueenMoves(Board * board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
+void generateQueenMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
 {
 	uint64_t queenBitboard;
-	if (aiColour == white)
+	if (board->nextColour == white)
 	{
 		queenBitboard = board->whiteQueenBitboard;
 	}

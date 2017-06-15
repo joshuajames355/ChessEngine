@@ -38,7 +38,7 @@ public:
 
 
 uint64_t get64rand();
-uint64_t getZorbistKey(Board* board, colours colour);
+uint64_t getZorbistKey(Board* board);
 uint64_t updateHash(Move newMove, uint64_t oldHash, colours colour);
 
 

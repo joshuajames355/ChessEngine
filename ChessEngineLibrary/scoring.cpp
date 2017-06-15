@@ -1,13 +1,13 @@
 #include "scoring.h"
 
-int calculateScoreDiff(Board* board, colours aiColour)
+int calculateScoreDiff(Board* board)
 {
-	int materialScore = calculateMaterialScore(board, aiColour);
-	int positionalScore = calculatePositionalScore(board, aiColour);
+	int materialScore = calculateMaterialScore(board);
+	int positionalScore = calculatePositionalScore(board);
 	return materialScore + positionalScore;
 }
 
-int calculateMaterialScore(Board* board, colours aiColour)
+int calculateMaterialScore(Board* board)
 {
 	int blackScore = 0;
 	blackScore += bitSum(board->blackPawnBitboard) * 100;
@@ -25,7 +25,7 @@ int calculateMaterialScore(Board* board, colours aiColour)
 	whiteScore += bitSum(board->whiteQueenBitboard) * 900;
 	whiteScore += bitSum(board->whiteKingBitboard) * 20000;
 
-	if (aiColour == black)
+	if (board->nextColour == black)
 	{
 		return blackScore - whiteScore;
 	}
@@ -35,7 +35,7 @@ int calculateMaterialScore(Board* board, colours aiColour)
 	}
 }
 
-int calculatePositionalScore(Board* board, colours aiColour)
+int calculatePositionalScore(Board* board)
 {
 	bool lateGame = false;
 	if (bitSum(board->whiteQueenBitboard) + bitSum(board->blackQueenBitboard) == 0)
@@ -100,7 +100,7 @@ int calculatePositionalScore(Board* board, colours aiColour)
 		blackScore += pieceSquareData::lateGameKingSquare.calcScore(board->blackKingBitboard, black);
 	}
 
-	if (aiColour == black)
+	if (board->nextColour == black)
 	{
 		return blackScore - whiteScore;
 	}

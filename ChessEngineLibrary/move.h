@@ -15,7 +15,7 @@ struct Move
 	pieceType piece;
 	MoveType moveType;
 	
-	Board applyMove(Board* board , colours colour);
+	Board applyMove(Board* board);
 
 	bool operator==(const Move& b)
 	{

@@ -12,79 +12,78 @@ Move::Move(int newFrom, int newTo, MoveType newMoveType, pieceType newPieceType)
 	piece = newPieceType;
 }
 
-Board Move::applyMove(Board * board, colours colour)
+Board Move::applyMove(Board * board)
 {
+	Board newBoard = *board;
+	newBoard.nextColour = switchColour(newBoard.nextColour);
 	switch (moveType)
 	{
 	case quietMove:
 	{
-		Board newBoard = *board;  //Moves the piece
-		uint64_t bitboard = newBoard.findBitboard(colour, piece);
+		//Moves the piece
+		uint64_t bitboard = newBoard.findBitboard(board->nextColour, piece);
 		bitboard = (bitboard & ~((uint64_t)1 << from)) | ((uint64_t)1 << to);
-		newBoard.setBitboard(colour, piece, bitboard);
-		newBoard.update();
-		return newBoard;
+		newBoard.setBitboard(board->nextColour, piece, bitboard);
 	}
 	break;
 	case capture:
 	{
-		Board newBoard = *board;
-		newBoard.removePiece((uint64_t)1 << to); //Removes the captued piece
+		//Removes the captued piece
+		newBoard.removePiece((uint64_t)1 << to); 
 
-		uint64_t bitboard = newBoard.findBitboard(colour, piece); //Moves the piece
+		//Moves the piece
+		uint64_t bitboard = newBoard.findBitboard(board->nextColour, piece);
 		bitboard = (bitboard & ~((uint64_t)1 << from)) | ((uint64_t)1 << to);
-		newBoard.setBitboard(colour, piece, bitboard);
-		newBoard.update();
-		return newBoard;
+		newBoard.setBitboard(board->nextColour, piece, bitboard);
 	}
 	break;
 	case knightPromotion:
 	{
-		Board newBoard = *board;
-		newBoard.removePiece((uint64_t)1 << from); //Removes the moved Piece
+		//Removes the moved Piece
+		newBoard.removePiece((uint64_t)1 << from); 
 
-		uint64_t bitboard = newBoard.findBitboard(colour, knight); //Creates the promoted piece
+		//Creates the promoted piece
+		uint64_t bitboard = newBoard.findBitboard(board->nextColour, knight);
 		bitboard |= ((uint64_t)1 << to);
-		newBoard.setBitboard(colour, knight, bitboard);
-		newBoard.update();
-		return newBoard;
+		newBoard.setBitboard(board->nextColour, knight, bitboard);
 	}
 	break;
 	case bishopPromotion:
 	{
-		Board newBoard = *board;
-		newBoard.removePiece((uint64_t)1 << from); //Removes the moved Piece
+		//Removes the moved Piece
+		newBoard.removePiece((uint64_t)1 << from); 
 
-		uint64_t bitboard = newBoard.findBitboard(colour, bishop); //Creates the promoted piece
+		//Creates the promoted piece
+		uint64_t bitboard = newBoard.findBitboard(board->nextColour, bishop);
 		bitboard |= ((uint64_t)1 << to);
-		newBoard.setBitboard(colour, bishop, bitboard);
-		newBoard.update();
-		return newBoard;
+		newBoard.setBitboard(board->nextColour, bishop, bitboard);
 	}
 	break;
 	case rookPromotion:
 	{
+		//Removes the moved Piece
 		Board newBoard = *board;
-		newBoard.removePiece((uint64_t)1 << from); //Removes the moved Piece
+		newBoard.removePiece((uint64_t)1 << from); 
 
-		uint64_t bitboard = newBoard.findBitboard(colour, rook); //Creates the promoted piece
+		//Creates the promoted piece
+		uint64_t bitboard = newBoard.findBitboard(board->nextColour, rook);
 		bitboard |= ((uint64_t)1 << to);
-		newBoard.setBitboard(colour, rook, bitboard);
-		newBoard.update();
-		return newBoard;
+		newBoard.setBitboard(board->nextColour, rook, bitboard);
 	}
 	break;
 	case queenPromotion:
 	{
+		//Removes the moved Piece
 		Board newBoard = *board;
-		newBoard.removePiece((uint64_t)1 << from); //Removes the moved Piece
+		newBoard.removePiece((uint64_t)1 << from); 
 
-		uint64_t bitboard = newBoard.findBitboard(colour, queen); //Creates the promoted piece
+		//Creates the promoted piece
+		uint64_t bitboard = newBoard.findBitboard(board->nextColour, queen);
 		bitboard |= ((uint64_t)1 << to);
-		newBoard.setBitboard(colour, queen, bitboard);
-		newBoard.update();
-		return newBoard;
+		newBoard.setBitboard(board->nextColour, queen, bitboard);
 	}
 	break;
 	}
+	newBoard.update();
+	return newBoard;
 }

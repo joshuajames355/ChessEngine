@@ -163,10 +163,10 @@ bool isInCheck(Board * board, colours colour)
 		break;
 	}
 
-	std::vector<Move> moveList = searchForMoves(board, opponentColour);
+	std::vector<Move> moveList = searchForMoves(board);
 	for (int x = 0; x < moveList.size(); x++)
 	{
-		if(moveList[x].applyMove(board,opponentColour).findBitboard(colour,king) == 0)
+		if(moveList[x].applyMove(board).findBitboard(colour,king) == 0)
 		{
 			return true;
 		}

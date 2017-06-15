@@ -11,34 +11,34 @@ void updateEngine(searchData * data, Move bestMove, int alpha)
 	
 }
 
-Move startSearch(int searchDepth, Board board, colours colour)
+Move startSearch(int searchDepth, Board board)
 {
+	searchData data;
+	data.startTime = time(0);
+	data.nodes = 0;
+	
 	Move bestMove;
 	for (int x = 1; x <= searchDepth; x++)
 	{
-		bestMove = rootSearch(x, board, colour);
+		data.depth = searchDepth;
+		bestMove = rootSearch(x, board, &data);
 	}
-	bestMove = rootSearch(searchDepth, board, colour);
 	return bestMove;
 }
 
 
-Move rootSearch(int depthLeft, Board board, colours colour)
+Move rootSearch(int depthLeft, Board board, searchData* data)
 {
-	searchData data;
-	data.startTime = time(0);
-	data.nodes = 1;
-	data.depth = depthLeft;
+	data->nodes++;
 
 	int alpha = -9999;
 	int beta = 9999;
-
 
 	int alphaOriginal = alpha;
 	Move bestMove;
 	bool isBestMove = false;
 
-	uint64_t hash = getZorbistKey(&board, colour);
+	uint64_t hash = getZorbistKey(&board);
 	TranspositionEntry entry = ZorbistKeys::TranspositionTable[hash % TTSize];
 
 	if (entry.zorbistKey == hash)
@@ -70,28 +70,27 @@ Move rootSearch(int depthLeft, Board board, colours colour)
 		}
 	}
 
-	std::vector<Move> moveList = searchForMoves(&board, colour);
+	std::vector<Move> moveList = searchForMoves(&board);
 	if (isBestMove && std::find(moveList.begin(), moveList.end(), bestMove) != moveList.end())
 	{
 		//Moves bestMove to the front of the moveList.
 		moveList.erase(std::remove(moveList.begin(), moveList.end(), bestMove), moveList.end());
 		moveList.insert(moveList.begin(), bestMove);
 	}
-	colours newColour = switchColour(colour);
 	Board newBoard;
 	uint64_t newHash;
 	for (int x = 0; x < moveList.size(); x++)
 	{
-		newBoard = moveList[x].applyMove(&board, colour);
+		newBoard = moveList[x].applyMove(&board);
 		if (moveList[x].moveType == quietMove)
 		{
-			newHash = updateHash(moveList[x], hash, newColour);
+			newHash = updateHash(moveList[x], hash, newBoard.nextColour);
 		}
 		else
 		{
-			newHash = getZorbistKey(&newBoard, newColour);
+			newHash = getZorbistKey(&newBoard);
 		}
-		int score = -negamax(-beta, -alpha, depthLeft - 1, newBoard, newColour, &data, newHash,true);
+		int score = -negamax(-beta, -alpha, depthLeft - 1, newBoard, data, newHash,true);
 		if (score >= beta)
 		{
 			return bestMove;   //  fail hard beta-cutoff
@@ -101,7 +100,7 @@ Move rootSearch(int depthLeft, Board board, colours colour)
 			alpha = score; // alpha acts like max in MiniMax
 			bestMove = moveList[x];
 		}
-		updateEngine(&data, bestMove, alpha);
+		updateEngine(data, bestMove, alpha);
 
 	}
 
@@ -125,12 +124,12 @@ Move rootSearch(int depthLeft, Board board, colours colour)
 
 	ZorbistKeys::TranspositionTable[hash % TTSize] = newEntry;
 
-	updateEngine(&data, bestMove, alpha);
+	updateEngine(data, bestMove, alpha);
 
 	return bestMove;
 }
 
-int negamax(int alpha, int beta, int depthLeft, Board board, colours colour, searchData* data, uint64_t hash, bool isQuiet)
+int negamax(int alpha, int beta, int depthLeft, Board board, searchData* data, uint64_t hash, bool isQuiet)
 {
 	data->nodes++;
 	int alphaOriginal = alpha;
@@ -170,11 +169,11 @@ int negamax(int alpha, int beta, int depthLeft, Board board, colours colour, sea
 
 	if (depthLeft <= 0 && isQuiet)
 	{
-		return calculateScoreDiff(&board, colour);
+		return calculateScoreDiff(&board);
 	}
 	else if (depthLeft <= 0)
 	{
-		int score = calculateScoreDiff(&board, colour);
+		int score = calculateScoreDiff(&board);
 		if (score >= beta)
 			return beta;
 		if (alpha < score)
@@ -183,29 +182,28 @@ int negamax(int alpha, int beta, int depthLeft, Board board, colours colour, sea
 
 	}
 
-	std::vector<Move> moveList = searchForMoves(&board, colour);
+	std::vector<Move> moveList = searchForMoves(&board);
 	if (isBestMove && std::find(moveList.begin(), moveList.end(), bestMove) != moveList.end())
 	{
 		//Moves bestMove to the front of the moveList.
 		moveList.erase(std::remove(moveList.begin(), moveList.end(), bestMove), moveList.end());
 		moveList.insert(moveList.begin(), bestMove);
 	}
-	colours newColour = switchColour(colour);
 	Board newBoard;
 	uint64_t newHash;
 	for (int x = 0; x < moveList.size(); x++)
 	{
 		if (depthLeft <= 0 && moveList[x].moveType != capture) continue;
-		newBoard = moveList[x].applyMove(&board, colour);
+		newBoard = moveList[x].applyMove(&board);
 		if (moveList[x].moveType == quietMove)
 		{
-			newHash = updateHash(moveList[x], hash, newColour);
+			newHash = updateHash(moveList[x], hash, newBoard.nextColour);
 		}
 		else
 		{
-			newHash = getZorbistKey(&newBoard, newColour);
+			newHash = getZorbistKey(&newBoard);
 		}
-		int score = -negamax(-beta, -alpha, depthLeft - 1, newBoard, newColour, data, newHash, moveList[x].moveType != capture);
+		int score = -negamax(-beta, -alpha, depthLeft - 1, newBoard, data, newHash, moveList[x].moveType != capture);
 		if (score >= beta)
 		{
 			return beta;   //  fail hard beta-cutoff

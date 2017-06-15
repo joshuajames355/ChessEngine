@@ -8,13 +8,13 @@
 #include "board.h"
 #include "magicBitboards.h"
 
-std::vector<Move> searchForMoves(Board* board, colours aiColour);
+std::vector<Move> searchForMoves(Board* board);
 
-void generatePawnMoves(Board* board ,colours aiColour, std::vector<Move>& Movelist);
-void generateKingMoves(Board* board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces);
-void generateKnightMoves(Board * board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces);
-void generateRookMoves(Board* board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces);
-void generateBishopMoves(Board * board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces);
-void generateQueenMoves(Board * board, colours aiColour, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces);
+void generatePawnMoves(Board* board, std::vector<Move>& Movelist);
+void generateKingMoves(Board* board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces);
+void generateKnightMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces);
+void generateRookMoves(Board* board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces);
+void generateBishopMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces);
+void generateQueenMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces);
 
 void addMoves(int start, int end, pieceType piece , std::vector<Move>& Movelist , uint64_t enemyPieces);

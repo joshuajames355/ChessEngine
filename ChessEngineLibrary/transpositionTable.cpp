@@ -15,7 +15,7 @@ void ZorbistKeys::initialize()
 	blackMoveKey = get64rand();
 }
 
-uint64_t getZorbistKey(Board * board, colours colour)
+uint64_t getZorbistKey(Board * board)
 {
 	board->update();
 	uint64_t hash = 0;
@@ -75,7 +75,7 @@ uint64_t getZorbistKey(Board * board, colours colour)
 			}
 		}
 	}
-	if (colour == black)
+	if (board->nextColour == black)
 	{
 		hash ^= ZorbistKeys::blackMoveKey;
 	}

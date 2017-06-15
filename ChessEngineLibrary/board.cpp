@@ -17,6 +17,9 @@ Board::Board()
 	blackQueenBitboard = emptyBitboard; 
 	blackKingBitboard = emptyBitboard; 
 
+	nextColour = white;
+	enPassantSquare = -1;
+
 	update();
 }
 
@@ -36,12 +39,14 @@ void Board::defaults()
 	blackQueenBitboard = 576460752303423488; //2^59
 	blackKingBitboard = 1152921504606846976; //2^60
 
+	nextColour = white;
+	enPassantSquare = -1;
+
 	update();
 }
 
 void Board::printBoard()
 {
-	update();
 	int counter = 56;
 	for (int x = 0; x < 8; x++)
 	{
@@ -122,7 +127,7 @@ void Board::update()
 	allPieces = whitePieces | blackPieces;
 }
 
-colours Board::loadFromFen(std::string fen)
+void Board::loadFromFen(std::string fen)
 {
 	int currentPosInBoard = 56;
 	int currentCharPos = 0;
@@ -202,17 +207,15 @@ colours Board::loadFromFen(std::string fen)
 		currentCharPos++;
 	}
 	update();
-	colours activeColour;
+
 	if (fen[currentCharPos] == 'w')
 	{
-		activeColour = white;
+		nextColour = white;
 	}
 	else if (fen[currentCharPos] == 'b')
 	{
-		activeColour = black;
+		nextColour = black;
 	}
-	return activeColour;
-
 }
 
 uint64_t Board::findBitboard(colours colour, pieceType piece)

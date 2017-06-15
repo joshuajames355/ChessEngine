@@ -10,7 +10,6 @@ int main(int argc, char *argv[])
 
 void engineLoop()
 {
-
 	int SEARCHDEPTH = 4;
 
 
@@ -18,7 +17,6 @@ void engineLoop()
 	board.defaults();
 	bool hasSetupEngine = false;
 
-	colours aiColour = white;
 	while (true)
 	{
 		std::string response;
@@ -29,7 +27,7 @@ void engineLoop()
 		{
 			std::cout << "id name UNSR Chess System\n";
 			std::cout << "id author UNSR\n";
-			std::cout << "option name SearchDepth type spin default 4 min 2 max 20\n";
+			std::cout << "option name SearchDepth type spin default " << SEARCHDEPTH << " min 2 max 20\n";
 			std::cout << "uciok\n";
 		}
 		if (response == "isready")
@@ -60,32 +58,16 @@ void engineLoop()
 				if (words.size() == 2)
 				{
 					board.defaults();
-					aiColour = white;
 				}
 				else if (words[2] == "moves")
 				{
 					board.defaults();
-
-					aiColour = white;
 					Move currentMove;
 					for (int x = 3; x < words.size(); x++)
 					{
 						//Applies each move to calculate the current board.
 						currentMove = moveFromNotation(words[x], &board);
-						std::cout << "from: " << currentMove.from << " to: " << currentMove.to << " type: " << currentMove.moveType << "\n";
-						board = currentMove.applyMove(&board, aiColour);
-						board.update();
-
-						//Calculate the colour of the AI. Even number of moves = white , odd number of moves = black
-						switch (aiColour)
-						{
-						case white:
-							aiColour = black;
-							break;
-						case black:
-							aiColour = white;
-							break;
-						}
+						board = currentMove.applyMove(&board);
 					}
 				}
 			}
@@ -93,7 +75,7 @@ void engineLoop()
 			{
 				std::string fenString = words[2] + " " + words[3] + " " + words[4] + " " + words[5] + " " + words[6] + " " + words[7];
 				board = Board();
-				aiColour = board.loadFromFen(fenString);
+				board.loadFromFen(fenString);
 
 				if (words.size() > 8 && words[8] == "moves") {
 					Move currentMove;
@@ -101,20 +83,8 @@ void engineLoop()
 					{
 						//Applies each move to calculate the current board.
 						currentMove = moveFromNotation(words[x], &board);
-						std::cout << "from: " << currentMove.from << " to: " << currentMove.to << " type: " << currentMove.moveType << "\n";
-						board = currentMove.applyMove(&board, aiColour);
-						board.update();
+						board = currentMove.applyMove(&board);
 
-						//Calculate the colour of the AI. Even number of moves = white , odd number of moves = black
-						switch (aiColour)
-						{
-						case white:
-							aiColour = black;
-							break;
-						case black:
-							aiColour = white;
-							break;
-						}
 					}
 				}
 			}
@@ -123,7 +93,7 @@ void engineLoop()
 		if (words[0] == "go")
 		{
 			board.printBoard();
-			std::cout << "bestmove " << notationFromMove(startSearch(SEARCHDEPTH, board, aiColour)) << "\n";
+			std::cout << "bestmove " << notationFromMove(startSearch(SEARCHDEPTH, board)) << "\n";
 		}
 	}
 
