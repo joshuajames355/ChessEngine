@@ -10,7 +10,8 @@ TEST(MoveGeneration, PawnMoves)
 	Board board = Board();
 	board.whitePawnBitboard = 2;
 	board.update();
-	std::vector<Move> Movelist = searchForMoves(&board, white);
+	board.nextColour = white;
+	std::vector<Move> Movelist = searchForMoves(&board);
 	EXPECT_EQ(Movelist.size(), 1);
 	EXPECT_EQ(Movelist[0].from, 1);
 	EXPECT_EQ(Movelist[0].to, 9);
@@ -20,7 +21,8 @@ TEST(MoveGeneration, PawnMoves)
 	board = Board();
 	board.whitePawnBitboard = 256;
 	board.update();
-	Movelist = searchForMoves(&board, white);
+	board.nextColour = white;
+	Movelist = searchForMoves(&board);
 	EXPECT_EQ(Movelist.size(), 2);
 	EXPECT_EQ(Movelist[0].from, 8);
 	EXPECT_EQ(Movelist[0].to + Movelist[1].to, 40);
@@ -32,7 +34,8 @@ TEST(MoveGeneration, PawnMoves)
 	board.blackKingBitboard = 256;
 	board.blackPawnBitboard = 512;
 	board.update();
-	Movelist = searchForMoves(&board, white);
+	board.nextColour = white;
+	Movelist = searchForMoves(&board);
 	EXPECT_EQ(Movelist.size(), 1);
 	EXPECT_EQ(Movelist[0].from, 0);
 	EXPECT_EQ(Movelist[0].to, 9);
@@ -44,7 +47,8 @@ TEST(MoveGeneration, PawnMoves)
 	board.blackKingBitboard = 4194304;
 	board.blackPawnBitboard = 8388608;
 	board.update();
-	Movelist = searchForMoves(&board, white);
+	board.nextColour = white;
+	Movelist = searchForMoves(&board);
 	EXPECT_EQ(Movelist.size(), 1);
 	EXPECT_EQ(Movelist[0].from, 15);
 	EXPECT_EQ(Movelist[0].to, 22);
@@ -54,7 +58,8 @@ TEST(MoveGeneration, PawnMoves)
 	board = Board();
 	board.whitePawnBitboard = 281474976710656;
 	board.update();
-	Movelist = searchForMoves(&board, white);
+	board.nextColour = white;
+	Movelist = searchForMoves(&board);
 	EXPECT_EQ(Movelist.size(), 5);
 	EXPECT_EQ(Movelist[0].from, 48);
 	EXPECT_EQ(Movelist[0].to, 56);
@@ -63,7 +68,8 @@ TEST(MoveGeneration, PawnMoves)
 	board = Board();
 	board.blackPawnBitboard = 256;
 	board.update();
-	Movelist = searchForMoves(&board, black);
+	board.nextColour = black;
+	Movelist = searchForMoves(&board);
 	EXPECT_EQ(Movelist.size(), 5);
 	EXPECT_EQ(Movelist[0].from, 8);
 	EXPECT_EQ(Movelist[0].to, 0);
@@ -79,7 +85,8 @@ TEST(MoveGeneration, KingMoves)
 	board.whitePawnBitboard = 768;
 	board.blackPawnBitboard = 2;
 	board.update();
-	generateKingMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
+	board.nextColour = white;
+	generateKingMoves(&board, movelist, board.whitePieces, board.blackPieces);
 
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 0);
@@ -93,7 +100,9 @@ TEST(MoveGeneration, KingMoves)
 	board.whitePawnBitboard = 512;
 	board.whiteRookBitboard = 2;
 	board.update();
-	generateKingMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
+	board.nextColour = white;
+	generateKingMoves(&board, movelist, board.whitePieces, board.blackPieces);
+
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 0);
 	EXPECT_EQ(movelist[0].to, 8);
@@ -106,7 +115,9 @@ TEST(MoveGeneration, KingMoves)
 	board.blackPawnBitboard = 4647714815446351872;
 	board.whiteRookBitboard = 18014398509481984;
 	board.update();
-	generateKingMoves(&board, black, movelist, board.blackPieces, board.whitePieces);
+	board.nextColour = black;
+	generateKingMoves(&board, movelist, board.blackPieces, board.whitePieces);
+
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 63);
 	EXPECT_EQ(movelist[0].to, 54);
@@ -121,7 +132,9 @@ TEST(MoveGeneration, KnightMoves)
 	board.whiteKnightBitboard = 1;
 	board.whitePawnBitboard = 1024;
 	board.update();
-	generateKnightMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
+	board.nextColour = white;
+
+	generateKnightMoves(&board, movelist, board.whitePieces, board.blackPieces);
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 0);
 	EXPECT_EQ(movelist[0].to, 17);
@@ -134,7 +147,9 @@ TEST(MoveGeneration, KnightMoves)
 	board.whitePawnBitboard = 70368744177664;
 	board.blackRookBitboard = 9007199254740992;
 	board.update();
-	generateKnightMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
+	board.nextColour = white;
+
+	generateKnightMoves(&board, movelist, board.whitePieces, board.blackPieces);
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 63);
 	EXPECT_EQ(movelist[0].to, 53);
@@ -151,7 +166,9 @@ TEST(MoveGeneration, RookMoves)
 	board.whiteRookBitboard = 1;
 	board.whitePawnBitboard = 260;
 	board.update();
-	generateRookMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
+	board.nextColour = white;
+
+	generateRookMoves(&board, movelist, board.whitePieces, board.blackPieces);
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 0);
 	EXPECT_EQ(movelist[0].to, 1);
@@ -164,7 +181,9 @@ TEST(MoveGeneration, RookMoves)
 	board.whitePawnBitboard = 2;
 	board.blackPawnBitboard = 256;
 	board.update();
-	generateRookMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
+	board.nextColour = white;
+
+	generateRookMoves(&board, movelist, board.whitePieces, board.blackPieces);
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 0);
 	EXPECT_EQ(movelist[0].to, 8);
@@ -179,7 +198,9 @@ TEST(MoveGeneration, BishopMoves)
 	board.whiteBishopBitboard = 1;
 	board.whitePawnBitboard = 262144;
 	board.update();
-	generateBishopMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
+	board.nextColour = white;
+
+	generateBishopMoves(&board, movelist, board.whitePieces, board.blackPieces);
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 0);
 	EXPECT_EQ(movelist[0].to, 9);
@@ -191,7 +212,9 @@ TEST(MoveGeneration, BishopMoves)
 	board.whiteBishopBitboard = 128;
 	board.whitePawnBitboard = 2097216;
 	board.update();
-	generateBishopMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
+	board.nextColour = white;
+
+	generateBishopMoves(&board, movelist, board.whitePieces, board.blackPieces);
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 7);
 	EXPECT_EQ(movelist[0].to, 14);
@@ -204,7 +227,9 @@ TEST(MoveGeneration, BishopMoves)
 	board.whitePawnBitboard = 68720787456;
 	board.blackPawnBitboard = 17179869184;
 	board.update();
-	generateBishopMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
+	board.nextColour = white;
+
+	generateBishopMoves(&board, movelist, board.whitePieces, board.blackPieces);
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 27);
 	EXPECT_EQ(movelist[0].to, 34);
@@ -217,7 +242,9 @@ TEST(MoveGeneration, BishopMoves)
 	board.whitePawnBitboard = 1536;
 	board.blackKnightBitboard = 1048576;
 	board.update();
-	generateBishopMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
+	board.nextColour = white;
+
+	generateBishopMoves(&board, movelist, board.whitePieces, board.blackPieces);
 	EXPECT_EQ(movelist.size(), 2);
 	if (movelist[0].to == 11)
 	{
@@ -244,7 +271,9 @@ TEST(MoveGeneration, QueenMoves)
 	board.whiteQueenBitboard = 1;
 	board.whitePawnBitboard = 262402;
 	board.update();
-	generateQueenMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
+	board.nextColour = white;
+
+	generateQueenMoves(&board, movelist, board.whitePieces, board.blackPieces);
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 0);
 	EXPECT_EQ(movelist[0].to, 9);
@@ -256,7 +285,9 @@ TEST(MoveGeneration, QueenMoves)
 	board.whiteQueenBitboard = 128;
 	board.whitePawnBitboard = 2129984;
 	board.update();
-	generateQueenMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
+	board.nextColour = white;
+
+	generateQueenMoves(&board, movelist, board.whitePieces, board.blackPieces);
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 7);
 	EXPECT_EQ(movelist[0].to, 14);
@@ -268,7 +299,9 @@ TEST(MoveGeneration, QueenMoves)
 	board.whiteQueenBitboard = 1;
 	board.whitePawnBitboard = 772;
 	board.update();
-	generateQueenMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
+	board.nextColour = white;
+
+	generateQueenMoves(&board, movelist, board.whitePieces, board.blackPieces);
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 0);
 	EXPECT_EQ(movelist[0].to, 1);
@@ -281,7 +314,9 @@ TEST(MoveGeneration, QueenMoves)
 	board.whitePawnBitboard = 1615884288;
 	board.blackKnightBitboard = 268435456;
 	board.update();
-	generateQueenMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
+	board.nextColour = white;
+
+	generateQueenMoves(&board, movelist, board.whitePieces, board.blackPieces);
 	EXPECT_EQ(movelist.size(), 1);
 	EXPECT_EQ(movelist[0].from, 21);
 	EXPECT_EQ(movelist[0].to, 28);
@@ -294,7 +329,9 @@ TEST(MoveGeneration, QueenMoves)
 	board.whitePawnBitboard = 60264677376;
 	board.blackKnightBitboard = 16777216;
 	board.update();
-	generateQueenMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
+	board.nextColour = white;
+
+	generateQueenMoves(&board, movelist, board.whitePieces, board.blackPieces);
 	EXPECT_EQ(movelist.size(), 2);
 	if (movelist[0].to == 24)
 	{
@@ -318,7 +355,9 @@ TEST(MoveGeneration, QueenMoves)
 	board.whitePawnBitboard = 3768623104;
 	board.blackKingBitboard = 64;
 	board.update();
-	generateQueenMoves(&board, white, movelist, board.whitePieces, board.blackPieces);
+	board.nextColour = white;
+
+	generateQueenMoves(&board, movelist, board.whitePieces, board.blackPieces);
 	EXPECT_EQ(movelist.size(), 2);
 	if (movelist[0].to == 6)
 	{

@@ -15,7 +15,6 @@ Move::Move(int newFrom, int newTo, MoveType newMoveType, pieceType newPieceType)
 Board Move::applyMove(Board * board)
 {
 	Board newBoard = *board;
-	newBoard.nextColour = switchColour(newBoard.nextColour);
 	switch (moveType)
 	{
 	case quietMove:
@@ -74,7 +73,6 @@ Board Move::applyMove(Board * board)
 	case queenPromotion:
 	{
 		//Removes the moved Piece
-		Board newBoard = *board;
 		newBoard.removePiece((uint64_t)1 << from); 
 
 		//Creates the promoted piece
@@ -84,6 +82,7 @@ Board Move::applyMove(Board * board)
 	}
 	break;
 	}
+	newBoard.nextColour = switchColour(newBoard.nextColour);
 	newBoard.update();
 	return newBoard;
 }
