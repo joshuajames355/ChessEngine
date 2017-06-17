@@ -4,7 +4,7 @@
 #include "piece.h"
 #include "board.h"
 
-enum MoveType{quietMove, capture, knightPromotion, bishopPromotion, rookPromotion, queenPromotion, pawnDoubleMove};
+enum MoveType{quietMove, capture, knightPromotion, bishopPromotion, rookPromotion, queenPromotion, pawnDoubleMove, kingSideCastling, queenSideCastling};
 
 struct Move
 {
@@ -22,5 +22,7 @@ struct Move
 		return (from == b.from) && (to == b.to) && (piece = b.piece) && (moveType = b.moveType);
 	}
 };
+
+void updateCastlingRights(Board* newBoard, Move* move);
 
 

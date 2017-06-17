@@ -175,8 +175,6 @@ TEST(MoveGeneration, KnightMoves)
 
 TEST(MoveGeneration, RookMoves)
 {
-
-
 	std::vector<Move> movelist = std::vector<Move>();
 	Board board = Board();
 	board.whiteRookBitboard = 1;
@@ -390,4 +388,63 @@ TEST(MoveGeneration, QueenMoves)
 		EXPECT_EQ(movelist[1].moveType, capture);
 	}
 
+}
+
+TEST(MoveGeneration, CastlingMoves)
+{
+	std::vector<Move> movelist = std::vector<Move>();
+	Board board = Board();
+	board.whiteKingBitboard = 16;
+	board.whiteRookBitboard = 128;
+	board.canWhiteCastleKingSide = true;
+	board.update();
+	board.nextColour = white;
+	generateCastlingMoves(&board, movelist, board.whitePieces, board.blackPieces);
+	EXPECT_EQ(movelist.size(), 1);
+	EXPECT_EQ(movelist[0].from, 4);
+	EXPECT_EQ(movelist[0].to, 6);
+	EXPECT_EQ(movelist[0].piece, king);
+	EXPECT_EQ(movelist[0].moveType, kingSideCastling);
+
+	movelist = std::vector<Move>();
+	board = Board();
+	board.whiteKingBitboard = 16;
+	board.whiteRookBitboard = 1;
+	board.canWhiteCastleQueenSide = true;
+	board.update();
+	board.nextColour = white;
+	generateCastlingMoves(&board, movelist, board.whitePieces, board.blackPieces);
+	EXPECT_EQ(movelist.size(), 1);
+	EXPECT_EQ(movelist[0].from, 4);
+	EXPECT_EQ(movelist[0].to, 2);
+	EXPECT_EQ(movelist[0].piece, king);
+	EXPECT_EQ(movelist[0].moveType, queenSideCastling);
+
+	movelist = std::vector<Move>();
+	board = Board();
+	board.blackKingBitboard = 1152921504606846976;
+	board.blackRookBitboard = 9223372036854775808;
+	board.canBlackCastleKingSide = true;
+	board.update();
+	board.nextColour = black;
+	generateCastlingMoves(&board, movelist, board.whitePieces, board.blackPieces);
+	EXPECT_EQ(movelist.size(), 1);
+	EXPECT_EQ(movelist[0].from, 60);
+	EXPECT_EQ(movelist[0].to, 62);
+	EXPECT_EQ(movelist[0].piece, king);
+	EXPECT_EQ(movelist[0].moveType, kingSideCastling);
+
+	movelist = std::vector<Move>();
+	board = Board();
+	board.blackKingBitboard = 1152921504606846976;
+	board.blackRookBitboard = 72057594037927936;
+	board.canBlackCastleQueenSide = true;
+	board.update();
+	board.nextColour = black;
+	generateCastlingMoves(&board, movelist, board.whitePieces, board.blackPieces);
+	EXPECT_EQ(movelist.size(), 1);
+	EXPECT_EQ(movelist[0].from, 60);
+	EXPECT_EQ(movelist[0].to, 58);
+	EXPECT_EQ(movelist[0].piece, king);
+	EXPECT_EQ(movelist[0].moveType, queenSideCastling);
 }

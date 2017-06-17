@@ -133,6 +133,31 @@ Move moveFromNotation(std::string moveNotation, Board * board)
 	{
 		return Move(from, to, capture, piece);
 	}
+	else if (std::abs(from - to) == 2 && piece == king) //Castling
+	{
+		if (aiColour == white)
+		{
+			if (from < to) //KingSide castling
+			{
+				return Move(from, to, kingSideCastling, piece);
+			}
+			else //QueenSide castling
+			{
+				return Move(from, to, queenSideCastling, piece);
+			}
+		}
+		else
+		{
+			if (from < to) //KingSide castling
+			{
+				return Move(from, to, kingSideCastling, piece);
+			}
+			else //QueenSide castling
+			{
+				return Move(from, to, queenSideCastling, piece);
+			}
+		}
+	}
 	else if (moveNotation.length() == 5) //Promotion moves. Format is a7a8q , where the last piece is the piece to be promoted to.
 	{
 		if (moveNotation.back() == 'q' || moveNotation.back() == 'Q')

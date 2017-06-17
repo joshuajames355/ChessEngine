@@ -163,6 +163,53 @@ TEST(Move, ApplyPromotionMoves)
 	EXPECT_EQ(moveBoard.allPieces, 1);
 }
 
+TEST(Move, ApplyCastlingMoves)
+{
+	Board board = Board();
+	Move move = Move(4, 2, queenSideCastling, king);
+	board.whiteKingBitboard = 16;
+	board.whiteRookBitboard = 1;
+	board.update();
+	board.nextColour = white;
+	Board moveBoard = move.applyMove(&board);
+	EXPECT_EQ(moveBoard.whiteKingBitboard, 4);
+	EXPECT_EQ(moveBoard.whiteRookBitboard, 8);
+	EXPECT_EQ(moveBoard.allPieces, 12);
+
+	board = Board();
+	move = Move(4, 6, kingSideCastling, king);
+	board.whiteKingBitboard = 16;
+	board.whiteRookBitboard = 128;
+	board.update();
+	board.nextColour = white;
+	moveBoard = move.applyMove(&board);
+	EXPECT_EQ(moveBoard.whiteKingBitboard, 64);
+	EXPECT_EQ(moveBoard.whiteRookBitboard, 32);
+	EXPECT_EQ(moveBoard.allPieces, 96);
+
+	board = Board();
+	move = Move(60, 58, queenSideCastling, king);
+	board.blackKingBitboard = 1152921504606846976;
+	board.blackRookBitboard = 72057594037927936;
+	board.update();
+	board.nextColour = black;
+	moveBoard = move.applyMove(&board);
+	EXPECT_EQ(moveBoard.blackKingBitboard, 288230376151711744);
+	EXPECT_EQ(moveBoard.blackRookBitboard, 576460752303423488);
+	EXPECT_EQ(moveBoard.allPieces, 864691128455135232);
+
+	board = Board();
+	move = Move(60, 62, kingSideCastling, king);
+	board.blackKingBitboard = 1152921504606846976;
+	board.blackRookBitboard = 9223372036854775808;
+	board.update();
+	board.nextColour = black;
+	moveBoard = move.applyMove(&board);
+	EXPECT_EQ(moveBoard.blackKingBitboard, 4611686018427387904);
+	EXPECT_EQ(moveBoard.blackRookBitboard, 2305843009213693952);
+	EXPECT_EQ(moveBoard.allPieces, 6917529027641081856);
+}
+
 TEST(Move, UpdateCastlingAvaliability)
 {
 	Board board = Board();

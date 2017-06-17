@@ -24,6 +24,7 @@ std::vector<Move> searchForMoves(Board * board)
 	generateRookMoves(board, moveList,  friendlyPieces,  enemyPieces);
 	generateBishopMoves(board, moveList,  friendlyPieces,  enemyPieces);
 	generateQueenMoves(board, moveList,  friendlyPieces,  enemyPieces);
+	generateCastlingMoves(board, moveList, friendlyPieces, enemyPieces);
 
 	moveList.shrink_to_fit();
 
@@ -273,6 +274,32 @@ void generateQueenMoves(Board * board, std::vector<Move>& Movelist, uint64_t fri
 		{
 			uint64_t queenPos = pop(moves);
 			addMoves(currentPos, bitScanForward(queenPos), queen, Movelist, enemyPieces);
+		}
+	}
+}
+
+void generateCastlingMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
+{
+	if (board->nextColour == white)
+	{
+		if (board->canWhiteCastleKingSide && (board->allPieces & 96) == 0)//Kingside castling
+		{
+			Movelist.push_back(Move(4, 6, kingSideCastling, king));
+		}
+		else if(board->canWhiteCastleQueenSide && (board->allPieces & 14) == 0)//Queenside castling
+		{
+			Movelist.push_back(Move(4, 2, queenSideCastling, king));
+		}
+	}
+	else
+	{
+		if (board->canBlackCastleKingSide && (board->allPieces & 6917529027641081856) == 0)//Kingside castling
+		{
+			Movelist.push_back(Move(60, 62, kingSideCastling, king));
+		}
+		else if (board->canBlackCastleQueenSide && (board->allPieces & 1008806316530991104) == 0)//Queenside castling
+		{
+			Movelist.push_back(Move(60, 58, queenSideCastling, king));
 		}
 	}
 }

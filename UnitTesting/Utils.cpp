@@ -83,6 +83,46 @@ TEST(Utils, moveFromNotation)
 	EXPECT_EQ(move.to, 0);
 	EXPECT_EQ(move.moveType, knightPromotion);
 	EXPECT_EQ(move.piece, pawn);
+
+	board = Board();
+	board.whiteKingBitboard = 16;
+	board.whiteRookBitboard = 128;
+	board.update();
+	move = moveFromNotation("e1g1", &board);
+	EXPECT_EQ(move.from,4);
+	EXPECT_EQ(move.to, 6);
+	EXPECT_EQ(move.moveType, kingSideCastling);
+	EXPECT_EQ(move.piece, king);
+
+	board = Board();
+	board.whiteKingBitboard = 16;
+	board.whiteRookBitboard = 1;
+	board.update();
+	move = moveFromNotation("e1c1", &board);
+	EXPECT_EQ(move.from, 4);
+	EXPECT_EQ(move.to, 2);
+	EXPECT_EQ(move.moveType, queenSideCastling);
+	EXPECT_EQ(move.piece, king);
+
+	board = Board();
+	board.blackKingBitboard = 1152921504606846976;
+	board.blackRookBitboard = 9223372036854775808;
+	board.update();
+	move = moveFromNotation("e8g8", &board);
+	EXPECT_EQ(move.from, 60);
+	EXPECT_EQ(move.to, 62);
+	EXPECT_EQ(move.moveType, kingSideCastling);
+	EXPECT_EQ(move.piece, king);
+
+	board = Board();
+	board.blackKingBitboard = 1152921504606846976;
+	board.blackRookBitboard = 72057594037927936;
+	board.update();
+	move = moveFromNotation("e8c8", &board);
+	EXPECT_EQ(move.from, 60);
+	EXPECT_EQ(move.to, 58);
+	EXPECT_EQ(move.moveType, queenSideCastling);
+	EXPECT_EQ(move.piece, king);
 }
 
 TEST(Utils, isInCheck)

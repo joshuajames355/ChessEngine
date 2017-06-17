@@ -17,45 +17,7 @@ Board Move::applyMove(Board * board)
 	Board newBoard = *board;
 	newBoard.enPassantSquare = -1;
 
-	//Update castling rights
-	if (piece == king)
-	{
-		if (board->nextColour == white)
-		{
-			newBoard.canWhiteCastleKingSide = false;
-			newBoard.canWhiteCastleQueenSide = false;
-		}
-		else
-		{
-			newBoard.canBlackCastleKingSide = false;
-			newBoard.canBlackCastleQueenSide = false;
-		}
-	}
-	else if (piece == rook)
-	{
-		if (board->nextColour == white)
-		{
-			if (board->canWhiteCastleQueenSide && from == 0)
-			{
-				newBoard.canWhiteCastleQueenSide = false;
-			}
-			else if(board->canWhiteCastleKingSide && from == 7)
-			{
-				newBoard.canWhiteCastleKingSide = false;
-			}
-		}
-		else
-		{
-			if (board->canBlackCastleQueenSide && from == 56)
-			{
-				newBoard.canBlackCastleQueenSide = false;
-			}
-			else if (board->canBlackCastleKingSide && from == 63)
-			{
-				newBoard.canBlackCastleKingSide = false;
-			}
-		}
-	}
+	updateCastlingRights(&newBoard, this);
 
 	switch (moveType)
 	{
@@ -156,8 +118,83 @@ Board Move::applyMove(Board * board)
 		}
 	}
 	break;
+	case kingSideCastling:
+	{
+		//Moves the king
+		uint64_t bitboard = newBoard.findBitboard(board->nextColour, piece);
+		bitboard = (bitboard & ~((uint64_t)1 << from)) | ((uint64_t)1 << to);
+		newBoard.setBitboard(board->nextColour, piece, bitboard);
+		if (board->nextColour == white)
+		{
+			newBoard.whiteRookBitboard = (newBoard.whiteRookBitboard & ~128) | 32; //Moves the rook
+		}
+		else
+		{
+			newBoard.blackRookBitboard = (newBoard.blackRookBitboard & ~9223372036854775808) | 2305843009213693952; //Moves the rook
+		}
 	}
+	break;
+	case queenSideCastling:
+	{
+		//Moves the king
+		uint64_t bitboard = newBoard.findBitboard(board->nextColour, piece);
+		bitboard = (bitboard & ~((uint64_t)1 << from)) | ((uint64_t)1 << to);
+		newBoard.setBitboard(board->nextColour, piece, bitboard);
+		if (board->nextColour == white)
+		{
+			newBoard.whiteRookBitboard = (newBoard.whiteRookBitboard & ~1) | 8; //Moves the rook
+		}
+		else
+		{
+			newBoard.blackRookBitboard = (newBoard.blackRookBitboard & ~72057594037927936) | 576460752303423488; //Moves the rook
+		}
+	}
+	break;
+	}
+
 	newBoard.nextColour = switchColour(newBoard.nextColour);
 	newBoard.update();
 	return newBoard;
+}
+
+void updateCastlingRights(Board * newBoard, Move * move)
+{
+	if (move->piece == king)
+	{
+		if (newBoard->nextColour == white)
+		{
+			newBoard->canWhiteCastleKingSide = false;
+			newBoard->canWhiteCastleQueenSide = false;
+		}
+		else
+		{
+			newBoard->canBlackCastleKingSide = false;
+			newBoard->canBlackCastleQueenSide = false;
+		}
+	}
+	else if (move->piece == rook)
+	{
+		if (newBoard->nextColour == white)
+		{
+			if (newBoard->canWhiteCastleQueenSide && move->from == 0)
+			{
+				newBoard->canWhiteCastleQueenSide = false;
+			}
+			else if (newBoard->canWhiteCastleKingSide && move->from == 7)
+			{
+				newBoard->canWhiteCastleKingSide = false;
+			}
+		}
+		else
+		{
+			if (newBoard->canBlackCastleQueenSide && move->from == 56)
+			{
+				newBoard->canBlackCastleQueenSide = false;
+			}
+			else if (newBoard->canBlackCastleKingSide && move->from == 63)
+			{
+				newBoard->canBlackCastleKingSide = false;
+			}
+		}
+	}
 }
