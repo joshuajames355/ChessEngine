@@ -59,6 +59,10 @@ TEST(Board, loadFromFen)
 	EXPECT_EQ(defaultBoard.whiteQueenBitboard, fenBoard.whiteQueenBitboard);
 	EXPECT_EQ(defaultBoard.whiteRookBitboard, fenBoard.whiteRookBitboard);
 	EXPECT_EQ(fenBoard.enPassantSquare, -1);
+	EXPECT_EQ(fenBoard.canBlackCastleKingSide, true);
+	EXPECT_EQ(fenBoard.canBlackCastleQueenSide, true);
+	EXPECT_EQ(fenBoard.canWhiteCastleQueenSide, true);
+	EXPECT_EQ(fenBoard.canWhiteCastleKingSide, true);
 
 	Board board = Board();
 	board.whitePawnBitboard = 1;
@@ -81,6 +85,10 @@ TEST(Board, loadFromFen)
 	EXPECT_EQ(board.whitePieces, fenBoard.whitePieces);
 	EXPECT_EQ(board.whiteQueenBitboard, fenBoard.whiteQueenBitboard);
 	EXPECT_EQ(fenBoard.enPassantSquare, -1);
+	EXPECT_EQ(fenBoard.canBlackCastleKingSide, true);
+	EXPECT_EQ(fenBoard.canBlackCastleQueenSide, true);
+	EXPECT_EQ(fenBoard.canWhiteCastleQueenSide, true);
+	EXPECT_EQ(fenBoard.canWhiteCastleKingSide, true);
 
 	board = Board();
 	board.whitePawnBitboard = 16777216;
@@ -106,6 +114,10 @@ TEST(Board, loadFromFen)
 	EXPECT_EQ(board.whiteRookBitboard, fenBoard.whiteRookBitboard);
 	EXPECT_EQ(board.whiteRookBitboard, fenBoard.whiteRookBitboard);
 	EXPECT_EQ(fenBoard.enPassantSquare, 16);
+	EXPECT_EQ(fenBoard.canBlackCastleKingSide, false);
+	EXPECT_EQ(fenBoard.canBlackCastleQueenSide, false);
+	EXPECT_EQ(fenBoard.canWhiteCastleQueenSide, false);
+	EXPECT_EQ(fenBoard.canWhiteCastleKingSide, false);
 }
 
 TEST(Bitboard, bitsum)

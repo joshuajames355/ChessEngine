@@ -16,6 +16,47 @@ Board Move::applyMove(Board * board)
 {
 	Board newBoard = *board;
 	newBoard.enPassantSquare = -1;
+
+	//Update castling rights
+	if (piece == king)
+	{
+		if (board->nextColour == white)
+		{
+			newBoard.canWhiteCastleKingSide = false;
+			newBoard.canWhiteCastleQueenSide = false;
+		}
+		else
+		{
+			newBoard.canBlackCastleKingSide = false;
+			newBoard.canBlackCastleQueenSide = false;
+		}
+	}
+	else if (piece == rook)
+	{
+		if (board->nextColour == white)
+		{
+			if (board->canWhiteCastleQueenSide && from == 0)
+			{
+				newBoard.canWhiteCastleQueenSide = false;
+			}
+			else if(board->canWhiteCastleKingSide && from == 7)
+			{
+				newBoard.canWhiteCastleKingSide = false;
+			}
+		}
+		else
+		{
+			if (board->canBlackCastleQueenSide && from == 56)
+			{
+				newBoard.canBlackCastleQueenSide = false;
+			}
+			else if (board->canBlackCastleKingSide && from == 63)
+			{
+				newBoard.canBlackCastleKingSide = false;
+			}
+		}
+	}
+
 	switch (moveType)
 	{
 	case quietMove:

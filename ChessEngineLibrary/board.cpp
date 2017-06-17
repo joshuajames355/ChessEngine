@@ -20,6 +20,11 @@ Board::Board()
 	nextColour = white;
 	enPassantSquare = -1;
 
+	canBlackCastleQueenSide = false;
+	canBlackCastleKingSide = false;
+	canWhiteCastleQueenSide = false;
+	canWhiteCastleKingSide = false;
+
 	update();
 }
 
@@ -41,6 +46,11 @@ void Board::defaults()
 
 	nextColour = white;
 	enPassantSquare = -1;
+
+	canBlackCastleQueenSide = true;
+	canBlackCastleKingSide = true;
+	canWhiteCastleQueenSide = true;
+	canWhiteCastleKingSide = true;
 
 	update();
 }
@@ -206,7 +216,6 @@ void Board::loadFromFen(std::string fen)
 		}
 		currentCharPos++;
 	}
-	update();
 
 	if (fen[currentCharPos] == 'w')
 	{
@@ -220,15 +229,28 @@ void Board::loadFromFen(std::string fen)
 	currentCharPos += 2;
 	currentChar = fen[currentCharPos];
 
-	std::string castlingAvaliability;
 	while (!isspace(currentChar))
 	{
-		castlingAvaliability += currentChar;
+		if (currentChar == 'K')
+		{
+			canWhiteCastleKingSide = true;
+		}
+		else if (currentChar == 'Q')
+		{
+			canWhiteCastleQueenSide = true;
+		}
+		else if (currentChar == 'k')
+		{
+			canBlackCastleKingSide = true;
+		}
+		else if (currentChar == 'q')
+		{
+			canBlackCastleQueenSide = true;
+		}
 		currentCharPos++;
 		currentChar = fen[currentCharPos];
 	}
 
-	//Load castling Avaliability
 
 	currentCharPos++;
 	currentChar = fen[currentCharPos];
@@ -250,6 +272,8 @@ void Board::loadFromFen(std::string fen)
 
 	//Halfmove clock
 	//Fullmove clock	
+
+	update();
 
 }
 

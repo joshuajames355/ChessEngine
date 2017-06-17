@@ -162,3 +162,70 @@ TEST(Move, ApplyPromotionMoves)
 	EXPECT_EQ(moveBoard.blackPawnBitboard, 0);
 	EXPECT_EQ(moveBoard.allPieces, 1);
 }
+
+TEST(Move, UpdateCastlingAvaliability)
+{
+	Board board = Board();
+	Move move = Move(0, 8, quietMove, rook);
+	board.whiteRookBitboard = 1;
+	board.whiteKingBitboard = 16;
+	board.canWhiteCastleQueenSide = true;
+	board.update();
+	board.nextColour = white;
+	Board moveBoard = move.applyMove(&board);
+	EXPECT_EQ(moveBoard.canWhiteCastleQueenSide, false);
+
+	board = Board();
+	move = Move(7, 15, quietMove, rook);
+	board.whiteRookBitboard = 128;
+	board.whiteKingBitboard = 16;
+	board.canWhiteCastleKingSide = true;
+	board.update();
+	board.nextColour = white;
+	moveBoard = move.applyMove(&board);
+	EXPECT_EQ(moveBoard.canWhiteCastleKingSide, false);
+
+	board = Board();
+	move = Move(4, 5, quietMove, king);
+	board.whiteRookBitboard = 129;
+	board.whiteKingBitboard = 16;
+	board.canWhiteCastleQueenSide = true;
+	board.canWhiteCastleKingSide = true;
+	board.update();
+	board.nextColour = white;
+	moveBoard = move.applyMove(&board);
+	EXPECT_EQ(moveBoard.canWhiteCastleKingSide, false);
+	EXPECT_EQ(moveBoard.canWhiteCastleQueenSide, false);
+
+	board = Board();
+	move = Move(56, 57, quietMove, rook);
+	board.whiteRookBitboard = 72057594037927936;
+	board.whiteKingBitboard = 1152921504606846976;
+	board.canBlackCastleQueenSide = true;
+	board.update();
+	board.nextColour = black;
+	moveBoard = move.applyMove(&board);
+	EXPECT_EQ(moveBoard.canBlackCastleQueenSide, false);
+
+	board = Board();
+	move = Move(63, 62, quietMove, rook);
+	board.whiteRookBitboard = 9223372036854775808;
+	board.whiteKingBitboard = 1152921504606846976;
+	board.canBlackCastleKingSide = true;
+	board.update();
+	board.nextColour = black;
+	moveBoard = move.applyMove(&board);
+	EXPECT_EQ(moveBoard.canBlackCastleKingSide, false);
+
+	board = Board();
+	move = Move(60, 59, quietMove, king);
+	board.whiteRookBitboard = 9295429630892703744;
+	board.whiteKingBitboard = 1152921504606846976;
+	board.canBlackCastleKingSide = true;
+	board.canBlackCastleQueenSide = true;
+	board.update();
+	board.nextColour = black;
+	moveBoard = move.applyMove(&board);
+	EXPECT_EQ(moveBoard.canBlackCastleKingSide, false);
+	EXPECT_EQ(moveBoard.canBlackCastleQueenSide, false);
+}

@@ -43,6 +43,11 @@ public:
 	int enPassantSquare;
 	colours nextColour;
 
+	bool canBlackCastleQueenSide;
+	bool canBlackCastleKingSide;
+	bool canWhiteCastleQueenSide;
+	bool canWhiteCastleKingSide;
+
 	uint64_t whitePawnBitboard;
 	uint64_t whiteKnightBitboard;
 	uint64_t whiteBishopBitboard;
