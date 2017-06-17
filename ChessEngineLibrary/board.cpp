@@ -216,6 +216,41 @@ void Board::loadFromFen(std::string fen)
 	{
 		nextColour = black;
 	}
+
+	currentCharPos += 2;
+	currentChar = fen[currentCharPos];
+
+	std::string castlingAvaliability;
+	while (!isspace(currentChar))
+	{
+		castlingAvaliability += currentChar;
+		currentCharPos++;
+		currentChar = fen[currentCharPos];
+	}
+
+	//Load castling Avaliability
+
+	currentCharPos++;
+	currentChar = fen[currentCharPos];
+	if (currentChar != '-')
+	{
+		//En passant target square
+		int column = currentChar - 'a';
+		int row = fen[currentCharPos + 1] - '1';
+		int pos = row * 8 + column;
+
+		enPassantSquare = pos;
+	}
+	else
+	{
+		enPassantSquare = -1;
+	}
+
+	currentCharPos += 2;
+
+	//Halfmove clock
+	//Fullmove clock	
+
 }
 
 uint64_t Board::findBitboard(colours colour, pieceType piece)

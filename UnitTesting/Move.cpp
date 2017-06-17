@@ -22,6 +22,66 @@ TEST(Move, ApplyQuietMoves)
 	EXPECT_EQ(moveBoard.allPieces, 1 << 7);
 }
 
+TEST(Move, ApplyPawnDoubleMoves)
+{
+	Move move = Move(8, 24, pawnDoubleMove, pawn);
+	Board board;
+	board.whitePawnBitboard = (uint64_t)1 << 8;
+	board.nextColour = white;
+	Board moveBoard = move.applyMove(&board);
+	EXPECT_EQ(moveBoard.whitePawnBitboard, (uint64_t)1 << 24);
+	EXPECT_EQ(moveBoard.allPieces, (uint64_t)1 << 24);
+	EXPECT_EQ(moveBoard.enPassantSquare, 16);
+
+	move = Move(48, 32, pawnDoubleMove, pawn);
+	board = Board();
+	board.blackPawnBitboard = (uint64_t)1 << 48;
+	board.nextColour = black;
+	moveBoard = move.applyMove(&board);
+	EXPECT_EQ(moveBoard.blackPawnBitboard, (uint64_t)1 << 32);
+	EXPECT_EQ(moveBoard.allPieces, (uint64_t)1 << 32);
+	EXPECT_EQ(moveBoard.enPassantSquare, 40);
+}
+
+TEST(Move, ApplyEnPassantMoves)
+{
+	Move move = Move(32, 41, capture, pawn);
+	Board board;
+	board.whitePawnBitboard = 4294967296;
+	board.blackPawnBitboard = 8589934592;
+	board.enPassantSquare = 41;
+	board.nextColour = white;
+	Board moveBoard = move.applyMove(&board);
+	EXPECT_EQ(moveBoard.whitePawnBitboard, 2199023255552);
+	EXPECT_EQ(moveBoard.allPieces, 2199023255552);
+	EXPECT_EQ(moveBoard.enPassantSquare, -1);
+
+	move = Move(25, 16, capture, pawn);
+	board = Board();
+	board.whitePawnBitboard = 16777216;
+	board.blackPawnBitboard = 33554432;
+	board.enPassantSquare = 16;
+	board.nextColour = black;
+	moveBoard = move.applyMove(&board);
+	EXPECT_EQ(moveBoard.blackPawnBitboard, 65536);
+	EXPECT_EQ(moveBoard.allPieces, 65536);
+	EXPECT_EQ(moveBoard.enPassantSquare, -1);
+
+	move = Move(25, 16, capture, pawn);
+	board = Board();
+	board.whitePawnBitboard = 16908288;
+	board.blackPawnBitboard = 33554432;
+	board.enPassantSquare = 16;
+	board.nextColour = black;
+	moveBoard = move.applyMove(&board);
+	EXPECT_EQ(moveBoard.blackPawnBitboard, 65536);
+	EXPECT_EQ(moveBoard.whitePawnBitboard, 131072);
+	EXPECT_EQ(moveBoard.allPieces, 196608);
+	EXPECT_EQ(moveBoard.enPassantSquare, -1);
+
+
+}
+
 TEST(Move, ApplyCaptureMoves)
 {
 	Board board = Board();

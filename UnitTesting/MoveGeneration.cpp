@@ -25,9 +25,25 @@ TEST(MoveGeneration, PawnMoves)
 	Movelist = searchForMoves(&board);
 	EXPECT_EQ(Movelist.size(), 2);
 	EXPECT_EQ(Movelist[0].from, 8);
-	EXPECT_EQ(Movelist[0].to + Movelist[1].to, 40);
-	EXPECT_EQ(Movelist[0].piece, pawn);
-	EXPECT_EQ(Movelist[0].moveType, quietMove);
+	EXPECT_EQ(Movelist[1].from, 8);
+	if (Movelist[0].to == 16)
+	{
+		EXPECT_EQ(Movelist[0].piece, pawn);
+		EXPECT_EQ(Movelist[0].moveType, quietMove);
+
+		EXPECT_EQ(Movelist[1].piece, pawn);
+		EXPECT_EQ(Movelist[1].moveType, pawnDoubleMove);
+		EXPECT_EQ(Movelist[1].to, 24);
+	}
+	else
+	{
+		EXPECT_EQ(Movelist[1].piece, pawn);
+		EXPECT_EQ(Movelist[1].moveType, quietMove);
+
+		EXPECT_EQ(Movelist[0].piece, pawn);
+		EXPECT_EQ(Movelist[0].moveType, pawnDoubleMove);
+		EXPECT_EQ(Movelist[0].to, 24);
+	}
 
 	board = Board();
 	board.whitePawnBitboard = 1;

@@ -27,7 +27,7 @@ TEST(Utils, moveFromNotation)
 	move = moveFromNotation("h2h4", &board);
 	EXPECT_EQ(move.from, 15);
 	EXPECT_EQ(move.to, 31);
-	EXPECT_EQ(move.moveType, quietMove);
+	EXPECT_EQ(move.moveType, pawnDoubleMove);
 	EXPECT_EQ(move.piece, pawn);
 
 	move = moveFromNotation("a7a6", &board);

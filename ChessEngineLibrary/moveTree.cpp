@@ -20,7 +20,7 @@ Move startSearch(int searchDepth, Board board)
 	Move bestMove;
 	for (int x = 1; x <= searchDepth; x++)
 	{
-		data.depth = searchDepth;
+		data.depth = x;
 		bestMove = rootSearch(x, board, &data);
 	}
 	return bestMove;
@@ -101,7 +101,6 @@ Move rootSearch(int depthLeft, Board board, searchData* data)
 			bestMove = moveList[x];
 		}
 		updateEngine(data, bestMove, alpha);
-
 	}
 
 	TranspositionEntry newEntry = TranspositionEntry();

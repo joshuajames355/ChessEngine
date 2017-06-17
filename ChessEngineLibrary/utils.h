@@ -6,6 +6,7 @@
 
 #include <string>
 #include <stdint.h>
+#include <stdlib.h> 
 #include <vector>
 
 std::string notationFromMove(const Move& move);

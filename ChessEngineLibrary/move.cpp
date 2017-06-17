@@ -15,6 +15,7 @@ Move::Move(int newFrom, int newTo, MoveType newMoveType, pieceType newPieceType)
 Board Move::applyMove(Board * board)
 {
 	Board newBoard = *board;
+	newBoard.enPassantSquare = -1;
 	switch (moveType)
 	{
 	case quietMove:
@@ -27,8 +28,23 @@ Board Move::applyMove(Board * board)
 	break;
 	case capture:
 	{
-		//Removes the captued piece
-		newBoard.removePiece((uint64_t)1 << to); 
+		if (board->enPassantSquare == to)
+		{
+			//Removes the captued piece under en passent
+			if (board->nextColour == white)
+			{
+				newBoard.removePiece((uint64_t)1 << (to - 8));
+			}
+			else
+			{
+				newBoard.removePiece((uint64_t)1 << (to + 8));
+			}
+		}
+		else
+		{
+			//Removes the captued piece
+			newBoard.removePiece((uint64_t)1 << to);
+		}
 
 		//Moves the piece
 		uint64_t bitboard = newBoard.findBitboard(board->nextColour, piece);
@@ -79,6 +95,24 @@ Board Move::applyMove(Board * board)
 		uint64_t bitboard = newBoard.findBitboard(board->nextColour, queen);
 		bitboard |= ((uint64_t)1 << to);
 		newBoard.setBitboard(board->nextColour, queen, bitboard);
+	}
+	break;
+	case pawnDoubleMove:
+	{
+		//Moves the piece
+		uint64_t bitboard = newBoard.findBitboard(board->nextColour, piece);
+		bitboard = (bitboard & ~((uint64_t)1 << from)) | ((uint64_t)1 << to);
+		newBoard.setBitboard(board->nextColour, piece, bitboard);
+
+		//Sets En passant target square.
+		if (board->nextColour == white)
+		{
+			newBoard.enPassantSquare = to - 8;
+		}
+		else
+		{
+			newBoard.enPassantSquare = to + 8;
+		}
 	}
 	break;
 	}

@@ -35,14 +35,16 @@ void generatePawnMoves(Board* board, std::vector<Move>& Movelist)
 	if (board->nextColour == white)
 	{
 		uint64_t pawnBitboard = board->whitePawnBitboard;
-		uint64_t pawnPos, pawnMoves, pawnAttacks;
+		uint64_t pawnPos, pawnMoves, pawnAttacks, pawnDoubleMoves;
 		while (pawnBitboard)
 		{
 			pawnPos = pop(pawnBitboard);
 
 			pawnMoves = pawnPos << 8 & ~board->allPieces; //Move forward
-			pawnMoves |= ((pawnMoves & rank3) << 8) & ~board->allPieces; //Move twice on first turn if first is clear
-			pawnAttacks = board->whitePawnBitboard << 7 & board->blackPieces & ~fileH | board->whitePawnBitboard << 9 & board->blackPieces & ~fileA; //Attack
+			pawnDoubleMoves = ((pawnMoves & rank3) << 8) & ~board->allPieces; //Move twice on first turn if first is clear
+
+			//Attack either enemy pieces or the en passent target square.
+			pawnAttacks = board->whitePawnBitboard << 7 & (board->blackPieces | (uint64_t)1 << board->enPassantSquare) & ~fileH | board->whitePawnBitboard << 9 & (board->blackPieces | (uint64_t)1 << board->enPassantSquare) & ~fileA; 
 
 			int pawnPosIndex = bitScanForward(pawnPos);
 
@@ -55,6 +57,11 @@ void generatePawnMoves(Board* board, std::vector<Move>& Movelist)
 			{
 				uint64_t pawnAttack = pop(pawnAttacks);
 				Movelist.push_back(Move(pawnPosIndex, bitScanForward(pawnAttack), capture, pawn));
+			}
+			while (pawnDoubleMoves)
+			{
+				uint64_t currentMove = pop(pawnDoubleMoves);
+				Movelist.push_back(Move(pawnPosIndex, bitScanForward(currentMove), pawnDoubleMove , pawn));
 			}
 
 			if ((pawnPos & rank7) > 0)//Pawn Promotion
@@ -70,14 +77,16 @@ void generatePawnMoves(Board* board, std::vector<Move>& Movelist)
 	else //Colour is black
 	{
 		uint64_t pawnBitboard = board->blackPawnBitboard;
-		uint64_t pawnPos, pawnMoves, pawnAttacks;
+		uint64_t pawnPos, pawnMoves, pawnAttacks, pawnDoubleMoves;
 		while (pawnBitboard)
 		{
 			pawnPos = pop(pawnBitboard);
 
 			pawnMoves = pawnPos >> 8 & ~board->allPieces; //Move forward
-			pawnMoves |= ((pawnMoves & rank3) << 8) & ~board->allPieces;  //Move twice on first turn if first is clear
-			pawnAttacks = (pawnPos >> 9) & board->whitePieces & ~fileH | (pawnPos >> 7) & board->whitePieces & ~fileA; //Attack
+			pawnDoubleMoves = ((pawnMoves & rank3) << 8) & ~board->allPieces;  //Move twice on first turn if first is clear
+
+			//Attack either enemy pieces or the en passent target square.
+			pawnAttacks = (pawnPos >> 9) & (board->whitePieces | (uint64_t)1 << board->enPassantSquare) &  ~fileH | (pawnPos >> 7) & (board->whitePieces | (uint64_t)1 << board->enPassantSquare) & ~fileA;
 
 			int pawnPosIndex = bitScanForward(pawnPos);
 
@@ -90,6 +99,11 @@ void generatePawnMoves(Board* board, std::vector<Move>& Movelist)
 			{
 				uint64_t pawnAttack = pop(pawnAttacks);
 				Movelist.push_back(Move(pawnPosIndex, bitScanForward(pawnAttack), capture, pawn));
+			}
+			while (pawnDoubleMoves)
+			{
+				uint64_t currentMove = pop(pawnDoubleMoves);
+				Movelist.push_back(Move(pawnPosIndex, bitScanForward(currentMove), pawnDoubleMove, pawn));
 			}
 
 			if ((pawnPos & rank2) > 0)//Pawn Promotion

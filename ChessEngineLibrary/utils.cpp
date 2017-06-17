@@ -120,7 +120,16 @@ Move moveFromNotation(std::string moveNotation, Board * board)
 	{
 		throw std::runtime_error("moveFromNotation failed. Piece not on board.");
 	}
-	if ((((uint64_t)1 << to) & board->allPieces) != 0)//Capture
+
+	if (std::abs(from - to) == 16 && piece == pawn)//Pawn double move
+	{
+		return Move(from, to, pawnDoubleMove, piece);
+	}
+	else if ((((uint64_t)1 << to) & board->allPieces) != 0)//Capture
+	{
+		return Move(from, to, capture, piece);
+	}
+	else if (to == board->enPassantSquare && piece == pawn)//En passant capture
 	{
 		return Move(from, to, capture, piece);
 	}
