@@ -211,7 +211,7 @@ void updateCastlingRights(Board * newBoard, Move * move)
 	else if(move->moveType != quietMove)
 	{
 		//Capturing a rook
-		if (move->to & newBoard->whiteRookBitboard)
+		if (((uint64_t)1 << move->to & newBoard->whiteRookBitboard) > 0)
 		{
 			if (move->to == 0)
 			{
@@ -222,7 +222,7 @@ void updateCastlingRights(Board * newBoard, Move * move)
 				newBoard->canWhiteCastleKingSide = false;
 			}
 		}
-		else if (move->to & newBoard->blackRookBitboard)
+		else if (((uint64_t)1 << move->to & newBoard->blackRookBitboard) > 0)
 		{
 			if (move->to == 56)
 			{
