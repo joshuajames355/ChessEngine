@@ -4,6 +4,8 @@
 #include <iostream>
 #include <vector>
 
+#include "bitboard.h"
+#include "magicBitboards.h"
 #include "piece.h"
 
 #define emptyBitboard 0
@@ -39,6 +41,7 @@ public:
 	uint64_t findBitboard(colours colour , pieceType piece);
 	void setBitboard(colours colour, pieceType piece, uint64_t bitboard);
 	void removePiece(uint64_t bitboard);
+	bool isPieceAttacked(int piecePos, colours colour);
 
 	int enPassantSquare;
 	colours nextColour;
@@ -66,8 +69,3 @@ public:
 	uint64_t blackPieces;
 	uint64_t allPieces;
 };
-
-int bitSum(uint64_t bitboard);
-uint64_t pop(uint64_t& bitboard);
-int bitScanForward(uint64_t bitboard);
-std::vector<int> getSetBits(uint64_t bitboard);

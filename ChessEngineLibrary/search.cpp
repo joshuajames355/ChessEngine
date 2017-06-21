@@ -1,4 +1,4 @@
-#include "moveTree.h"
+#include "search.h"
 
 void updateEngine(searchData * data, Move bestMove, int alpha)
 {

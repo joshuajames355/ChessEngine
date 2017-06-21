@@ -436,47 +436,114 @@ void Board::removePiece(uint64_t bitboard)
 	}
 }
 
-int bitSum(uint64_t bitboard)
+bool Board::isPieceAttacked(int piecePos, colours colour)
 {
-	int count = 0;
-	while (bitboard)
+	uint64_t pieceBitboard = (uint64_t)1 << piecePos;
+
+	if (colour == white)
 	{
-		count++;
-		bitboard &= bitboard - 1;
+		if ((pieceBitboard << 7) & blackPawnBitboard & ~fileH || (pieceBitboard << 9) & blackPawnBitboard & ~fileA)
+		{
+			return true;
+		}
 	}
-	return count;
-}
-
-uint64_t pop(uint64_t& bitboard)
-{
-	uint64_t lsb = bitboard & -bitboard;
-	bitboard -= lsb;
-	return lsb;
-}
-
-const int index64[64] = {
-	0,  1, 48,  2, 57, 49, 28,  3,
-	61, 58, 50, 42, 38, 29, 17,  4,
-	62, 55, 59, 36, 53, 51, 43, 22,
-	45, 39, 33, 30, 24, 18, 12,  5,
-	63, 47, 56, 27, 60, 41, 37, 16,
-	54, 35, 52, 21, 44, 32, 23, 11,
-	46, 26, 40, 15, 34, 20, 31, 10,
-	25, 14, 19,  9, 13,  8,  7,  6
-};
-
-int bitScanForward(uint64_t bitboard) {
-	const uint64_t debruijn64 = 285870213051386505;
-	return index64[((bitboard & -bitboard) * debruijn64) >> 58];
-}
-
-std::vector<int> getSetBits(uint64_t bitboard)
-{
-	std::vector<int> setBits;
-	while (bitboard)
+	else
 	{
-		uint64_t pos = pop(bitboard);
-		setBits.push_back(bitScanForward(pos));
+		if ((pieceBitboard >> 9) & whitePawnBitboard & ~fileH || (pieceBitboard >> 7) & whitePawnBitboard & ~fileA)
+		{
+			return true;
+		}
 	}
-	return setBits;
+
+	//KnightMoves
+	uint64_t knightMoves= (pieceBitboard << 15) & ~fileH; //2 up 1 left
+	knightMoves |= (pieceBitboard << 17) & ~fileA; //2 up 1 Right
+	knightMoves |= (pieceBitboard << 06) & ~fileH & ~fileG;//1 up 2 left
+	knightMoves |= (pieceBitboard << 10) & ~fileA & ~fileB;//1 up 2 right
+	knightMoves |= (pieceBitboard >> 10) & ~fileH & ~fileG;//1 down 2 left
+	knightMoves |= (pieceBitboard >> 06) & ~fileA & ~fileB;//1 down 2 right
+	knightMoves |= (pieceBitboard >> 17) & ~fileH;//2 down 1 left
+	knightMoves |= (pieceBitboard >> 15) & ~fileA;//2 down 1 right
+
+	if (colour == white)
+	{
+		if (knightMoves & blackKnightBitboard)
+		{
+			return true;
+		}
+	}
+	else
+	{
+		if (knightMoves & whiteKnightBitboard)
+		{
+			return true;
+		}
+	}
+
+	uint64_t moves = pieceBitboard << 8;
+	moves |= pieceBitboard << 9 & ~fileA;
+	moves |= pieceBitboard << 1 & ~fileA;
+	moves |= pieceBitboard >> 7 & ~fileA;
+	moves |= pieceBitboard >> 8;
+	moves |= pieceBitboard >> 9 & ~fileH;
+	moves |= pieceBitboard >> 1 & ~fileH;
+	moves |= pieceBitboard << 7 & ~fileH;
+
+	if (colour == white)
+	{
+		if (knightMoves & blackKingBitboard)
+		{
+			return true;
+		}
+	}
+	else
+	{
+		if (knightMoves & whiteKingBitboard)
+		{
+			return true;
+		}
+	}
+	
+	//Rook and half of queen moves
+	uint64_t occupancy = magicBitboards::rookMask[piecePos] & allPieces;
+	uint64_t magicResult = occupancy * magicBitboards::magicNumberRook[piecePos];
+	int arrayIndex = magicResult >> magicBitboards::magicNumberShiftRook[piecePos];
+	uint64_t magicMoves = magicBitboards::magicMovesRook[piecePos][arrayIndex];
+
+	if (colour == white)
+	{
+		if (magicMoves & (blackRookBitboard | blackQueenBitboard))
+		{
+			return true;
+		}
+	}
+	else
+	{
+		if (magicMoves & (whiteRookBitboard | whiteQueenBitboard))
+		{
+			return true;
+		}
+	}
+
+	//Bishop and half of queen moves
+	occupancy = magicBitboards::bishopMask[piecePos] & allPieces;
+	magicResult = occupancy * magicBitboards::magicNumberBishop[piecePos];
+	arrayIndex = magicResult >> magicBitboards::magicNumberShiftBishop[piecePos];
+	magicMoves = magicBitboards::magicMovesBishop[piecePos][arrayIndex];
+
+	if (colour == white)
+	{
+		if (magicMoves & (blackBishopBitboard | blackQueenBitboard))
+		{
+			return true;
+		}
+	}
+	else
+	{
+		if (magicMoves & (whiteBishopBitboard | whiteQueenBitboard))
+		{
+			return true;
+		}
+	}
+	return false;
 }

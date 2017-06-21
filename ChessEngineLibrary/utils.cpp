@@ -125,7 +125,7 @@ Move moveFromNotation(std::string moveNotation, Board * board)
 	{
 		return Move(from, to, pawnDoubleMove, piece);
 	}
-	else if ((((uint64_t)1 << to) & board->allPieces) != 0)//Capture
+	else if ((((uint64_t)1 << to) & board->allPieces) != 0 && moveNotation.length() == 4)//Capture
 	{
 		return Move(from, to, capture, piece);
 	}

@@ -48,9 +48,6 @@
     <ClInclude Include="moveGeneration.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="moveTree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="piece.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -69,6 +66,12 @@
     <ClInclude Include="transpositionTable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="bitboard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="search.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="board.cpp">
@@ -78,9 +81,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="moveGeneration.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="moveTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="piece.cpp">
@@ -99,6 +99,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="transpositionTable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bitboard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="search.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

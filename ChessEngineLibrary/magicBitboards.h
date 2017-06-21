@@ -1,10 +1,10 @@
 #pragma once
-#include "board.h"
-
 #include <stdint.h>
 #include <array>
 #include <vector>
 #include <unordered_map>
+
+#include "bitboard.h"
 
 class magicBitboards
 {

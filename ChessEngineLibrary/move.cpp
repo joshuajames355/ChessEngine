@@ -57,6 +57,9 @@ Board Move::applyMove(Board * board)
 	break;
 	case knightPromotion:
 	{
+		//Removes the captued piece
+		newBoard.removePiece((uint64_t)1 << to);
+
 		//Removes the moved Piece
 		newBoard.removePiece((uint64_t)1 << from); 
 
@@ -68,6 +71,9 @@ Board Move::applyMove(Board * board)
 	break;
 	case bishopPromotion:
 	{
+		//Removes the captued piece
+		newBoard.removePiece((uint64_t)1 << to);
+
 		//Removes the moved Piece
 		newBoard.removePiece((uint64_t)1 << from); 
 
@@ -79,8 +85,10 @@ Board Move::applyMove(Board * board)
 	break;
 	case rookPromotion:
 	{
+		//Removes the captued piece
+		newBoard.removePiece((uint64_t)1 << to);
+
 		//Removes the moved Piece
-		Board newBoard = *board;
 		newBoard.removePiece((uint64_t)1 << from); 
 
 		//Creates the promoted piece
@@ -91,6 +99,9 @@ Board Move::applyMove(Board * board)
 	break;
 	case queenPromotion:
 	{
+		//Removes the captued piece
+		newBoard.removePiece((uint64_t)1 << to);
+
 		//Removes the moved Piece
 		newBoard.removePiece((uint64_t)1 << from); 
 
@@ -192,6 +203,32 @@ void updateCastlingRights(Board * newBoard, Move * move)
 				newBoard->canBlackCastleQueenSide = false;
 			}
 			else if (newBoard->canBlackCastleKingSide && move->from == 63)
+			{
+				newBoard->canBlackCastleKingSide = false;
+			}
+		}
+	}
+	else if(move->moveType != quietMove)
+	{
+		//Capturing a rook
+		if (move->to & newBoard->whiteRookBitboard)
+		{
+			if (move->to == 0)
+			{
+				newBoard->canWhiteCastleQueenSide = false;
+			}
+			else if (move->to == 7)
+			{
+				newBoard->canWhiteCastleKingSide = false;
+			}
+		}
+		else if (move->to & newBoard->blackRookBitboard)
+		{
+			if (move->to == 56)
+			{
+				newBoard->canBlackCastleQueenSide = false;
+			}
+			else if (move->to == 63)
 			{
 				newBoard->canBlackCastleKingSide = false;
 			}

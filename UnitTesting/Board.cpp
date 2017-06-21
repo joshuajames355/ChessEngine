@@ -120,6 +120,26 @@ TEST(Board, loadFromFen)
 	EXPECT_EQ(fenBoard.canWhiteCastleKingSide, false);
 }
 
+TEST(Board, IsPieceAttacked)
+{
+	Board board;
+
+	board.loadFromFen("r7/8/8/8/8/8/8/K7 w - - 0 1 ");
+	EXPECT_EQ(board.isPieceAttacked(0, white), true);
+
+	board = Board();
+	board.loadFromFen("1r6/8/8/8/8/8/8/K7 w - - 0 1 ");
+	EXPECT_EQ(board.isPieceAttacked(0, white), false);
+
+	board = Board();
+	board.loadFromFen("8/8/8/8/8/8/1p6/K7 w - - 0 1 ");
+	EXPECT_EQ(board.isPieceAttacked(0, white), true);
+
+	board = Board();
+	board.loadFromFen("8/8/8/8/8/8/p7/K7 w - - 0 1 ");
+	EXPECT_EQ(board.isPieceAttacked(0, white), false);
+}
+
 TEST(Bitboard, bitsum)
 {
 	EXPECT_EQ(bitSum(15), 4);

@@ -4,7 +4,7 @@
 #include <string>
 
 #include "board.h"
-#include "moveTree.h"
+#include "search.h"
 #include "utils.h"
 #include "transpositionTable.h"
 

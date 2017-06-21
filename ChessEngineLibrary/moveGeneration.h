@@ -18,4 +18,5 @@ void generateBishopMoves(Board * board, std::vector<Move>& Movelist, uint64_t fr
 void generateQueenMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces);
 void generateCastlingMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces);
 
+void addPawnMoves(int start, uint64_t quietMoves, uint64_t captureMoves, Board* board, std::vector<Move>& Movelist);
 void addMoves(int start, int end, pieceType piece , std::vector<Move>& Movelist , uint64_t enemyPieces);
