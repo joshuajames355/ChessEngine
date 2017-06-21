@@ -45,7 +45,14 @@ void generatePawnMoves(Board* board, std::vector<Move>& Movelist)
 			pawnDoubleMoves = ((pawnMoves & rank3) << 8) & ~board->allPieces; //Move twice on first turn if first is clear
 
 			//Attack either enemy pieces or the en passent target square.
-			pawnAttacks = board->whitePawnBitboard << 7 & (board->blackPieces | (uint64_t)1 << board->enPassantSquare) & ~fileH | board->whitePawnBitboard << 9 & (board->blackPieces | (uint64_t)1 << board->enPassantSquare) & ~fileA; 
+			if(board->enPassantSquare != -1)
+			{
+				pawnAttacks = board->whitePawnBitboard << 7 & (board->blackPieces | (uint64_t)1 << board->enPassantSquare) & ~fileH | board->whitePawnBitboard << 9 & (board->blackPieces | (uint64_t)1 << board->enPassantSquare) & ~fileA; 
+			}
+			else
+			{
+				pawnAttacks = board->whitePawnBitboard << 7 & (board->blackPieces) & ~fileH | board->whitePawnBitboard << 9 & (board->blackPieces) & ~fileA; 
+			}
 
 			int pawnPosIndex = bitScanForward(pawnPos);
 
@@ -87,7 +94,14 @@ void generatePawnMoves(Board* board, std::vector<Move>& Movelist)
 			pawnDoubleMoves = ((pawnMoves & rank3) << 8) & ~board->allPieces;  //Move twice on first turn if first is clear
 
 			//Attack either enemy pieces or the en passent target square.
-			pawnAttacks = (pawnPos >> 9) & (board->whitePieces | (uint64_t)1 << board->enPassantSquare) &  ~fileH | (pawnPos >> 7) & (board->whitePieces | (uint64_t)1 << board->enPassantSquare) & ~fileA;
+			if(board->enPassantSquare != -1)
+			{
+				pawnAttacks = (pawnPos >> 9) & (board->whitePieces | (uint64_t)1 << board->enPassantSquare) &  ~fileH | (pawnPos >> 7) & (board->whitePieces | (uint64_t)1 << board->enPassantSquare) & ~fileA;
+			}
+			else
+			{
+				pawnAttacks = (pawnPos >> 9) & (board->whitePieces) &  ~fileH | (pawnPos >> 7) & (board->whitePieces) & ~fileA;
+			}
 
 			int pawnPosIndex = bitScanForward(pawnPos);
 
