@@ -47,11 +47,11 @@ void generatePawnMoves(Board* board, std::vector<Move>& Movelist)
 			//Attack either enemy pieces or the en passent target square.
 			if(board->enPassantSquare != -1)
 			{
-				pawnAttacks = board->whitePawnBitboard << 7 & (board->blackPieces | (uint64_t)1 << board->enPassantSquare) & ~fileH | board->whitePawnBitboard << 9 & (board->blackPieces | (uint64_t)1 << board->enPassantSquare) & ~fileA; 
+				pawnAttacks = pawnPos << 7 & (board->blackPieces | (uint64_t)1 << board->enPassantSquare) & ~fileH | pawnPos << 9 & (board->blackPieces | (uint64_t)1 << board->enPassantSquare) & ~fileA; 
 			}
 			else
 			{
-				pawnAttacks = board->whitePawnBitboard << 7 & (board->blackPieces) & ~fileH | board->whitePawnBitboard << 9 & (board->blackPieces) & ~fileA; 
+				pawnAttacks = pawnPos << 7 & (board->blackPieces) & ~fileH | pawnPos << 9 & (board->blackPieces) & ~fileA; 
 			}
 
 			int pawnPosIndex = bitScanForward(pawnPos);
