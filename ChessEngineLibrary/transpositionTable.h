@@ -4,42 +4,28 @@
 #include <vector>
 #include <unordered_map>
 
-#include "piece.h"
-#include "board.h"
-#include "move.h"
+#include "transpositionTable.h"
 
 #define TTSize 16777216
 
-
-
-enum nodeType { Exact, lowerBound, upperBound };
-
-struct TranspositionEntry
-{
-public:
-	uint64_t zorbistKey;
-	Move bestMove;
-	nodeType flag;
-	int score;
-	int depth;
-};
+struct TranspositionEntry;
 
 struct ZorbistKeys
 {
 	//A key for each square. WP = 0 
 public:
 	static uint64_t pieceKeys[64][12];
+	static uint64_t enPassantKeys[8];
 	static uint64_t blackMoveKey;
-	static TranspositionEntry TranspositionTable[TTSize];
-	//static std::unordered_map<uint64_t, TranspositionEntry> TranspositionTable;
+	static uint64_t blackQueenSideCastlingKey;
+	static uint64_t blackKingSideCastlingKey;
+	static uint64_t whiteQueenSideCastlingKey;
+	static uint64_t whiteKingSideCastlingKey;
 	
 	static void initialize();
 };
 
-
 uint64_t get64rand();
-uint64_t getZorbistKey(Board* board);
-uint64_t updateHash(Move newMove, uint64_t oldHash, colours colour);
 
 
 

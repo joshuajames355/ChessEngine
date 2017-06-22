@@ -12,82 +12,16 @@ void ZorbistKeys::initialize()
 			pieceKeys[i][j] = get64rand();
 		}
 	}
+	for (int i = 0; i < 8; i++)
+	{
+		enPassantKeys[i] = get64rand();
+	}
+
 	blackMoveKey = get64rand();
-}
-
-uint64_t getZorbistKey(Board * board)
-{
-	board->update();
-	uint64_t hash = 0;
-	for (int x = 0; x < 64; x++)
-	{
-		//std::cout << "current hash " << (((uint64_t)1 << x) & board->allPieces) << "\n";
-		if ((((uint64_t)1 << x) & board->allPieces) > 0) //If their is a piece at the square.
-		{
-			//std::cout << "current hash " << ((uint64_t)1 << x) << "\n";
-			if (board->blackPawnBitboard & ((uint64_t)1 << x) > 0) //If the piece is a black pawn
-			{
-				hash ^= ZorbistKeys::pieceKeys[x][0];
-			}
-			else if (board->blackKnightBitboard & ((uint64_t)1 << x) > 0) //If the piece is a black knight
-			{
-				hash ^= ZorbistKeys::pieceKeys[x][1];
-			}
-			else if (board->blackBishopBitboard & ((uint64_t)1 << x) > 0) //If the piece is a black bishop
-			{
-				hash ^= ZorbistKeys::pieceKeys[x][2];
-			}
-			else if (board->blackRookBitboard & ((uint64_t)1 << x) > 0) //If the piece is a black rook
-			{
-				hash ^= ZorbistKeys::pieceKeys[x][3];
-			}
-			else if (board->blackQueenBitboard & ((uint64_t)1 << x) > 0) //If the piece is a black queen
-			{
-				hash ^= ZorbistKeys::pieceKeys[x][4];
-			}
-			else if (board->blackKingBitboard & ((uint64_t)1 << x) > 0) //If the piece is a black king
-			{
-				hash ^= ZorbistKeys::pieceKeys[x][5];
-			}
-			else if (board->whitePawnBitboard & ((uint64_t)1 << x) > 0) //If the piece is a white pawn
-			{
-				hash ^= ZorbistKeys::pieceKeys[x][6];
-			}
-			else if (board->whiteKnightBitboard & ((uint64_t)1 << x) > 0) //If the piece is a white knight
-			{
-				hash ^= ZorbistKeys::pieceKeys[x][7];
-			}
-			else if (board->whiteBishopBitboard & ((uint64_t)1 << x) > 0) //If the piece is a white bishop
-			{
-				hash ^= ZorbistKeys::pieceKeys[x][8];
-			}
-			else if (board->whiteRookBitboard & ((uint64_t)1 << x) > 0) //If the piece is a white rook
-			{
-				hash ^= ZorbistKeys::pieceKeys[x][9];
-			}
-			else if (board->whiteQueenBitboard & ((uint64_t)1 << x) > 0) //If the piece is a white queen
-			{
-				hash ^= ZorbistKeys::pieceKeys[x][10];
-			}
-			else if (board->whiteKingBitboard & ((uint64_t)1 << x) > 0) //If the piece is a white king
-			{
-				hash ^= ZorbistKeys::pieceKeys[x][11];
-			}
-		}
-	}
-	if (board->nextColour == black)
-	{
-		hash ^= ZorbistKeys::blackMoveKey;
-	}
-	return hash;
-}
-
-uint64_t updateHash(Move newMove, uint64_t oldHash, colours colour) //currently only works for quiet moves.
-{
-	uint64_t newHash = oldHash ^ ZorbistKeys::blackMoveKey;
-	newHash ^= ZorbistKeys::pieceKeys[newMove.from][newMove.piece + 6 * colour];
-	newHash ^= ZorbistKeys::pieceKeys[newMove.to][newMove.piece + 6 * colour];
-	return newHash;
+	blackQueenSideCastlingKey = get64rand();
+	blackKingSideCastlingKey = get64rand();
+	whiteQueenSideCastlingKey = get64rand();
+	whiteKingSideCastlingKey = get64rand();
 }
 
 uint64_t get64rand() {
@@ -100,4 +34,8 @@ uint64_t get64rand() {
 
 uint64_t ZorbistKeys::pieceKeys[64][12];
 uint64_t ZorbistKeys::blackMoveKey;
-TranspositionEntry ZorbistKeys::TranspositionTable[TTSize];
+uint64_t ZorbistKeys::blackQueenSideCastlingKey;
+uint64_t ZorbistKeys::blackKingSideCastlingKey;
+uint64_t ZorbistKeys::whiteQueenSideCastlingKey;
+uint64_t ZorbistKeys::whiteKingSideCastlingKey;
+uint64_t ZorbistKeys::enPassantKeys[8];

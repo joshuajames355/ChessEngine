@@ -12,6 +12,7 @@ void engineLoop()
 {
 	int SEARCHDEPTH = 4;
 
+	TranspositionEntry* transpositionTable = new TranspositionEntry[TTSize];
 
 	Board board = Board();
 	board.defaults();
@@ -93,7 +94,7 @@ void engineLoop()
 		if (words[0] == "go")
 		{
 			board.printBoard();
-			std::cout << "bestmove " << notationFromMove(startSearch(SEARCHDEPTH, board)) << "\n";
+			std::cout << "bestmove " << notationFromMove(startSearch(SEARCHDEPTH, board, transpositionTable)) << "\n";
 		}
 	}
 

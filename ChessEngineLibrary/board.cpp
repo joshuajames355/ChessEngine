@@ -25,6 +25,7 @@ Board::Board()
 	canWhiteCastleQueenSide = false;
 	canWhiteCastleKingSide = false;
 
+	generateZorbistKey();
 	update();
 }
 
@@ -51,6 +52,8 @@ void Board::defaults()
 	canBlackCastleKingSide = true;
 	canWhiteCastleQueenSide = true;
 	canWhiteCastleKingSide = true;
+
+	generateZorbistKey();
 
 	update();
 }
@@ -273,6 +276,7 @@ void Board::loadFromFen(std::string fen)
 	//Halfmove clock
 	//Fullmove clock	
 
+	generateZorbistKey();
 	update();
 
 }
@@ -436,6 +440,17 @@ void Board::removePiece(uint64_t bitboard)
 	}
 }
 
+pieceType Board::getPieceTypeInSquare(uint64_t bitboard)
+{
+	if (bitboard & (blackPawnBitboard | whitePawnBitboard)) return pawn;
+	else if (bitboard & (blackRookBitboard | whiteRookBitboard)) return rook;
+	else if (bitboard & (blackKnightBitboard | whiteKnightBitboard)) return knight;
+	else if (bitboard & (blackBishopBitboard | whiteBishopBitboard)) return bishop;
+	else if (bitboard & (blackQueenBitboard | whiteQueenBitboard)) return queen;
+	else if (bitboard & (blackKingBitboard | whiteKingBitboard)) return king;
+	else throw std::runtime_error("getPieceTypeInSquare failed. Piece not on board.");
+}
+
 bool Board::isPieceAttacked(int piecePos, colours colour)
 {
 	uint64_t pieceBitboard = (uint64_t)1 << piecePos;
@@ -546,4 +561,80 @@ bool Board::isPieceAttacked(int piecePos, colours colour)
 		}
 	}
 	return false;
+}
+
+void Board::generateZorbistKey()
+{
+	update();
+	uint64_t hash = 0;
+	for (int x = 0; x < 64; x++)
+	{
+		//std::cout << "current hash " << (((uint64_t)1 << x) & allPieces) << "\n";
+		if ((((uint64_t)1 << x) & allPieces) > 0) //If their is a piece at the square.
+		{
+			//std::cout << "current hash " << ((uint64_t)1 << x) << "\n";
+			if (blackPawnBitboard & ((uint64_t)1 << x) > 0) //If the piece is a black pawn
+			{
+				hash ^= ZorbistKeys::pieceKeys[x][0];
+			}
+			else if (blackKnightBitboard & ((uint64_t)1 << x) > 0) //If the piece is a black knight
+			{
+				hash ^= ZorbistKeys::pieceKeys[x][1];
+			}
+			else if (blackBishopBitboard & ((uint64_t)1 << x) > 0) //If the piece is a black bishop
+			{
+				hash ^= ZorbistKeys::pieceKeys[x][2];
+			}
+			else if (blackRookBitboard & ((uint64_t)1 << x) > 0) //If the piece is a black rook
+			{
+				hash ^= ZorbistKeys::pieceKeys[x][3];
+			}
+			else if (blackQueenBitboard & ((uint64_t)1 << x) > 0) //If the piece is a black queen
+			{
+				hash ^= ZorbistKeys::pieceKeys[x][4];
+			}
+			else if (blackKingBitboard & ((uint64_t)1 << x) > 0) //If the piece is a black king
+			{
+				hash ^= ZorbistKeys::pieceKeys[x][5];
+			}
+			else if (whitePawnBitboard & ((uint64_t)1 << x) > 0) //If the piece is a white pawn
+			{
+				hash ^= ZorbistKeys::pieceKeys[x][6];
+			}
+			else if (whiteKnightBitboard & ((uint64_t)1 << x) > 0) //If the piece is a white knight
+			{
+				hash ^= ZorbistKeys::pieceKeys[x][7];
+			}
+			else if (whiteBishopBitboard & ((uint64_t)1 << x) > 0) //If the piece is a white bishop
+			{
+				hash ^= ZorbistKeys::pieceKeys[x][8];
+			}
+			else if (whiteRookBitboard & ((uint64_t)1 << x) > 0) //If the piece is a white rook
+			{
+				hash ^= ZorbistKeys::pieceKeys[x][9];
+			}
+			else if (whiteQueenBitboard & ((uint64_t)1 << x) > 0) //If the piece is a white queen
+			{
+				hash ^= ZorbistKeys::pieceKeys[x][10];
+			}
+			else if (whiteKingBitboard & ((uint64_t)1 << x) > 0) //If the piece is a white king
+			{
+				hash ^= ZorbistKeys::pieceKeys[x][11];
+			}
+		}
+	}
+	if (nextColour == black)
+		hash ^= ZorbistKeys::blackMoveKey;
+	if(canBlackCastleQueenSide)
+		hash ^= ZorbistKeys::blackQueenSideCastlingKey;
+	if (canBlackCastleKingSide)
+		hash ^= ZorbistKeys::blackKingSideCastlingKey;
+	if (canWhiteCastleQueenSide)
+		hash ^= ZorbistKeys::whiteQueenSideCastlingKey;
+	if (canWhiteCastleKingSide)
+		hash ^= ZorbistKeys::whiteKingSideCastlingKey;
+	if (enPassantSquare == -1)
+		hash ^= ZorbistKeys::enPassantKeys[enPassantSquare % 8]; //Adds the hash for the column the of en passant square
+
+	zorbistKey = hash;
 }

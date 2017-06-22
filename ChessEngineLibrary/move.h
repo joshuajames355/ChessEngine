@@ -5,6 +5,8 @@
 #include "piece.h"
 #include "board.h"
 
+#include "transpositionTable.h"
+
 enum MoveType{quietMove, capture, knightPromotion, bishopPromotion, rookPromotion, queenPromotion, pawnDoubleMove, kingSideCastling, queenSideCastling};
 
 struct Move

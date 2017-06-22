@@ -7,6 +7,7 @@
 #include "bitboard.h"
 #include "magicBitboards.h"
 #include "piece.h"
+#include "transpositionTable.h"
 
 #define emptyBitboard 0
 #define universalBitboard 18446744073709551615 //2**64 - 1
@@ -41,7 +42,10 @@ public:
 	uint64_t findBitboard(colours colour , pieceType piece);
 	void setBitboard(colours colour, pieceType piece, uint64_t bitboard);
 	void removePiece(uint64_t bitboard);
+	pieceType getPieceTypeInSquare(uint64_t bitboard);
 	bool isPieceAttacked(int piecePos, colours colour);
+
+	void generateZorbistKey();
 
 	int enPassantSquare;
 	colours nextColour;
@@ -50,6 +54,8 @@ public:
 	bool canBlackCastleKingSide;
 	bool canWhiteCastleQueenSide;
 	bool canWhiteCastleKingSide;
+
+	uint64_t zorbistKey;
 
 	uint64_t whitePawnBitboard;
 	uint64_t whiteKnightBitboard;

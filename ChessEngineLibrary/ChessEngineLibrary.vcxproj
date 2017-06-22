@@ -148,6 +148,7 @@
     <ClInclude Include="pieceSquare.h" />
     <ClInclude Include="scoring.h" />
     <ClInclude Include="search.h" />
+    <ClInclude Include="transpositionEntry.h" />
     <ClInclude Include="transpositionTable.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
@@ -161,6 +162,7 @@
     <ClCompile Include="pieceSquare.cpp" />
     <ClCompile Include="scoring.cpp" />
     <ClCompile Include="search.cpp" />
+    <ClCompile Include="transpositionEntry.cpp" />
     <ClCompile Include="transpositionTable.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
