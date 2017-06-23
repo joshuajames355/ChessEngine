@@ -7,13 +7,16 @@ pieceSquare::pieceSquare()
 
 pieceSquare::pieceSquare(std::string filename, pieceType typeNew, colours defaultColourNew)
 {
-	loadFromFile(filename);
 	defaultColour = defaultColourNew;
 	type = typeNew;
+	loadFromFile(filename);
 }
 
 void pieceSquare::loadFromFile(std::string filename)
 {
+	//Used to add the material scores of each piece into the table.
+	int materialValues[6] = { 100,320,330,500,900,20000 };
+
 	std::ifstream tableFile;
 	tableFile.open(filename);
 	std::string line;
@@ -33,7 +36,7 @@ void pieceSquare::loadFromFile(std::string filename)
 				}
 				else
 				{
-					square[colNum][lineNum] = std::stoi(temp);
+					square[colNum][lineNum] = std::stoi(temp) + materialValues[type];
 					temp = "";
 					colNum++;
 				}
@@ -57,15 +60,20 @@ int pieceSquare::calcScore(uint64_t bitboard,colours targetColour)
 	while (bitboard)
 	{
 		bitPos = bitScanForward(pop(bitboard));
-		if (targetColour == defaultColour)
-		{
-			bitPos = 63 - bitPos;
-		}
-		x = bitPos % 8;
-		y = (bitPos - x) / 8;
-		score += square[x][y];
+		score += getScoreFromPos(bitPos, targetColour);
 	}
 	return score;
+}
+
+int pieceSquare::getScoreFromPos(int pos, colours targetColour)
+{
+	if (targetColour == defaultColour)
+	{
+		pos = 63 - pos;
+	}
+	int x = pos % 8;
+	int y = (pos - x) / 8;
+	return square[x][y];
 }
 
 pieceSquare pieceSquareData::pawnSquare = pieceSquare("WPSquareTable.txt", pawn, white);

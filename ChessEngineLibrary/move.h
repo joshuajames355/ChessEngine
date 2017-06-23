@@ -12,7 +12,7 @@ enum MoveType{quietMove, capture, knightPromotion, bishopPromotion, rookPromotio
 struct Move
 {
 	Move();
-	Move::Move(int newFrom, int newTo, MoveType newMoveType, pieceType newPieceType, Board* board);
+	Move(int newFrom, int newTo, MoveType newMoveType, pieceType newPieceType, Board* board);
 	int from;
 	int to;
 	pieceType piece;

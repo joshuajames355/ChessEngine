@@ -18,6 +18,7 @@ public:
 	void loadFromFile(std::string filename);
 
 	int calcScore(uint64_t bitboard, colours targetColour);
+	int getScoreFromPos(int pos, colours targetColour);
 
 	int square[8][8];
 	colours defaultColour;

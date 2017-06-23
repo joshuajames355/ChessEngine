@@ -5,12 +5,13 @@
 
 TEST(Utils, notationFromMove)
 {
-	EXPECT_EQ(notationFromMove(Move(0, 8, quietMove, pawn)), "a1a2");
-	EXPECT_EQ(notationFromMove(Move(3, 11, quietMove, pawn)), "d1d2");
-	EXPECT_EQ(notationFromMove(Move(32, 40, quietMove, pawn)), "a5a6");
-	EXPECT_EQ(notationFromMove(Move(54, 62, quietMove, pawn)), "g7g8");
-	EXPECT_EQ(notationFromMove(Move(48, 56, knightPromotion, pawn)), "a7a8n");
-	EXPECT_EQ(notationFromMove(Move(8, 0, queenPromotion, pawn)), "a2a1q");
+	Board board;
+	EXPECT_EQ(notationFromMove(Move(0, 8, quietMove, pawn, &board)), "a1a2");
+	EXPECT_EQ(notationFromMove(Move(3, 11, quietMove, pawn, &board)), "d1d2");
+	EXPECT_EQ(notationFromMove(Move(32, 40, quietMove, pawn, &board)), "a5a6");
+	EXPECT_EQ(notationFromMove(Move(54, 62, quietMove, pawn, &board)), "g7g8");
+	EXPECT_EQ(notationFromMove(Move(48, 56, knightPromotion, pawn, &board)), "a7a8n");
+	EXPECT_EQ(notationFromMove(Move(8, 0, queenPromotion, pawn, &board)), "a2a1q");
 
 }
 
