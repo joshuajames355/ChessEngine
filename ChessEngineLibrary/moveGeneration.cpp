@@ -59,7 +59,7 @@ void generatePawnMoves(Board* board, std::vector<Move>& Movelist)
 			while (pawnDoubleMoves)
 			{
 				uint64_t currentMove = pop(pawnDoubleMoves);
-				Movelist.push_back(Move(pawnPosIndex, bitScanForward(currentMove), pawnDoubleMove , pawn));
+				Movelist.push_back(Move(pawnPosIndex, bitScanForward(currentMove), pawnDoubleMove , pawn, board));
 			}
 
 			addPawnMoves(pawnPosIndex, pawnMoves, pawnAttacks, board, Movelist);
@@ -91,7 +91,7 @@ void generatePawnMoves(Board* board, std::vector<Move>& Movelist)
 			while (pawnDoubleMoves)
 			{
 				uint64_t currentMove = pop(pawnDoubleMoves);
-				Movelist.push_back(Move(pawnPosIndex, bitScanForward(currentMove), pawnDoubleMove, pawn));
+				Movelist.push_back(Move(pawnPosIndex, bitScanForward(currentMove), pawnDoubleMove, pawn, board));
 			}
 
 			addPawnMoves(pawnPosIndex, pawnMoves, pawnAttacks, board, Movelist);
@@ -123,7 +123,7 @@ void generateKingMoves(Board * board, std::vector<Move>& Movelist, uint64_t frie
 	while (moves)
 	{
 		uint64_t kingPos = pop(moves);
-		addMoves(kingPosIndex, bitScanForward(kingPos), king, Movelist, enemyPieces);
+		addMoves(kingPosIndex, bitScanForward(kingPos), king, Movelist, enemyPieces, board);
 	}
 }
 
@@ -157,7 +157,7 @@ void generateKnightMoves(Board * board, std::vector<Move>& Movelist, uint64_t fr
     	while (moveBitboard)
 	    {
 	       	uint64_t knightPos = pop(moveBitboard);
-	    	addMoves(knightPosIndex, bitScanForward(knightPos), knight, Movelist, enemyPieces);
+	    	addMoves(knightPosIndex, bitScanForward(knightPos), knight, Movelist, enemyPieces, board);
     	}
     }
 
@@ -188,7 +188,7 @@ void generateRookMoves(Board * board, std::vector<Move>& Movelist, uint64_t frie
 		while (moves)
 		{
 			uint64_t rookPos = pop(moves);
-			addMoves(currentPos, bitScanForward(rookPos), rook, Movelist, enemyPieces);
+			addMoves(currentPos, bitScanForward(rookPos), rook, Movelist, enemyPieces, board);
 		}
 	}
 }
@@ -217,7 +217,7 @@ void generateBishopMoves(Board * board, std::vector<Move>& Movelist, uint64_t fr
 		while (moves)
 		{
 			uint64_t bishopPos = pop(moves);
-			addMoves(currentPos, bitScanForward(bishopPos), bishop, Movelist, enemyPieces);
+			addMoves(currentPos, bitScanForward(bishopPos), bishop, Movelist, enemyPieces, board);
 		}
 	}
 }
@@ -253,7 +253,7 @@ void generateQueenMoves(Board * board, std::vector<Move>& Movelist, uint64_t fri
 		while (moves)
 		{
 			uint64_t queenPos = pop(moves);
-			addMoves(currentPos, bitScanForward(queenPos), queen, Movelist, enemyPieces);
+			addMoves(currentPos, bitScanForward(queenPos), queen, Movelist, enemyPieces, board);
 		}
 	}
 }
@@ -264,22 +264,22 @@ void generateCastlingMoves(Board * board, std::vector<Move>& Movelist, uint64_t 
 	{
 		if (board->canWhiteCastleKingSide && (board->allPieces & 96) == 0)//Kingside castling
 		{
-			if(!board->isPieceAttacked(5,white) && !board->isPieceAttacked(4, white)) Movelist.push_back(Move(4, 6, kingSideCastling, king));
+			if(!board->isPieceAttacked(5,white) && !board->isPieceAttacked(4, white)) Movelist.push_back(Move(4, 6, kingSideCastling, king, board));
 		}
 		if(board->canWhiteCastleQueenSide && (board->allPieces & 14) == 0)//Queenside castling
 		{
-			if (!board->isPieceAttacked(3,white) && !board->isPieceAttacked(4, white)) Movelist.push_back(Move(4, 2, queenSideCastling, king));
+			if (!board->isPieceAttacked(3,white) && !board->isPieceAttacked(4, white)) Movelist.push_back(Move(4, 2, queenSideCastling, king, board));
 		}
 	}
 	else
 	{
 		if (board->canBlackCastleKingSide && (board->allPieces & 6917529027641081856) == 0)//Kingside castling
 		{
-			if (!board->isPieceAttacked(61,black) && !board->isPieceAttacked(60, black)) Movelist.push_back(Move(60, 62, kingSideCastling, king));
+			if (!board->isPieceAttacked(61,black) && !board->isPieceAttacked(60, black)) Movelist.push_back(Move(60, 62, kingSideCastling, king, board));
 		}
 		if (board->canBlackCastleQueenSide && (board->allPieces & 1008806316530991104) == 0)//Queenside castling
 		{
-			if (!board->isPieceAttacked(59,black) && !board->isPieceAttacked(60, black)) Movelist.push_back(Move(60, 58, queenSideCastling, king));
+			if (!board->isPieceAttacked(59,black) && !board->isPieceAttacked(60, black)) Movelist.push_back(Move(60, 58, queenSideCastling, king, board));
 		}
 	}
 }
@@ -295,14 +295,14 @@ void addPawnMoves(int start, uint64_t quietMoves, uint64_t captureMoves, Board* 
 		//Pawn promotion
 		if ((board->nextColour == white && currentMove & rank8) || (board->nextColour == black && currentMove & rank1))
 		{
-			Movelist.push_back(Move(start, currentPos, rookPromotion, pawn));
-			Movelist.push_back(Move(start, currentPos, knightPromotion, pawn));
-			Movelist.push_back(Move(start, currentPos, queenPromotion, pawn));
-			Movelist.push_back(Move(start, currentPos, bishopPromotion, pawn));
+			Movelist.push_back(Move(start, currentPos, rookPromotion, pawn, board));
+			Movelist.push_back(Move(start, currentPos, knightPromotion, pawn, board));
+			Movelist.push_back(Move(start, currentPos, queenPromotion, pawn, board));
+			Movelist.push_back(Move(start, currentPos, bishopPromotion, pawn, board));
 		}
 		else
 		{
-			Movelist.push_back(Move(start, currentPos, quietMove, pawn));
+			Movelist.push_back(Move(start, currentPos, quietMove, pawn, board));
 		}
 	}
 	while (captureMoves)
@@ -312,26 +312,26 @@ void addPawnMoves(int start, uint64_t quietMoves, uint64_t captureMoves, Board* 
 		//Pawn promotion
 		if ((board->nextColour == white && currentMove & rank8) || (board->nextColour == black && currentMove & rank1))
 		{
-			Movelist.push_back(Move(start, currentPos, rookPromotion, pawn));
-			Movelist.push_back(Move(start, currentPos, knightPromotion, pawn));
-			Movelist.push_back(Move(start, currentPos, queenPromotion, pawn));
-			Movelist.push_back(Move(start, currentPos, bishopPromotion, pawn));
+			Movelist.push_back(Move(start, currentPos, rookPromotion, pawn, board));
+			Movelist.push_back(Move(start, currentPos, knightPromotion, pawn, board));
+			Movelist.push_back(Move(start, currentPos, queenPromotion, pawn, board));
+			Movelist.push_back(Move(start, currentPos, bishopPromotion, pawn, board));
 		}
 		else
 		{
-			Movelist.push_back(Move(start, currentPos, capture, pawn));
+			Movelist.push_back(Move(start, currentPos, capture, pawn, board));
 		}
 	}
 }
 
-void addMoves(int start, int end, pieceType piece, std::vector<Move>& Movelist, uint64_t enemyPieces)
+void addMoves(int start, int end, pieceType piece, std::vector<Move>& Movelist, uint64_t enemyPieces, Board* board)
 {
 	if ((((uint64_t)1 << end) & enemyPieces )!= 0) //If the move is a capture
 	{
-		Movelist.push_back(Move(start, end, capture, piece));
+		Movelist.push_back(Move(start, end, capture, piece, board));
 	}
 	else
 	{
-		Movelist.push_back(Move(start, end, quietMove, piece));
+		Movelist.push_back(Move(start, end, quietMove, piece, board));
 	}
 }

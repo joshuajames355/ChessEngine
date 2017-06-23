@@ -123,15 +123,15 @@ Move moveFromNotation(std::string moveNotation, Board * board)
 
 	if (std::abs(from - to) == 16 && piece == pawn)//Pawn double move
 	{
-		return Move(from, to, pawnDoubleMove, piece);
+		return Move(from, to, pawnDoubleMove, piece, board);
 	}
 	else if ((((uint64_t)1 << to) & board->allPieces) != 0 && moveNotation.length() == 4)//Capture
 	{
-		return Move(from, to, capture, piece);
+		return Move(from, to, capture, piece, board);
 	}
 	else if (to == board->enPassantSquare && piece == pawn)//En passant capture
 	{
-		return Move(from, to, capture, piece);
+		return Move(from, to, capture, piece, board);
 	}
 	else if (std::abs(from - to) == 2 && piece == king) //Castling
 	{
@@ -139,22 +139,22 @@ Move moveFromNotation(std::string moveNotation, Board * board)
 		{
 			if (from < to) //KingSide castling
 			{
-				return Move(from, to, kingSideCastling, piece);
+				return Move(from, to, kingSideCastling, piece, board);
 			}
 			else //QueenSide castling
 			{
-				return Move(from, to, queenSideCastling, piece);
+				return Move(from, to, queenSideCastling, piece, board);
 			}
 		}
 		else
 		{
 			if (from < to) //KingSide castling
 			{
-				return Move(from, to, kingSideCastling, piece);
+				return Move(from, to, kingSideCastling, piece, board);
 			}
 			else //QueenSide castling
 			{
-				return Move(from, to, queenSideCastling, piece);
+				return Move(from, to, queenSideCastling, piece, board);
 			}
 		}
 	}
@@ -162,25 +162,25 @@ Move moveFromNotation(std::string moveNotation, Board * board)
 	{
 		if (moveNotation.back() == 'q' || moveNotation.back() == 'Q')
 		{
-			return Move(from, to, queenPromotion, piece);
+			return Move(from, to, queenPromotion, piece, board);
 		}
 		else if (moveNotation.back() == 'r' || moveNotation.back() == 'R')
 		{
-			return Move(from, to, rookPromotion, piece);
+			return Move(from, to, rookPromotion, piece, board);
 		}
 		else if (moveNotation.back() == 'n' || moveNotation.back() == 'N')
 		{
-			return Move(from, to, knightPromotion, piece);
+			return Move(from, to, knightPromotion, piece, board);
 		}
 		else if (moveNotation.back() == 'b' || moveNotation.back() == 'B')
 		{
-			return Move(from, to, bishopPromotion, piece);
+			return Move(from, to, bishopPromotion, piece, board);
 		}
 
 	}
 	else//Quiet Move
 	{
-		return Move(from, to, quietMove, piece);
+		return Move(from, to, quietMove, piece, board);
 	}
 }
 

@@ -144,6 +144,7 @@
     <ClInclude Include="magicBitboards.h" />
     <ClInclude Include="move.h" />
     <ClInclude Include="moveGeneration.h" />
+    <ClInclude Include="moveOrdering.h" />
     <ClInclude Include="piece.h" />
     <ClInclude Include="pieceSquare.h" />
     <ClInclude Include="scoring.h" />
@@ -158,6 +159,7 @@
     <ClCompile Include="magicBitboards.cpp" />
     <ClCompile Include="move.cpp" />
     <ClCompile Include="moveGeneration.cpp" />
+    <ClCompile Include="moveOrdering.cpp" />
     <ClCompile Include="piece.cpp" />
     <ClCompile Include="pieceSquare.cpp" />
     <ClCompile Include="scoring.cpp" />

@@ -4,30 +4,40 @@ Move::Move()
 {
 }
 
-Move::Move(int newFrom, int newTo, MoveType newMoveType, pieceType newPieceType)
+Move::Move(int newFrom, int newTo, MoveType newMoveType, pieceType newPieceType, Board* board)
 {
 	moveType = newMoveType;
 	to = newTo;
 	from = newFrom;
 	piece = newPieceType;
+	//Removed captured piece from hash
+	if (board->allPieces & (uint64_t)1 << to)
+	{
+		capturedPiece = board->getPieceTypeInSquare((uint64_t)1 << to);
+	}
 }
 
 Board Move::applyMove(Board * board)
 {
 	Board newBoard = *board;
-	pieceType capturedPiece;
 	newBoard.enPassantSquare = -1;
 	newBoard.nextColour = switchColour(newBoard.nextColour);
 
 	updateCastlingRights(&newBoard, this);
 
-	//Removes moved piece from hash.
-	newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[from][piece + 6 * board->nextColour];
-
 	//Removes en passant file from hash.
 	if (board->enPassantSquare != -1)
 	{
 		newBoard.zorbistKey ^= ZorbistKeys::enPassantKeys[board->enPassantSquare % 8];
+	}
+
+	//Removes moved piece from hash.
+	newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[from][piece + 6 * board->nextColour];
+
+	//Removed captured piece from hash
+	if (board->allPieces & (uint64_t)1 << to)
+	{
+		newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[to][capturedPiece + 6 * newBoard.nextColour];
 	}
 
 	switch (moveType)
@@ -51,10 +61,12 @@ Board Move::applyMove(Board * board)
 			if (board->nextColour == white)
 			{
 				newBoard.removePiece((uint64_t)1 << (to - 8));
+				newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[to - 8][pawn + 6 * newBoard.nextColour];
 			}
 			else
 			{
 				newBoard.removePiece((uint64_t)1 << (to + 8));
+				newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[to + 8][pawn + 6 * newBoard.nextColour];
 			}
 		}
 		else
@@ -70,13 +82,6 @@ Board Move::applyMove(Board * board)
 
 		//Adds moved piece to hash
 		newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[to][piece + 6 * board->nextColour];
-
-		//Removed captured piece from hash
-		if (board->allPieces & (uint64_t)1 << to)
-		{
-			capturedPiece = newBoard.getPieceTypeInSquare((uint64_t)1 << to);
-			newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[to][piece + 6 * newBoard.nextColour];
-		}
 	}
 	break;
 	case knightPromotion:
@@ -94,13 +99,6 @@ Board Move::applyMove(Board * board)
 
 		//Adds promoted piece to hash
 		newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[to][knight + 6 * board->nextColour];
-
-		//Removed captured piece from hash
-		if (board->allPieces & (uint64_t)1 << to)
-		{
-			capturedPiece = newBoard.getPieceTypeInSquare((uint64_t)1 << to);
-			newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[to][piece + 6 * newBoard.nextColour];
-		}
 	}
 	break;
 	case bishopPromotion:
@@ -118,13 +116,6 @@ Board Move::applyMove(Board * board)
 
 		//Adds promoted piece to hash
 		newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[to][bishop + 6 * board->nextColour];
-
-		//Removed captured piece from hash
-		if (board->allPieces & (uint64_t)1 << to)
-		{
-			capturedPiece = newBoard.getPieceTypeInSquare((uint64_t)1 << to);
-			newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[to][piece + 6 * newBoard.nextColour];
-		}
 	}
 	break;
 	case rookPromotion:
@@ -142,13 +133,6 @@ Board Move::applyMove(Board * board)
 
 		//Adds promoted piece to hash
 		newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[to][rook + 6 * board->nextColour];
-
-		//Removed captured piece from hash
-		if (board->allPieces & (uint64_t)1 << to)
-		{
-			capturedPiece = newBoard.getPieceTypeInSquare((uint64_t)1 << to);
-			newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[to][piece + 6 * newBoard.nextColour];
-		}
 	}
 	break;
 	case queenPromotion:
@@ -166,13 +150,6 @@ Board Move::applyMove(Board * board)
 
 		//Adds promoted piece to hash
 		newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[to][queen + 6 * board->nextColour];
-
-		//Removed captured piece from hash
-		if (board->allPieces & (uint64_t)1 << to)
-		{
-			capturedPiece = newBoard.getPieceTypeInSquare((uint64_t)1 << to);
-			newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[to][piece + 6 * newBoard.nextColour];
-		}
 	}
 	break;
 	case pawnDoubleMove:

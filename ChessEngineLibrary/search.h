@@ -12,6 +12,7 @@
 #include "utils.h"
 #include "transpositionTable.h"
 #include "transpositionEntry.h"
+#include "moveOrdering.h"
 
 struct searchData
 {

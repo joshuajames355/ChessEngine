@@ -74,7 +74,7 @@ void engineLoop()
 			}
 			else if (words[1] == "fen")
 			{
-				std::string fenString = words[2] + " " + words[3] + " " + words[4] + " " + words[5] + " " + words[6] + " " + words[7];
+				std::string fenString = response.substr(13);
 				board = Board();
 				board.loadFromFen(fenString);
 

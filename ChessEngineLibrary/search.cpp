@@ -2,10 +2,9 @@
 
 void updateEngine(searchData * data, Move bestMove, int alpha)
 {
-
 	std::cout << "info depth " << data->depth;
 	std::cout << " nodes " << data->nodes;
-	std::cout << " nps " << (data->nodes) / difftime(time(NULL), data->startTime);
+	std::cout << " nps " << (uint64_t)((data->nodes) / difftime(time(NULL), data->startTime));
 	std::cout << " pv " << notationFromMove(bestMove);
 	std::cout << " score upperbound " << alpha << "\n";
 	
@@ -113,7 +112,7 @@ Move rootSearch(int depthLeft, Board board, searchData* data, TranspositionEntry
 
 int negamax(int alpha, int beta, int depthLeft, Board board, searchData* data, bool isQuiet, TranspositionEntry* transpositionTable)
 {
-	if (depthLeft == 0) return quiescence(alpha, beta, 4, board, data, isQuiet);
+	if (depthLeft == 0) return quiescence(alpha, beta, 3, board, data, isQuiet);
 
 	data->nodes++;
 	int alphaOriginal = alpha;
@@ -204,8 +203,8 @@ int quiescence(int alpha, int beta, int depthLeft, Board board, searchData * dat
 	if (alpha < score) alpha = score;
 	if (depthLeft == 0) return alpha;
 
-
 	std::vector<Move> moveList = searchForMoves(&board);
+	orderQuiescentSearch(&moveList,&board);
 
 	Board newBoard;
 
