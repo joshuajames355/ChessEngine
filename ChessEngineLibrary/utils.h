@@ -11,4 +11,3 @@
 
 std::string notationFromMove(const Move& move);
 Move moveFromNotation(std::string moveNotation, Board* board);
-bool isInCheck(Board* board, colours colour);

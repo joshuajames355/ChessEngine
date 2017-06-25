@@ -1,5 +1,8 @@
 #include "moveGeneration.h"
 
+uint64_t knightMovesArray[64];
+uint64_t kingMovesArray[64];
+
 std::vector<Move> searchForMoves(Board * board)
 {
 	std::vector<Move> moveList;
@@ -18,41 +21,74 @@ std::vector<Move> searchForMoves(Board * board)
 		enemyPieces = board->whitePieces;
 	}
 
-	generatePawnMoves(board, moveList);
-	generateKingMoves(board, moveList,  friendlyPieces,  enemyPieces);
-	generateKnightMoves(board, moveList,  friendlyPieces,  enemyPieces);
-	generateRookMoves(board, moveList,  friendlyPieces,  enemyPieces);
-	generateBishopMoves(board, moveList,  friendlyPieces,  enemyPieces);
-	generateQueenMoves(board, moveList,  friendlyPieces,  enemyPieces);
-	generateCastlingMoves(board, moveList, friendlyPieces, enemyPieces);
+	uint64_t captureMask = 0xFFFFFFFFFFFFFFFF;
+	uint64_t pushMask = 0xFFFFFFFFFFFFFFFF;
+
+	uint64_t kingDangerSquares = generateAttackSet(board, switchColour(board->nextColour), board->allPieces & ~board->findBitboard(board->nextColour, king));
+	uint64_t pinnedPieces = getPinnedPieces(board);
+
+	uint64_t kingAttackers = getAttackers(board, board->nextColour, board->findBitboard(board->nextColour, king));
+	int numOfKingAttackers = bitSum(kingAttackers);
+
+	if (numOfKingAttackers == 1)
+	{
+		captureMask = kingAttackers;
+
+		//If the attacker is a sliding piece
+		if (kingAttackers & (board->findBitboard(switchColour(board->nextColour), rook) | board->findBitboard(switchColour(board->nextColour), queen) | board->findBitboard(switchColour(board->nextColour), bishop)))
+		{
+			pushMask = inBetween(bitScanForward(board->findBitboard(board->nextColour, king)), bitScanForward(kingAttackers));
+		}
+		else
+		{
+			pushMask = 0;
+		}
+	}
+	if(numOfKingAttackers > 1) generateKingMoves(board, moveList, friendlyPieces, enemyPieces, kingDangerSquares);
+	else 
+	{
+		generatePawnMoves(board, moveList, pinnedPieces, pushMask, captureMask);
+		generateKingMoves(board, moveList, friendlyPieces, enemyPieces, kingDangerSquares);
+		generateKnightMoves(board, moveList, friendlyPieces, enemyPieces, pinnedPieces, pushMask, captureMask);
+		generateRookMoves(board, moveList, friendlyPieces, enemyPieces, pinnedPieces, pushMask, captureMask);
+		generateBishopMoves(board, moveList, friendlyPieces, enemyPieces, pinnedPieces, pushMask, captureMask);
+		generateQueenMoves(board, moveList, friendlyPieces, enemyPieces, pinnedPieces, pushMask, captureMask);
+		generateCastlingMoves(board, moveList, friendlyPieces, enemyPieces, kingDangerSquares);
+	}
 
 	moveList.shrink_to_fit();
 
 	return moveList;
 }
 
-void generatePawnMoves(Board* board, std::vector<Move>& Movelist)
+void generatePawnMoves(Board* board, std::vector<Move>& Movelist, uint64_t pinnedPieces, uint64_t pushMask, uint64_t captureMask)
 {
+	uint64_t pawnPos, pawnMoves, pawnAttacks, pawnDoubleMoves, legalMoves;
 	if (board->nextColour == white)
 	{
 		uint64_t pawnBitboard = board->whitePawnBitboard;
-		uint64_t pawnPos, pawnMoves, pawnAttacks, pawnDoubleMoves;
 		while (pawnBitboard)
 		{
 			pawnPos = pop(pawnBitboard);
+			if (pawnPos & pinnedPieces) legalMoves = generateLegalFilterForPinnedPiece(board, pawnPos);
+			else legalMoves = ~0;
 
-			pawnMoves = pawnPos << 8 & ~board->allPieces; //Move forward
-			pawnDoubleMoves = ((pawnMoves & rank3) << 8) & ~board->allPieces; //Move twice on first turn if first is clear
+			pawnMoves = pawnPos << 8 & ~board->allPieces & legalMoves; //Move forward
+			pawnDoubleMoves = ((pawnMoves & rank3) << 8) & ~board->allPieces & legalMoves & pushMask; //Move twice on first turn if first is clear
+			pawnMoves &= pushMask;
+
+			pawnAttacks = pawnPos << 7 & board->blackPieces & ~fileH | pawnPos << 9 & board->blackPieces & ~fileA;
 
 			//Attack either enemy pieces or the en passent target square.
 			if(board->enPassantSquare != -1)
 			{
-				pawnAttacks = pawnPos << 7 & (board->blackPieces | (uint64_t)1 << board->enPassantSquare) & ~fileH | pawnPos << 9 & (board->blackPieces | (uint64_t)1 << board->enPassantSquare) & ~fileA; 
+				uint64_t movedPieces = pawnPos | ((uint64_t)1 << board->enPassantSquare >> 8);
+				if(!isPinnedEnPassant(board,movedPieces))
+					pawnAttacks |= pawnPos << 7 & (uint64_t)1 << board->enPassantSquare & ~fileH | pawnPos << 9 & (uint64_t)1 << board->enPassantSquare & ~fileA;
 			}
-			else
-			{
-				pawnAttacks = pawnPos << 7 & (board->blackPieces) & ~fileH | pawnPos << 9 & (board->blackPieces) & ~fileA; 
-			}
+
+
+			pawnAttacks &= legalMoves & captureMask;
 
 			int pawnPosIndex = bitScanForward(pawnPos);
 
@@ -68,23 +104,30 @@ void generatePawnMoves(Board* board, std::vector<Move>& Movelist)
 	else //Colour is black
 	{
 		uint64_t pawnBitboard = board->blackPawnBitboard;
-		uint64_t pawnPos, pawnMoves, pawnAttacks, pawnDoubleMoves;
 		while (pawnBitboard)
 		{
 			pawnPos = pop(pawnBitboard);
+			if (pawnPos & pinnedPieces) legalMoves = generateLegalFilterForPinnedPiece(board, pawnPos);
+			else legalMoves = ~0;
 
-			pawnMoves = pawnPos >> 8 & ~board->allPieces; //Move forward
-			pawnDoubleMoves = ((pawnMoves & rank6) >> 8) & ~board->allPieces;  //Move twice on first turn if first is clear
+			pawnMoves = pawnPos >> 8 & ~board->allPieces & legalMoves; //Move forward
+			pawnDoubleMoves = ((pawnMoves & rank6) >> 8) & ~board->allPieces & legalMoves & pushMask;  //Move twice on first turn if first is clear
+			pawnMoves &= pushMask;
+
+			pawnAttacks = pawnPos >> 9 & board->whitePieces &  ~fileH | pawnPos >> 7 & board->whitePieces & ~fileA;
 
 			//Attack either enemy pieces or the en passent target square.
 			if(board->enPassantSquare != -1)
 			{
-				pawnAttacks = (pawnPos >> 9) & (board->whitePieces | (uint64_t)1 << board->enPassantSquare) &  ~fileH | (pawnPos >> 7) & (board->whitePieces | (uint64_t)1 << board->enPassantSquare) & ~fileA;
+				uint64_t movedPieces = pawnPos | ((uint64_t)1 << board->enPassantSquare << 8);
+				if(!isPinnedEnPassant(board,movedPieces))
+					pawnAttacks |= (pawnPos >> 9) & (board->whitePieces | (uint64_t)1 << board->enPassantSquare) &  ~fileH | (pawnPos >> 7) & (board->whitePieces | (uint64_t)1 << board->enPassantSquare) & ~fileA;
 			}
 			else
 			{
 				pawnAttacks = (pawnPos >> 9) & (board->whitePieces) &  ~fileH | (pawnPos >> 7) & (board->whitePieces) & ~fileA;
 			}
+			pawnAttacks &= legalMoves & captureMask;
 
 			int pawnPosIndex = bitScanForward(pawnPos);
 
@@ -99,7 +142,7 @@ void generatePawnMoves(Board* board, std::vector<Move>& Movelist)
 	}
 }
 
-void generateKingMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
+void generateKingMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, uint64_t kingDangerSquares)
 {
 	uint64_t kingBitboard;
 	if (board->nextColour == white)
@@ -110,49 +153,36 @@ void generateKingMoves(Board * board, std::vector<Move>& Movelist, uint64_t frie
 	{
 		kingBitboard = board->blackKingBitboard;
 	}
-	uint64_t moves = kingBitboard << 8 & ~friendlyPieces;
-	moves |= kingBitboard << 9 & ~friendlyPieces & ~fileA;
-	moves |= kingBitboard << 1 & ~friendlyPieces & ~fileA;
-	moves |= kingBitboard >> 7 & ~friendlyPieces & ~fileA;
-	moves |= kingBitboard >> 8 & ~friendlyPieces;
-	moves |= kingBitboard >> 9 & ~friendlyPieces & ~fileH;
-	moves |= kingBitboard >> 1 & ~friendlyPieces & ~fileH;
-	moves |= kingBitboard << 7 & ~friendlyPieces & ~fileH;
-
-	int kingPosIndex = bitScanForward(kingBitboard);
-	while (moves)
+	if (kingBitboard)
 	{
-		uint64_t kingPos = pop(moves);
-		addMoves(kingPosIndex, bitScanForward(kingPos), king, Movelist, enemyPieces, board);
+		uint64_t moves = kingMovesArray[bitScanForward(kingBitboard)] & ~friendlyPieces;
+
+		//Filters out moves that would move the king into check.
+		moves &= ~kingDangerSquares;
+
+		int kingPosIndex = bitScanForward(kingBitboard);
+		while (moves)
+		{
+			uint64_t kingPos = pop(moves);
+			addMoves(kingPosIndex, bitScanForward(kingPos), king, Movelist, enemyPieces, board);
+		}
 	}
 }
 
-void generateKnightMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
+void generateKnightMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, uint64_t pinnedPieces, uint64_t pushMask, uint64_t captureMask)
 {
-	uint64_t knightBitboard;
-	if (board->nextColour == white)
-	{
-		knightBitboard = board->whiteKnightBitboard;
-	}
-	else
-	{
-		knightBitboard = board->blackKnightBitboard;
-	}
+	uint64_t legalMoves;
+	//Gets the knight bitboard , filtering out pieces that cannot move due to being pinned
+	uint64_t knightBitboard = board->findBitboard(board->nextColour, knight) & ~pinnedPieces;
 	
     while(knightBitboard)
     {
         uint64_t currentKnight = pop(knightBitboard);
-		uint64_t moveBitboard = 0;
-        
-        moveBitboard |= (currentKnight << 15) & ~friendlyPieces & ~fileH; //2 up 1 left
-        moveBitboard |= (currentKnight << 17) & ~friendlyPieces & ~fileA; //2 up 1 Right
-        moveBitboard |= (currentKnight << 06) & ~friendlyPieces & ~fileH & ~fileG;//1 up 2 left
-        moveBitboard |= (currentKnight << 10) & ~friendlyPieces & ~fileA & ~fileB;//1 up 2 right
-        moveBitboard |= (currentKnight >> 10) & ~friendlyPieces & ~fileH & ~fileG;//1 down 2 left
-        moveBitboard |= (currentKnight >> 06) & ~friendlyPieces & ~fileA & ~fileB;//1 down 2 right
-        moveBitboard |= (currentKnight >> 17) & ~friendlyPieces & ~fileH;//2 down 1 left
-        moveBitboard |= (currentKnight >> 15) & ~friendlyPieces & ~fileA;//2 down 1 right
-       
+		uint64_t moveBitboard = knightMovesArray[bitScanForward(currentKnight)] & ~friendlyPieces;
+              
+		//Filters out invalid moves while in check
+		moveBitboard &= (pushMask | captureMask);
+
 	    int knightPosIndex = bitScanForward(currentKnight);
     	while (moveBitboard)
 	    {
@@ -160,13 +190,11 @@ void generateKnightMoves(Board * board, std::vector<Move>& Movelist, uint64_t fr
 	    	addMoves(knightPosIndex, bitScanForward(knightPos), knight, Movelist, enemyPieces, board);
     	}
     }
-
-
 }
 
-void generateRookMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
+void generateRookMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, uint64_t pinnedPieces, uint64_t pushMask, uint64_t captureMask)
 {
-	uint64_t rookBitboard;
+	uint64_t rookBitboard, legalMoves;
 	if (board->nextColour == white)
 	{
 		rookBitboard = board->whiteRookBitboard;
@@ -180,10 +208,13 @@ void generateRookMoves(Board * board, std::vector<Move>& Movelist, uint64_t frie
 		uint64_t currentRook = pop(rookBitboard);
 		int currentPos = bitScanForward(currentRook);
 
+		if (currentRook & pinnedPieces) legalMoves = generateLegalFilterForPinnedPiece(board, currentRook);
+		else legalMoves = ~0;
+
 		uint64_t occupancy = magicBitboards::rookMask[currentPos] & board->allPieces;
 		uint64_t magicResult = occupancy * magicBitboards::magicNumberRook[currentPos];
 		int arrayIndex = magicResult >> magicBitboards::magicNumberShiftRook[currentPos];
-		uint64_t moves = magicBitboards::magicMovesRook[currentPos][arrayIndex] & ~friendlyPieces;
+		uint64_t moves = magicBitboards::magicMovesRook[currentPos][arrayIndex] & ~friendlyPieces & legalMoves & (pushMask | captureMask);
 
 		while (moves)
 		{
@@ -193,9 +224,9 @@ void generateRookMoves(Board * board, std::vector<Move>& Movelist, uint64_t frie
 	}
 }
 
-void generateBishopMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
+void generateBishopMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, uint64_t pinnedPieces, uint64_t pushMask, uint64_t captureMask)
 {
-	uint64_t bishopBitboard;
+	uint64_t bishopBitboard, legalMoves;
 	if (board->nextColour == white)
 	{
 		bishopBitboard = board->whiteBishopBitboard;
@@ -209,10 +240,13 @@ void generateBishopMoves(Board * board, std::vector<Move>& Movelist, uint64_t fr
 		uint64_t currentBishop = pop(bishopBitboard);
 		int currentPos = bitScanForward(currentBishop);
 
+		if (currentBishop & pinnedPieces) legalMoves = generateLegalFilterForPinnedPiece(board, currentBishop);
+		else legalMoves = ~0;
+
 		uint64_t occupancy = magicBitboards::bishopMask[currentPos] & board->allPieces;
 		uint64_t magicResult = occupancy * magicBitboards::magicNumberBishop[currentPos];
 		int arrayIndex = magicResult >> magicBitboards::magicNumberShiftBishop[currentPos];
-		uint64_t moves = magicBitboards::magicMovesBishop[currentPos][arrayIndex] & ~friendlyPieces;
+		uint64_t moves = magicBitboards::magicMovesBishop[currentPos][arrayIndex] & ~friendlyPieces & legalMoves & (pushMask | captureMask);
 
 		while (moves)
 		{
@@ -222,9 +256,9 @@ void generateBishopMoves(Board * board, std::vector<Move>& Movelist, uint64_t fr
 	}
 }
 
-void generateQueenMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
+void generateQueenMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, uint64_t pinnedPieces, uint64_t pushMask, uint64_t captureMask)
 {
-	uint64_t queenBitboard;
+	uint64_t queenBitboard, legalMoves;
 	if (board->nextColour == white)
 	{
 		queenBitboard = board->whiteQueenBitboard;
@@ -238,17 +272,20 @@ void generateQueenMoves(Board * board, std::vector<Move>& Movelist, uint64_t fri
 		uint64_t currentQueen = pop(queenBitboard);
 		int currentPos = bitScanForward(currentQueen);
 
+		if (currentQueen & pinnedPieces) legalMoves = generateLegalFilterForPinnedPiece(board, currentQueen);
+		else legalMoves = ~0;
+
 		//Moves bishop moves
 		uint64_t occupancy = magicBitboards::bishopMask[currentPos] & board->allPieces;
 		uint64_t magicResult = occupancy * magicBitboards::magicNumberBishop[currentPos];
 		int arrayIndex = magicResult >> magicBitboards::magicNumberShiftBishop[currentPos];
-		uint64_t moves = magicBitboards::magicMovesBishop[currentPos][arrayIndex] & ~friendlyPieces;
+		uint64_t moves = magicBitboards::magicMovesBishop[currentPos][arrayIndex] & ~friendlyPieces & legalMoves & (pushMask | captureMask);
 
 		//Rook moves
 		occupancy = magicBitboards::rookMask[currentPos] & board->allPieces;
 		magicResult = occupancy * magicBitboards::magicNumberRook[currentPos];
 		arrayIndex = magicResult >> magicBitboards::magicNumberShiftRook[currentPos];
-		moves |= magicBitboards::magicMovesRook[currentPos][arrayIndex] & ~friendlyPieces;
+		moves |= magicBitboards::magicMovesRook[currentPos][arrayIndex] & ~friendlyPieces & legalMoves & (pushMask | captureMask);
 
 		while (moves)
 		{
@@ -258,28 +295,28 @@ void generateQueenMoves(Board * board, std::vector<Move>& Movelist, uint64_t fri
 	}
 }
 
-void generateCastlingMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces)
+void generateCastlingMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, uint64_t kingDangerSquares)
 {
 	if (board->nextColour == white)
 	{
 		if (board->canWhiteCastleKingSide && (board->allPieces & 96) == 0)//Kingside castling
 		{
-			if(!board->isPieceAttacked(5,white) && !board->isPieceAttacked(4, white)) Movelist.push_back(Move(4, 6, kingSideCastling, king, board));
+			if((112 & kingDangerSquares) == 0) Movelist.push_back(Move(4, 6, kingSideCastling, king, board));
 		}
 		if(board->canWhiteCastleQueenSide && (board->allPieces & 14) == 0)//Queenside castling
 		{
-			if (!board->isPieceAttacked(3,white) && !board->isPieceAttacked(4, white)) Movelist.push_back(Move(4, 2, queenSideCastling, king, board));
+			if ((28 & kingDangerSquares) == 0) Movelist.push_back(Move(4, 2, queenSideCastling, king, board));
 		}
 	}
 	else
 	{
 		if (board->canBlackCastleKingSide && (board->allPieces & 6917529027641081856) == 0)//Kingside castling
 		{
-			if (!board->isPieceAttacked(61,black) && !board->isPieceAttacked(60, black)) Movelist.push_back(Move(60, 62, kingSideCastling, king, board));
+			if ((8070450532247928832 & kingDangerSquares) == 0) Movelist.push_back(Move(60, 62, kingSideCastling, king, board));
 		}
 		if (board->canBlackCastleQueenSide && (board->allPieces & 1008806316530991104) == 0)//Queenside castling
 		{
-			if (!board->isPieceAttacked(59,black) && !board->isPieceAttacked(60, black)) Movelist.push_back(Move(60, 58, queenSideCastling, king, board));
+			if ((2017612633061982208 & kingDangerSquares) == 0) Movelist.push_back(Move(60, 58, queenSideCastling, king, board));
 		}
 	}
 }
@@ -334,4 +371,260 @@ void addMoves(int start, int end, pieceType piece, std::vector<Move>& Movelist, 
 	{
 		Movelist.push_back(Move(start, end, quietMove, piece, board));
 	}
+}
+
+uint64_t generateAttackSet(Board * board, colours colour, uint64_t allPieces)
+{
+	uint64_t attackSet = 0;
+	uint64_t currentPos;
+
+	uint64_t pawnBitboard = board->findBitboard(colour, pawn);
+	if (colour == white)
+	{
+		while (pawnBitboard)
+		{
+			currentPos = pop(pawnBitboard);
+			attackSet |= currentPos << 7 & ~fileH | currentPos << 9 & ~fileA;
+		}
+	}
+	else
+	{
+		while (pawnBitboard)
+		{
+			currentPos = pop(pawnBitboard);
+			attackSet |= (currentPos >> 9) & ~fileH | (currentPos >> 7) & ~fileA;
+		}
+	}
+
+	uint64_t knightBitboard = board->findBitboard(colour, knight);
+	while (knightBitboard)
+	{
+		currentPos = pop(knightBitboard);
+		attackSet |= knightMovesArray[bitScanForward(currentPos)];
+	}
+
+	uint64_t kingBitboard = board->findBitboard(colour, king);
+	while (kingBitboard)
+	{
+		currentPos = pop(kingBitboard);
+		attackSet |= kingMovesArray[bitScanForward(currentPos)];
+	}
+
+	uint64_t rookBitboard = board->findBitboard(colour, rook) | board->findBitboard(colour, queen);
+	while (rookBitboard)
+	{
+		currentPos = pop(rookBitboard);
+		int piecePos = bitScanForward(currentPos);
+
+		uint64_t occupancy = magicBitboards::rookMask[piecePos] & allPieces;
+		uint64_t magicResult = occupancy * magicBitboards::magicNumberRook[piecePos];
+		int arrayIndex = magicResult >> magicBitboards::magicNumberShiftRook[piecePos];
+		attackSet |= magicBitboards::magicMovesRook[piecePos][arrayIndex];
+	}
+
+	uint64_t bishopBitboard = board->findBitboard(colour, bishop) | board->findBitboard(colour, queen);
+	while (bishopBitboard)
+	{
+		currentPos = pop(bishopBitboard);
+		int piecePos = bitScanForward(currentPos);
+
+		uint64_t occupancy = magicBitboards::bishopMask[piecePos] & allPieces;
+		uint64_t magicResult = occupancy * magicBitboards::magicNumberBishop[piecePos];
+		int arrayIndex = magicResult >> magicBitboards::magicNumberShiftBishop[piecePos];
+		attackSet |= magicBitboards::magicMovesBishop[piecePos][arrayIndex];
+	}
+
+	return attackSet;
+}
+
+uint64_t getPinnedPieces(Board * board)
+{
+	uint64_t pinnedPieces = 0;
+
+	uint64_t kingBitBoard = board->findBitboard(board->nextColour, king);
+	int kingPos = bitScanForward(kingBitBoard);
+
+	uint64_t enemyPieces, friendlyPieces;
+	if (board->nextColour == white)
+	{
+		enemyPieces = board->blackPieces;
+		friendlyPieces = board->whitePieces;
+	}
+	else
+	{
+		enemyPieces = board->whitePieces;
+		friendlyPieces = board->blackPieces;
+	}
+
+	uint64_t occupancy = magicBitboards::rookMask[kingPos] & enemyPieces;
+	uint64_t magicResult = occupancy * magicBitboards::magicNumberRook[kingPos];
+	int arrayIndex = magicResult >> magicBitboards::magicNumberShiftRook[kingPos];
+	uint64_t kingRaysRook = magicBitboards::magicMovesRook[kingPos][arrayIndex] & (board->findBitboard(switchColour(board->nextColour), rook) | board->findBitboard(switchColour(board->nextColour), queen));
+	while (kingRaysRook)
+	{
+		uint64_t pinner = pop(kingRaysRook);
+		uint64_t pinnedPiece = inBetween(kingPos, bitScanForward(pinner)) & friendlyPieces;
+		if (bitSum(pinnedPiece) == 1) pinnedPieces |= pinnedPiece;
+	}
+
+
+	occupancy = magicBitboards::bishopMask[kingPos] & enemyPieces;
+	magicResult = occupancy * magicBitboards::magicNumberBishop[kingPos];
+	arrayIndex = magicResult >> magicBitboards::magicNumberShiftBishop[kingPos];
+	uint64_t kingRaysBishop = magicBitboards::magicMovesBishop[kingPos][arrayIndex] & (board->findBitboard(switchColour(board->nextColour), bishop) | board->findBitboard(switchColour(board->nextColour), queen));;
+	while (kingRaysBishop)
+	{
+		uint64_t pinner = pop(kingRaysBishop);
+		uint64_t pinnedPiece = inBetween(kingPos, bitScanForward(pinner)) & friendlyPieces;
+		if (bitSum(pinnedPiece) == 1) pinnedPieces |= pinnedPiece;
+	}
+
+	return pinnedPieces;
+}
+
+//Calculates the moves a pinned piece could move and stay out of check.
+uint64_t generateLegalFilterForPinnedPiece(Board* board, uint64_t pinnedPiece)
+{
+	uint64_t allPiecesWithoutPiece = board->allPieces & ~pinnedPiece;
+	uint64_t kingBitBoard = board->findBitboard(board->nextColour, king);
+	int kingPos = bitScanForward(kingBitBoard);
+
+	uint64_t currentPos, currentRay, rookRays, bishopRays;
+	uint64_t rookBitboard = board->findBitboard(switchColour(board->nextColour), rook) | board->findBitboard(switchColour(board->nextColour), queen);
+	while (rookBitboard)
+	{
+		currentPos = pop(rookBitboard);
+		int piecePos = bitScanForward(currentPos);
+
+		uint64_t occupancy = magicBitboards::rookMask[piecePos] & allPiecesWithoutPiece;
+		uint64_t magicResult = occupancy * magicBitboards::magicNumberRook[piecePos];
+		int arrayIndex = magicResult >> magicBitboards::magicNumberShiftRook[piecePos];
+		rookRays = magicBitboards::magicMovesRook[piecePos][arrayIndex] & kingBitBoard;
+		if (inBetween(kingPos, piecePos) & pinnedPiece)
+		{
+			return inBetween(kingPos, piecePos) | currentPos;
+		}
+		
+	}
+
+	uint64_t bishopBitboard = board->findBitboard(switchColour(board->nextColour), bishop) | board->findBitboard(switchColour(board->nextColour), queen);
+	while (bishopBitboard)
+	{
+		currentPos = pop(bishopBitboard);
+		int piecePos = bitScanForward(currentPos);
+
+		uint64_t occupancy = magicBitboards::bishopMask[piecePos] & allPiecesWithoutPiece;
+		uint64_t magicResult = occupancy * magicBitboards::magicNumberBishop[piecePos];
+		int arrayIndex = magicResult >> magicBitboards::magicNumberShiftBishop[piecePos];
+		bishopRays = magicBitboards::magicMovesBishop[piecePos][arrayIndex] & kingBitBoard;
+		if (inBetween(kingPos, piecePos) & pinnedPiece)
+		{
+			return inBetween(kingPos, piecePos) | currentPos;
+		}
+		
+	}
+
+	return 0;
+}
+
+uint64_t getAttackers(Board * board, colours colour, uint64_t targetBitboard)
+{
+	colours opponentColour = switchColour(colour);
+	int targetPos = bitScanForward(targetBitboard);
+	uint64_t attackers = 0;
+
+	if (colour == white)
+	{
+		attackers |= board->findBitboard(opponentColour, pawn) & (((targetBitboard << 7) & ~fileH) | ((targetBitboard << 9) & ~fileA));
+	}
+	else
+	{
+		attackers |= board->findBitboard(opponentColour, pawn) & (((targetBitboard >> 9) & ~fileH) | ((targetBitboard >> 7) & ~fileA));
+	}
+
+	//KnightMoves
+	uint64_t knightMoves = knightMovesArray[targetPos];
+	attackers |= knightMoves & board->findBitboard(opponentColour, knight);
+
+	uint64_t moves = kingMovesArray[targetPos];
+	attackers |= moves & board->findBitboard(opponentColour, king);
+	
+	//Rook and half of queen moves
+	uint64_t occupancy = magicBitboards::rookMask[targetPos] & board->allPieces;
+	uint64_t magicResult = occupancy * magicBitboards::magicNumberRook[targetPos];
+	int arrayIndex = magicResult >> magicBitboards::magicNumberShiftRook[targetPos];
+	uint64_t magicMoves = magicBitboards::magicMovesRook[targetPos][arrayIndex];
+
+	attackers |= magicMoves & (board->findBitboard(opponentColour, rook) | (board->findBitboard(opponentColour, queen)));
+	
+	//Bishop and half of queen moves
+	occupancy = magicBitboards::bishopMask[targetPos] & board->allPieces;
+	magicResult = occupancy * magicBitboards::magicNumberBishop[targetPos];
+	arrayIndex = magicResult >> magicBitboards::magicNumberShiftBishop[targetPos];
+	magicMoves = magicBitboards::magicMovesBishop[targetPos][arrayIndex];
+
+	attackers |= magicMoves & (board->findBitboard(opponentColour, bishop) | (board->findBitboard(opponentColour, queen)));
+
+	return attackers;
+}
+
+void setupMoveGen()
+{
+	uint64_t currentPos, knightMoves, kingMoves;
+	for (int x = 0; x < 64; x++)
+	{
+		currentPos = (uint64_t)1 << x;
+
+		knightMoves = 0;
+		knightMoves |= currentPos << 15 & ~fileH;
+		knightMoves |= currentPos << 17 & ~fileA;
+		knightMoves |= currentPos << 06 & ~fileH & ~fileG;
+		knightMoves |= currentPos << 10 & ~fileA & ~fileB;
+		knightMoves |= currentPos >> 10 & ~fileH & ~fileG;
+		knightMoves |= currentPos >> 06 & ~fileA & ~fileB;
+		knightMoves |= currentPos >> 17 & ~fileH;
+		knightMoves |= currentPos >> 15 & ~fileA;
+		knightMovesArray[x] = knightMoves;
+
+		kingMoves = 0;
+		kingMoves |= currentPos << 8;
+		kingMoves |= currentPos << 9 & ~fileA;
+		kingMoves |= currentPos << 1 & ~fileA;
+		kingMoves |= currentPos >> 7 & ~fileA;
+		kingMoves |= currentPos >> 8;
+		kingMoves |= currentPos >> 9 & ~fileH;
+		kingMoves |= currentPos >> 1 & ~fileH;
+		kingMoves |= currentPos << 7 & ~fileH;
+		kingMovesArray[x] = kingMoves;
+	}
+}
+
+bool isPinnedEnPassant(Board* board, uint64_t pieces)
+{
+	uint64_t kingBitBoard = board->findBitboard(board->nextColour, king);
+	int kingPos = bitScanForward(kingBitBoard);
+
+	uint64_t magicResult = 0 * magicBitboards::magicNumberRook[kingPos];
+	int arrayIndex = magicResult >> magicBitboards::magicNumberShiftRook[kingPos];
+	uint64_t kingRaysRook = magicBitboards::magicMovesRook[kingPos][arrayIndex];
+	kingRaysRook &= (board->findBitboard(switchColour(board->nextColour), rook) | board->findBitboard(switchColour(board->nextColour), queen));
+	while (kingRaysRook)
+	{
+		uint64_t pinner = pop(kingRaysRook);
+		uint64_t pinnedPiece = inBetween(kingPos, bitScanForward(pinner)) & board->allPieces;
+		if (pinnedPiece ==  pieces) return true;
+	}
+	/*
+	magicResult = 0 * magicBitboards::magicNumberBishop[kingPos];
+	arrayIndex = magicResult >> magicBitboards::magicNumberShiftBishop[kingPos];
+	uint64_t kingRaysBishop = magicBitboards::magicMovesBishop[kingPos][arrayIndex];
+	kingRaysBishop &= (board->findBitboard(switchColour(board->nextColour), bishop) | board->findBitboard(switchColour(board->nextColour), queen));
+	while (kingRaysBishop)
+	{
+		uint64_t pinner = pop(kingRaysBishop);
+		uint64_t pinnedPiece = inBetween(kingPos, bitScanForward(pinner)) & board->allPieces;
+		if (pinnedPiece & pieces > 0 && bitSum(pinnedPiece) == bitSum(pinnedPiece & pieces)) return true;
+	}
+	*/
+	return false;
 }

@@ -183,29 +183,3 @@ Move moveFromNotation(std::string moveNotation, Board * board)
 		return Move(from, to, quietMove, piece, board);
 	}
 }
-
-bool isInCheck(Board * board, colours colour)
-{
-	colours opponentColour;
-	switch (colour)
-	{
-	case white:
-		opponentColour = black;
-		break;
-	case black:
-		opponentColour = white;
-		break;
-	}
-
-	std::vector<Move> moveList = searchForMoves(board);
-	for (int x = 0; x < moveList.size(); x++)
-	{
-		if(moveList[x].applyMove(board).findBitboard(colour,king) == 0)
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
-

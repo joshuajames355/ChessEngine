@@ -125,18 +125,3 @@ TEST(Utils, moveFromNotation)
 	EXPECT_EQ(move.moveType, queenSideCastling);
 	EXPECT_EQ(move.piece, king);
 }
-
-TEST(Utils, isInCheck)
-{
-	Board board = Board();
-	board.blackKingBitboard = 1;
-	board.whiteRookBitboard = 8;
-	board.update();
-	EXPECT_EQ(isInCheck(&board, black), true);
-
-	board = Board();
-	board.blackKingBitboard = 256;
-	board.whiteRookBitboard = 8;
-	board.update();
-	EXPECT_EQ(isInCheck(&board, black), false);
-}

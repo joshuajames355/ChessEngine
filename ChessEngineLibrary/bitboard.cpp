@@ -44,3 +44,89 @@ std::vector<int> getSetBits(uint64_t bitboard)
 	}
 	return setBits;
 }
+
+uint64_t inBetweenLookup[64][64];
+
+uint64_t inBetween(int from, int to)
+{
+	return inBetweenLookup[from][to];
+}
+
+void setupBitboardUtils()
+{
+	for (int from = 0; from < 64; from++)
+	{
+		for (int to = 0; to < 64; to++)
+		{
+			inBetweenLookup[from][to] = 0;
+			if (from % 8 == to % 8) //Same column
+			{
+				if (to > from)
+				{
+					for (int x = from + 8; x < to; x += 8)
+					{
+						inBetweenLookup[from][to] |= (uint64_t)1 << x;
+					}
+				}
+				else
+				{
+					for (int x = from - 8; x > to; x -= 8)
+					{
+						inBetweenLookup[from][to] |= (uint64_t)1 << x;
+					}
+				}
+			}
+			else if (from / 8 == to / 8) //Same row
+			{
+				if (to > from)
+				{
+					for (int x = from + 1; x < to; x += 1)
+					{
+						inBetweenLookup[from][to] |= (uint64_t)1 << x;
+					}
+				}
+				else
+				{
+					for (int x = from - 1; x > to; x -= 1)
+					{
+						inBetweenLookup[from][to] |= (uint64_t)1 << x;
+					}
+				}
+			}
+			else if (std::abs(from - to) % 9 == 0) //Bottom-left to top-right diagonal
+			{
+				if (to > from)
+				{
+					for (int x = from + 9; x < to; x += 9)
+					{
+						inBetweenLookup[from][to] |= (uint64_t)1 << x;
+					}
+				}
+				else
+				{
+					for (int x = from - 9; x > to; x -= 9)
+					{
+						inBetweenLookup[from][to] |= (uint64_t)1 << x;
+					}
+				}
+			}
+			else if (std::abs(from - to) % 7 == 0) //Top-left to Bottom-right diagonal
+			{
+				if (to > from)
+				{
+					for (int x = from + 7; x < to; x += 7)
+					{
+						inBetweenLookup[from][to] |= (uint64_t)1 << x;
+					}
+				}
+				else
+				{
+					for (int x = from - 7; x > to; x -= 7)
+					{
+						inBetweenLookup[from][to] |= (uint64_t)1 << x;
+					}
+				}
+			}
+		}
+	}
+}
