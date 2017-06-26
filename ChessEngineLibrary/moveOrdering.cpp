@@ -1,8 +1,30 @@
 #include "moveOrdering.h"
 
-void orderQuiescentSearch(std::vector<Move>* moveList, Board * board)
+void orderSearch(std::array<Move, 150>* moveList, Board * board, int arraySize, Move TTMove, bool isBestMove)
 {
-	*moveList = MVVLVA(moveList, board);
+	if (isBestMove) 
+		std::swap(moveList->begin(), std::find(moveList->begin(), moveList->begin() + arraySize, TTMove));
+}
+
+int orderQuiescentSearch(std::array<Move, 150>* moveList, Board * board, int arraySize)
+{
+	//Filters out non-capture moves
+	std::array<Move, 150> captureMoves;
+	int counter = 0;
+	for (int x = 0; x < arraySize; x++)
+	{
+		if ((*moveList)[x].capturedPiece != blank)
+		{
+			captureMoves[counter] = (*moveList)[x];
+			counter++;
+		}
+	}
+	arraySize = counter;
+	*moveList = captureMoves;
+
+	MVVLVA(moveList, board, arraySize);
+	
+	return arraySize;
 }
 
 bool MVVLVAComparisonFunc(Move move1, Move move2)
@@ -20,18 +42,7 @@ bool MVVLVAComparisonFunc(Move move1, Move move2)
 }
 
 //Most valuable victim , least valuable attacker
-std::vector<Move> MVVLVA(std::vector<Move>* moveList, Board * board)
+void MVVLVA(std::array<Move, 150>* moveList, Board * board, int arraySize)
 { 
-	std::vector<Move> captureMoves;
-	captureMoves.reserve(moveList->size());
-	for (int x = 0; x < moveList->size(); x++)
-	{
-		if ((*moveList)[x].moveType == capture)
-		{
-			captureMoves.push_back((*moveList)[x]);
-		}
-	}
-	std::sort(captureMoves.begin(), captureMoves.end(), MVVLVAComparisonFunc);
-
-	return captureMoves;
+	std::sort(moveList->begin(), moveList->begin() + arraySize, MVVLVAComparisonFunc);
 }

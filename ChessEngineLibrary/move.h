@@ -19,7 +19,16 @@ struct Move
 	pieceType capturedPiece;
 	MoveType moveType;
 	
-	Board applyMove(Board* board);
+	//The flags of the board prior to applyMove. Used in undoMove
+	bool canBlackCastleQueenSide;
+	bool canBlackCastleKingSide;
+	bool canWhiteCastleQueenSide;
+	bool canWhiteCastleKingSide;
+	int enPassantSquare;
+	uint64_t hash;
+
+	void applyMove(Board* board);
+	void undoMove(Board* board);
 
 	bool operator==(const Move& b)
 	{

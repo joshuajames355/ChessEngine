@@ -10,7 +10,7 @@ void updateEngine(searchData * data, Move bestMove, int alpha)
 	
 }
 
-Move startSearch(int searchDepth, Board board, TranspositionEntry* transpositionTable)
+Move startSearch(int searchDepth, Board* board, TranspositionEntry* transpositionTable)
 {
 	searchData data;
 	data.startTime = time(0);
@@ -26,7 +26,7 @@ Move startSearch(int searchDepth, Board board, TranspositionEntry* transposition
 }
 
 
-Move rootSearch(int depthLeft, Board board, searchData* data, TranspositionEntry* transpositionTable)
+Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntry* transpositionTable)
 {
 	data->nodes++;
 
@@ -35,11 +35,13 @@ Move rootSearch(int depthLeft, Board board, searchData* data, TranspositionEntry
 
 	int alphaOriginal = alpha;
 	Move bestMove;
+	bool isBestMove = false;
 
-	TranspositionEntry entry = transpositionTable[board.zorbistKey % TTSize];
+	TranspositionEntry entry = transpositionTable[board->zorbistKey % TTSize];
 
-	std::vector<Move> moveList = searchForMoves(&board);
-	if (entry.zorbistKey == board.zorbistKey && std::find(moveList.begin(), moveList.end(), entry.bestMove) != moveList.end())
+	std::array<Move, 150> moveList;
+	int arraySize = searchForMoves(board,&moveList);
+	if (entry.zorbistKey == board->zorbistKey && std::find(moveList.begin(), moveList.end(), entry.bestMove) != moveList.end())
 	{
 		if (entry.depth >= depthLeft)
 		{
@@ -60,19 +62,18 @@ Move rootSearch(int depthLeft, Board board, searchData* data, TranspositionEntry
 				return entry.bestMove;
 			}
 		}
-		else
-		{
-			bestMove = entry.bestMove;
-			moveList.erase(std::remove(moveList.begin(), moveList.end(), entry.bestMove), moveList.end());
-			moveList.insert(moveList.begin(), entry.bestMove);
-		}
+
+		isBestMove = true;
+		bestMove = entry.bestMove;
 	}
 
-	Board newBoard;
-	for (int x = 0; x < moveList.size(); x++)
+	orderSearch(&moveList, board, arraySize, bestMove, isBestMove);
+
+	for (int x = 0; x < arraySize; x++)
 	{
-		newBoard = moveList[x].applyMove(&board);
-		int score = -negamax(-beta, -alpha, depthLeft - 1, newBoard, data,true, transpositionTable);
+		moveList[x].applyMove(board);
+		int score = -negamax(-beta, -alpha, depthLeft - 1, board, data,true, transpositionTable);
+		moveList[x].undoMove(board);
 		if (score >= beta)
 		{
 			return bestMove;   //  fail hard beta-cutoff
@@ -101,27 +102,29 @@ Move rootSearch(int depthLeft, Board board, searchData* data, TranspositionEntry
 	}
 	newEntry.depth = depthLeft;
 	newEntry.bestMove = bestMove;
-	newEntry.zorbistKey = board.zorbistKey;
+	newEntry.zorbistKey = board->zorbistKey;
 
-	transpositionTable[board.zorbistKey % TTSize] = newEntry;
+	transpositionTable[board->zorbistKey % TTSize] = newEntry;
 
 	updateEngine(data, bestMove, alpha);
 
 	return bestMove;
 }
 
-int negamax(int alpha, int beta, int depthLeft, Board board, searchData* data, bool isQuiet, TranspositionEntry* transpositionTable)
+int negamax(int alpha, int beta, int depthLeft, Board* board, searchData* data, bool isQuiet, TranspositionEntry* transpositionTable)
 {
 	if (depthLeft == 0) return quiescence(alpha, beta, 3, board, data, isQuiet);
 
 	data->nodes++;
 	int alphaOriginal = alpha;
 	Move bestMove;
+	bool isBestMove = false;
 
-	TranspositionEntry entry = transpositionTable[board.zorbistKey % TTSize];
+	TranspositionEntry entry = transpositionTable[board->zorbistKey % TTSize];
 
-	std::vector<Move> moveList = searchForMoves(&board);
-	if (entry.zorbistKey == board.zorbistKey && std::find(moveList.begin(), moveList.end(), entry.bestMove) != moveList.end())
+	std::array<Move,150> moveList;
+	int arraySize = searchForMoves(board, &moveList);
+	if (entry.zorbistKey == board->zorbistKey && std::find(moveList.begin(), moveList.end(), entry.bestMove) != moveList.end())
 	{
 		if (entry.depth >= depthLeft)
 		{
@@ -142,19 +145,18 @@ int negamax(int alpha, int beta, int depthLeft, Board board, searchData* data, b
 				return entry.score;
 			}
 		}
-		else
-		{
-			moveList.erase(std::remove(moveList.begin(), moveList.end(), entry.bestMove), moveList.end());
-			moveList.insert(moveList.begin(), entry.bestMove);
-		}
+		isBestMove = true;
+		bestMove = entry.bestMove;
 	}
 
-	Board newBoard;
-	for (int x = 0; x < moveList.size(); x++)
+	orderSearch(&moveList, board, arraySize, bestMove, isBestMove);
+
+	for (int x = 0; x < arraySize; x++)
 	{
-		if (depthLeft <= 0 && moveList[x].moveType != capture) continue;
-		newBoard = moveList[x].applyMove(&board);
-		int score = -negamax(-beta, -alpha, depthLeft - 1, newBoard, data, moveList[x].moveType != capture, transpositionTable);
+		moveList[x].applyMove(board);
+		int score = -negamax(-beta, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable);
+		moveList[x].undoMove(board);
+
 		if (score >= beta)
 		{
 			return beta;   //  fail hard beta-cutoff
@@ -183,37 +185,35 @@ int negamax(int alpha, int beta, int depthLeft, Board board, searchData* data, b
 	}
 	newEntry.depth = depthLeft;
 	newEntry.bestMove = bestMove;
-	newEntry.zorbistKey = board.zorbistKey;
+	newEntry.zorbistKey = board->zorbistKey;
 
-	transpositionTable[board.zorbistKey % TTSize] = newEntry;
+	transpositionTable[board->zorbistKey % TTSize] = newEntry;
 	return alpha;
 }
 
-int quiescence(int alpha, int beta, int depthLeft, Board board, searchData * data, bool isQuiet)
+int quiescence(int alpha, int beta, int depthLeft, Board* board, searchData * data, bool isQuiet)
 {
 	data->nodes++;
 
 	if (isQuiet)
 	{
-		return calculateScoreDiff(&board);
+		return calculateScoreDiff(board);
 	}
 
-	int score = calculateScoreDiff(&board);
+	int score = calculateScoreDiff(board);
 	if (score >= beta) return beta;
 	if (alpha < score) alpha = score;
 	if (depthLeft == 0) return alpha;
 
-	std::vector<Move> moveList = searchForMoves(&board);
-	orderQuiescentSearch(&moveList,&board);
+	std::array<Move, 150> moveList;
+	int arraySize = searchForMoves(board, &moveList);
+	arraySize = orderQuiescentSearch(&moveList,board, arraySize);
 
-	Board newBoard;
-
-	for (int x = 0; x < moveList.size(); x++)
+	for (int x = 0; x < arraySize; x++)
 	{
-		if (moveList[x].moveType != capture) continue;
-		newBoard = moveList[x].applyMove(&board);
-
-		int score = -quiescence(-beta, -alpha, depthLeft - 1, newBoard, data, moveList[x].moveType != capture);
+		moveList[x].applyMove(board);
+		score = -quiescence(-beta, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture);
+		moveList[x].undoMove(board);
 		if (score >= beta)
 		{
 			return beta;   //  fail hard beta-cutoff

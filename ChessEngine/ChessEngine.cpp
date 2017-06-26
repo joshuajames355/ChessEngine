@@ -68,7 +68,7 @@ void engineLoop()
 					{
 						//Applies each move to calculate the current board.
 						currentMove = moveFromNotation(words[x], &board);
-						board = currentMove.applyMove(&board);
+						currentMove.applyMove(&board);
 					}
 				}
 			}
@@ -84,7 +84,7 @@ void engineLoop()
 					{
 						//Applies each move to calculate the current board.
 						currentMove = moveFromNotation(words[x], &board);
-						board = currentMove.applyMove(&board);
+						currentMove.applyMove(&board);
 
 					}
 				}
@@ -94,7 +94,7 @@ void engineLoop()
 		if (words[0] == "go")
 		{
 			board.printBoard();
-			std::cout << "bestmove " << notationFromMove(startSearch(SEARCHDEPTH, board, transpositionTable)) << "\n";
+			std::cout << "bestmove " << notationFromMove(startSearch(SEARCHDEPTH, &board, transpositionTable)) << "\n";
 		}
 	}
 

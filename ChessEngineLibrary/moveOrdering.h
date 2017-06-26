@@ -5,6 +5,7 @@
 #include "move.h"
 #include "board.h"
 
-void orderQuiescentSearch(std::vector<Move>* moveList, Board* board);
-std::vector<Move> MVVLVA(std::vector<Move>* moveList, Board* board);
+void orderSearch(std::array<Move, 150>* moveList, Board * board, int arraySize, Move TTMove, bool isBestMove);
+int orderQuiescentSearch(std::array<Move, 150>* moveList, Board * board, int arraySize);
+void MVVLVA(std::array<Move, 150>* moveList, Board * board, int arraySize);
 

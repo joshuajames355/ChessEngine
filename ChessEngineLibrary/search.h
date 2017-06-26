@@ -21,7 +21,7 @@ struct searchData
 	time_t startTime;
 };
 
-Move startSearch(int searchDepth, Board board, TranspositionEntry* transpositionTable);
-Move rootSearch(int depthLeft, Board board, searchData* data, TranspositionEntry* transpositionTable);
-int negamax(int alpha, int beta, int depthLeft, Board board, searchData* data, bool isQuiet, TranspositionEntry* transpositionTable);
-int quiescence(int alpha, int beta, int depthLeft, Board board, searchData* data, bool isQuiet);
+Move startSearch(int searchDepth, Board* board, TranspositionEntry* transpositionTable);
+Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntry* transpositionTable);
+int negamax(int alpha, int beta, int depthLeft, Board* board, searchData* data, bool isQuiet, TranspositionEntry* transpositionTable);
+int quiescence(int alpha, int beta, int depthLeft, Board* board, searchData* data, bool isQuiet);

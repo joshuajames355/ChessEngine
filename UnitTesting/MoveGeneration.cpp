@@ -11,10 +11,9 @@ TEST(MoveGeneration, PawnMoves)
 	board.whitePawnBitboard = 2;
 	board.update();
 	board.nextColour = white;
-	std::vector<Move> Movelist = std::vector<Move>();
-	generatePawnMoves(&board, Movelist, 0, ~0, ~0);
-
-	EXPECT_EQ(Movelist.size(), 1);
+	std::array<Move, 150> Movelist;
+	int arraySize = generatePawnMoves(&board, &Movelist, 0, ~0, ~0, 0);
+	EXPECT_EQ(arraySize, 1);
 	EXPECT_EQ(Movelist[0].from, 1);
 	EXPECT_EQ(Movelist[0].to, 9);
 	EXPECT_EQ(Movelist[0].piece, pawn);
@@ -24,9 +23,8 @@ TEST(MoveGeneration, PawnMoves)
 	board.whitePawnBitboard = 256;
 	board.update();
 	board.nextColour = white;
-	Movelist = std::vector<Move>();
-	generatePawnMoves(&board, Movelist, 0, ~0, ~0);
-	EXPECT_EQ(Movelist.size(), 2);
+	arraySize = generatePawnMoves(&board, &Movelist, 0, ~0, ~0, 0);
+	EXPECT_EQ(arraySize, 2);
 	EXPECT_EQ(Movelist[0].from, 8);
 	EXPECT_EQ(Movelist[1].from, 8);
 	if (Movelist[0].to == 16)
@@ -54,9 +52,8 @@ TEST(MoveGeneration, PawnMoves)
 	board.blackPawnBitboard = 512;
 	board.update();
 	board.nextColour = white;
-	Movelist = std::vector<Move>();
-	generatePawnMoves(&board, Movelist, 0, ~0, ~0);
-	EXPECT_EQ(Movelist.size(), 1);
+	arraySize = generatePawnMoves(&board, &Movelist, 0, ~0, ~0, 0);
+	EXPECT_EQ(arraySize, 1);
 	EXPECT_EQ(Movelist[0].from, 0);
 	EXPECT_EQ(Movelist[0].to, 9);
 	EXPECT_EQ(Movelist[0].piece, pawn);
@@ -68,9 +65,8 @@ TEST(MoveGeneration, PawnMoves)
 	board.blackPawnBitboard = 8388608;
 	board.update();
 	board.nextColour = white;
-	Movelist = std::vector<Move>();
-	generatePawnMoves(&board, Movelist, 0, ~0, ~0);
-	EXPECT_EQ(Movelist.size(), 1);
+	arraySize = generatePawnMoves(&board, &Movelist, 0, ~0, ~0, 0);
+	EXPECT_EQ(arraySize, 1);
 	EXPECT_EQ(Movelist[0].from, 15);
 	EXPECT_EQ(Movelist[0].to, 22);
 	EXPECT_EQ(Movelist[0].piece, pawn);
@@ -80,9 +76,8 @@ TEST(MoveGeneration, PawnMoves)
 	board.whitePawnBitboard = 281474976710656;
 	board.update();
 	board.nextColour = white;
-	Movelist = std::vector<Move>();
-	generatePawnMoves(&board, Movelist, 0, ~0, ~0);
-	EXPECT_EQ(Movelist.size(), 4);
+	arraySize = generatePawnMoves(&board, &Movelist, 0, ~0, ~0, 0);
+	EXPECT_EQ(arraySize, 4);
 	EXPECT_EQ(Movelist[0].from, 48);
 	EXPECT_EQ(Movelist[0].to, 56);
 	EXPECT_EQ(Movelist[0].piece, pawn);
@@ -91,9 +86,8 @@ TEST(MoveGeneration, PawnMoves)
 	board.blackPawnBitboard = 256;
 	board.update();
 	board.nextColour = black;
-	Movelist = std::vector<Move>();
-	generatePawnMoves(&board, Movelist, 0, ~0, ~0);
-	EXPECT_EQ(Movelist.size(), 4);
+	arraySize = generatePawnMoves(&board, &Movelist, 0, ~0, ~0, 0);
+	EXPECT_EQ(arraySize, 4);
 	EXPECT_EQ(Movelist[0].from, 8);
 	EXPECT_EQ(Movelist[0].to, 0);
 	EXPECT_EQ(Movelist[0].piece, pawn);
@@ -102,46 +96,41 @@ TEST(MoveGeneration, PawnMoves)
 
 TEST(MoveGeneration, KingMoves)
 {
-	std::vector<Move> movelist = std::vector<Move>();
+	std::array<Move,150> movelist;
 	Board board = Board();
 	board.whiteKingBitboard = 1;
 	board.whitePawnBitboard = 768;
 	board.blackPawnBitboard = 2;
 	board.update();
 	board.nextColour = white;
-	generateKingMoves(&board, movelist, board.whitePieces, board.blackPieces, 0);
-
-	EXPECT_EQ(movelist.size(), 1);
+	int arraySize = generateKingMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0,0);
+	EXPECT_EQ(arraySize, 1);
 	EXPECT_EQ(movelist[0].from, 0);
 	EXPECT_EQ(movelist[0].to, 1);
 	EXPECT_EQ(movelist[0].piece, king);
 	EXPECT_EQ(movelist[0].moveType, capture);
 
-	movelist = std::vector<Move>();
 	board = Board();
 	board.whiteKingBitboard = 1;
 	board.whitePawnBitboard = 512;
 	board.whiteRookBitboard = 2;
 	board.update();
 	board.nextColour = white;
-	generateKingMoves(&board, movelist, board.whitePieces, board.blackPieces, 0);
-
-	EXPECT_EQ(movelist.size(), 1);
+	arraySize = generateKingMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, 0);
+	EXPECT_EQ(arraySize, 1);
 	EXPECT_EQ(movelist[0].from, 0);
 	EXPECT_EQ(movelist[0].to, 8);
 	EXPECT_EQ(movelist[0].piece, king);
 	EXPECT_EQ(movelist[0].moveType, quietMove);
 
-	movelist = std::vector<Move>();
 	board = Board();
 	board.blackKingBitboard = 9223372036854775808;
 	board.blackPawnBitboard = 4647714815446351872;
 	board.whiteRookBitboard = 18014398509481984;
 	board.update();
 	board.nextColour = black;
-	generateKingMoves(&board, movelist, board.blackPieces, board.whitePieces, 0);
-
-	EXPECT_EQ(movelist.size(), 1);
+	arraySize = generateKingMoves(&board, &movelist, board.blackPieces, board.whitePieces, 0, 0);
+	EXPECT_EQ(arraySize, 1);
 	EXPECT_EQ(movelist[0].from, 63);
 	EXPECT_EQ(movelist[0].to, 54);
 	EXPECT_EQ(movelist[0].piece, king);
@@ -150,30 +139,27 @@ TEST(MoveGeneration, KingMoves)
 
 TEST(MoveGeneration, KnightMoves)
 {
-	std::vector<Move> movelist = std::vector<Move>();
+	std::array<Move, 150> movelist;
 	Board board = Board();
 	board.whiteKnightBitboard = 1;
 	board.whitePawnBitboard = 1024;
 	board.update();
 	board.nextColour = white;
-
-	generateKnightMoves(&board, movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0);
-	EXPECT_EQ(movelist.size(), 1);
+	int arraySize = generateKnightMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0,0);
+	EXPECT_EQ(arraySize, 1);
 	EXPECT_EQ(movelist[0].from, 0);
 	EXPECT_EQ(movelist[0].to, 17);
 	EXPECT_EQ(movelist[0].piece, knight);
 	EXPECT_EQ(movelist[0].moveType, quietMove);
 
-	movelist = std::vector<Move>();
 	board = Board();
 	board.whiteKnightBitboard = 9223372036854775808;
 	board.whitePawnBitboard = 70368744177664;
 	board.blackRookBitboard = 9007199254740992;
 	board.update();
 	board.nextColour = white;
-
-	generateKnightMoves(&board, movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0);
-	EXPECT_EQ(movelist.size(), 1);
+	arraySize = generateKnightMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
+	EXPECT_EQ(arraySize, 1);
 	EXPECT_EQ(movelist[0].from, 63);
 	EXPECT_EQ(movelist[0].to, 53);
 	EXPECT_EQ(movelist[0].piece, knight);
@@ -182,30 +168,27 @@ TEST(MoveGeneration, KnightMoves)
 
 TEST(MoveGeneration, RookMoves)
 {
-	std::vector<Move> movelist = std::vector<Move>();
+	std::array<Move, 150> movelist;
 	Board board = Board();
 	board.whiteRookBitboard = 1;
 	board.whitePawnBitboard = 260;
 	board.update();
 	board.nextColour = white;
-
-	generateRookMoves(&board, movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0);
-	EXPECT_EQ(movelist.size(), 1);
+	int arraySize = generateRookMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
+	EXPECT_EQ(arraySize, 1);
 	EXPECT_EQ(movelist[0].from, 0);
 	EXPECT_EQ(movelist[0].to, 1);
 	EXPECT_EQ(movelist[0].piece, rook);
 	EXPECT_EQ(movelist[0].moveType, quietMove);
 
-	movelist = std::vector<Move>();
 	board = Board();
 	board.whiteRookBitboard = 1;
 	board.whitePawnBitboard = 2;
 	board.blackPawnBitboard = 256;
 	board.update();
 	board.nextColour = white;
-
-	generateRookMoves(&board, movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0);
-	EXPECT_EQ(movelist.size(), 1);
+	arraySize = generateRookMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
+	EXPECT_EQ(arraySize, 1);
 	EXPECT_EQ(movelist[0].from, 0);
 	EXPECT_EQ(movelist[0].to, 8);
 	EXPECT_EQ(movelist[0].piece, rook);
@@ -214,59 +197,52 @@ TEST(MoveGeneration, RookMoves)
 
 TEST(MoveGeneration, BishopMoves)
 {
-	std::vector<Move> movelist = std::vector<Move>();
+	std::array<Move, 150> movelist;
 	Board board = Board();
 	board.whiteBishopBitboard = 1;
 	board.whitePawnBitboard = 262144;
 	board.update();
 	board.nextColour = white;
-
-	generateBishopMoves(&board, movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0);
-	EXPECT_EQ(movelist.size(), 1);
+	int arraySize = generateBishopMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
+	EXPECT_EQ(arraySize, 1);
 	EXPECT_EQ(movelist[0].from, 0);
 	EXPECT_EQ(movelist[0].to, 9);
 	EXPECT_EQ(movelist[0].piece, bishop);
 	EXPECT_EQ(movelist[0].moveType, quietMove);
 
-	movelist = std::vector<Move>();
 	board = Board();
 	board.whiteBishopBitboard = 128;
 	board.whitePawnBitboard = 2097216;
 	board.update();
 	board.nextColour = white;
-
-	generateBishopMoves(&board, movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0);
-	EXPECT_EQ(movelist.size(), 1);
+	arraySize = generateBishopMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
+	EXPECT_EQ(arraySize, 1);
 	EXPECT_EQ(movelist[0].from, 7);
 	EXPECT_EQ(movelist[0].to, 14);
 	EXPECT_EQ(movelist[0].piece, bishop);
 	EXPECT_EQ(movelist[0].moveType, quietMove);
 
-	movelist = std::vector<Move>();
 	board = Board();
 	board.whiteBishopBitboard = 134217728;
 	board.whitePawnBitboard = 68720787456;
 	board.blackPawnBitboard = 17179869184;
 	board.update();
 	board.nextColour = white;
-
-	generateBishopMoves(&board, movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0);
-	EXPECT_EQ(movelist.size(), 1);
+	arraySize = generateBishopMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
+	EXPECT_EQ(arraySize, 1);
 	EXPECT_EQ(movelist[0].from, 27);
 	EXPECT_EQ(movelist[0].to, 34);
 	EXPECT_EQ(movelist[0].piece, bishop);
 	EXPECT_EQ(movelist[0].moveType, capture);
 
-	movelist = std::vector<Move>();
 	board = Board();
 	board.whiteBishopBitboard = 4;
 	board.whitePawnBitboard = 1536;
 	board.blackKnightBitboard = 1048576;
 	board.update();
 	board.nextColour = white;
-
-	generateBishopMoves(&board, movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0);
-	EXPECT_EQ(movelist.size(), 2);
+	arraySize = generateBishopMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
+	EXPECT_EQ(arraySize, 2);
 	if (movelist[0].to == 11)
 	{
 		EXPECT_EQ(movelist[1].from, 2);
@@ -285,73 +261,64 @@ TEST(MoveGeneration, BishopMoves)
 
 TEST(MoveGeneration, QueenMoves)
 {
-	std::vector<Move> movelist = std::vector<Move>();
+	std::array<Move, 150> movelist;
 	Board board = Board();
 	board.whiteQueenBitboard = 1;
 	board.whitePawnBitboard = 262402;
 	board.update();
 	board.nextColour = white;
-
-	generateQueenMoves(&board, movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0);
-	EXPECT_EQ(movelist.size(), 1);
+	int arraySize = generateQueenMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
+	EXPECT_EQ(arraySize, 1);
 	EXPECT_EQ(movelist[0].from, 0);
 	EXPECT_EQ(movelist[0].to, 9);
 	EXPECT_EQ(movelist[0].piece, queen);
 	EXPECT_EQ(movelist[0].moveType, quietMove);
 
-	movelist = std::vector<Move>();
 	board = Board();
 	board.whiteQueenBitboard = 128;
 	board.whitePawnBitboard = 2129984;
 	board.update();
 	board.nextColour = white;
-
-	generateQueenMoves(&board, movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0);
-	EXPECT_EQ(movelist.size(), 1);
+	arraySize = generateQueenMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
+	EXPECT_EQ(arraySize, 1);
 	EXPECT_EQ(movelist[0].from, 7);
 	EXPECT_EQ(movelist[0].to, 14);
 	EXPECT_EQ(movelist[0].piece, queen);
 	EXPECT_EQ(movelist[0].moveType, quietMove);
 
-	movelist = std::vector<Move>();
 	board = Board();
 	board.whiteQueenBitboard = 1;
 	board.whitePawnBitboard = 772;
 	board.update();
 	board.nextColour = white;
-
-	generateQueenMoves(&board, movelist, board.whitePieces, board.blackPieces ,0, ~0, ~0);
-	EXPECT_EQ(movelist.size(), 1);
+	arraySize = generateQueenMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
+	EXPECT_EQ(arraySize, 1);
 	EXPECT_EQ(movelist[0].from, 0);
 	EXPECT_EQ(movelist[0].to, 1);
 	EXPECT_EQ(movelist[0].piece, queen);
 	EXPECT_EQ(movelist[0].moveType, quietMove);
 
-	movelist = std::vector<Move>();
 	board = Board();
 	board.whiteQueenBitboard = 2097152;
 	board.whitePawnBitboard = 1615884288;
 	board.blackKnightBitboard = 268435456;
 	board.update();
 	board.nextColour = white;
-
-	generateQueenMoves(&board, movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0);
-	EXPECT_EQ(movelist.size(), 1);
+	arraySize = generateQueenMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
+	EXPECT_EQ(arraySize, 1);
 	EXPECT_EQ(movelist[0].from, 21);
 	EXPECT_EQ(movelist[0].to, 28);
 	EXPECT_EQ(movelist[0].piece, queen);
 	EXPECT_EQ(movelist[0].moveType, capture);
 
-	movelist = std::vector<Move>();
 	board = Board();
 	board.whiteQueenBitboard = 67108864;
 	board.whitePawnBitboard = 60264677376;
 	board.blackKnightBitboard = 16777216;
 	board.update();
 	board.nextColour = white;
-
-	generateQueenMoves(&board, movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0);
-	EXPECT_EQ(movelist.size(), 2);
+	arraySize = generateQueenMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
+	EXPECT_EQ(arraySize, 2);
 	if (movelist[0].to == 24)
 	{
 		EXPECT_EQ(movelist[0].from, 26);
@@ -368,16 +335,14 @@ TEST(MoveGeneration, QueenMoves)
 	}
 
 
-	movelist = std::vector<Move>();
 	board = Board();
 	board.whiteQueenBitboard = 4194304;
 	board.whitePawnBitboard = 3768623104;
 	board.blackKingBitboard = 64;
 	board.update();
 	board.nextColour = white;
-
-	generateQueenMoves(&board, movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0);
-	EXPECT_EQ(movelist.size(), 2);
+	arraySize = generateQueenMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
+	EXPECT_EQ(arraySize, 2);
 	if (movelist[0].to == 6)
 	{
 		EXPECT_EQ(movelist[0].from, 22);
@@ -392,62 +357,58 @@ TEST(MoveGeneration, QueenMoves)
 		EXPECT_EQ(movelist[1].piece, queen);
 		EXPECT_EQ(movelist[1].moveType, capture);
 	}
-
 }
 
 TEST(MoveGeneration, CastlingMoves)
 {
-	std::vector<Move> movelist = std::vector<Move>();
+	std::array<Move, 150> movelist;
 	Board board = Board();
 	board.whiteKingBitboard = 16;
 	board.whiteRookBitboard = 128;
 	board.canWhiteCastleKingSide = true;
 	board.update();
 	board.nextColour = white;
-	generateCastlingMoves(&board, movelist, board.whitePieces, board.blackPieces, 0);
-	EXPECT_EQ(movelist.size(), 1);
+	int arraySize = generateCastlingMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, 0);
+	EXPECT_EQ(arraySize, 1);
 	EXPECT_EQ(movelist[0].from, 4);
 	EXPECT_EQ(movelist[0].to, 6);
 	EXPECT_EQ(movelist[0].piece, king);
 	EXPECT_EQ(movelist[0].moveType, kingSideCastling);
 
-	movelist = std::vector<Move>();
 	board = Board();
 	board.whiteKingBitboard = 16;
 	board.whiteRookBitboard = 1;
 	board.canWhiteCastleQueenSide = true;
 	board.update();
 	board.nextColour = white;
-	generateCastlingMoves(&board, movelist, board.whitePieces, board.blackPieces, 0);
-	EXPECT_EQ(movelist.size(), 1);
+	arraySize = generateCastlingMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, 0);
+	EXPECT_EQ(arraySize, 1);
 	EXPECT_EQ(movelist[0].from, 4);
 	EXPECT_EQ(movelist[0].to, 2);
 	EXPECT_EQ(movelist[0].piece, king);
 	EXPECT_EQ(movelist[0].moveType, queenSideCastling);
 
-	movelist = std::vector<Move>();
 	board = Board();
 	board.blackKingBitboard = 1152921504606846976;
 	board.blackRookBitboard = 9223372036854775808;
 	board.canBlackCastleKingSide = true;
 	board.update();
 	board.nextColour = black;
-	generateCastlingMoves(&board, movelist, board.whitePieces, board.blackPieces, 0);
-	EXPECT_EQ(movelist.size(), 1);
+	arraySize = generateCastlingMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, 0);
+	EXPECT_EQ(arraySize, 1);
 	EXPECT_EQ(movelist[0].from, 60);
 	EXPECT_EQ(movelist[0].to, 62);
 	EXPECT_EQ(movelist[0].piece, king);
 	EXPECT_EQ(movelist[0].moveType, kingSideCastling);
 
-	movelist = std::vector<Move>();
 	board = Board();
 	board.blackKingBitboard = 1152921504606846976;
 	board.blackRookBitboard = 72057594037927936;
 	board.canBlackCastleQueenSide = true;
 	board.update();
 	board.nextColour = black;
-	generateCastlingMoves(&board, movelist, board.whitePieces, board.blackPieces, 0);
-	EXPECT_EQ(movelist.size(), 1);
+	arraySize = generateCastlingMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, 0);
+	EXPECT_EQ(arraySize, 1);
 	EXPECT_EQ(movelist[0].from, 60);
 	EXPECT_EQ(movelist[0].to, 58);
 	EXPECT_EQ(movelist[0].piece, king);
@@ -456,31 +417,21 @@ TEST(MoveGeneration, CastlingMoves)
 
 uint64_t perft(int depth, Board* board, int divide)
 {
-	std::vector<Move> moveList;
+	std::array<Move,150> moveList;
 
-	moveList = searchForMoves(board);
+	int arraySize = searchForMoves(board,&moveList);
 	int perftVal;
 	uint64_t nodes = 0;
 
 	if (depth == 0) return 1;
 
-	for (int x = 0; x < moveList.size(); x++)
+	for (int x = 0; x < arraySize; x++)
 	{
-		Board newBoard = moveList[x].applyMove(board);
-		if (board->nextColour == white)
-		{
-
-			perftVal = perft(depth - 1, &newBoard, divide);
-			nodes += perftVal;
-			if (depth == divide) std::cout << notationFromMove(moveList[x]) << " " << perftVal << "\n";
-
-		}
-		else
-		{
-			perftVal = perft(depth - 1, &newBoard, divide);
-			nodes += perftVal;
-			if (depth == divide) std::cout << notationFromMove(moveList[x]) << " " << perftVal << "\n";
-		}
+		moveList[x].applyMove(board);
+		perftVal = perft(depth - 1, board, divide);
+		nodes += perftVal;
+		if (depth == divide) std::cout << notationFromMove(moveList[x]) << " " << perftVal << "\n";
+		moveList[x].undoMove(board);
 	}
 	return nodes;
 }
@@ -488,6 +439,11 @@ uint64_t perft(int depth, Board* board, int divide)
 TEST(MoveGeneration, Perft)
 {
 	Board board;
+	
+	//time_t startTime = time(0);
+	//board.defaults();
+	//perft(6, &board, -1);
+	//std::cout << (uint64_t)((119060324) / difftime(time(NULL), startTime)) << "\n";
 	
 	board.defaults();
 	EXPECT_EQ(perft(0, &board, -1), 1);

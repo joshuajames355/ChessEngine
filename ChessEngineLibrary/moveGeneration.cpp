@@ -3,11 +3,11 @@
 uint64_t knightMovesArray[64];
 uint64_t kingMovesArray[64];
 
-std::vector<Move> searchForMoves(Board * board)
+int searchForMoves(Board * board, std::array<Move,150>* moveList)
 {
-	std::vector<Move> moveList;
+	int arraySize = 0;
+
 	magicBitboards magicData;
-	moveList.reserve(150);
 
 	uint64_t friendlyPieces, enemyPieces;
 	if (board->nextColour == white)
@@ -27,8 +27,20 @@ std::vector<Move> searchForMoves(Board * board)
 	uint64_t kingDangerSquares = generateAttackSet(board, switchColour(board->nextColour), board->allPieces & ~board->findBitboard(board->nextColour, king));
 	uint64_t pinnedPieces = getPinnedPieces(board);
 
-	uint64_t kingAttackers = getAttackers(board, board->nextColour, board->findBitboard(board->nextColour, king));
-	int numOfKingAttackers = bitSum(kingAttackers);
+	uint64_t kingAttackers;
+	int numOfKingAttackers;
+
+	//If in check
+	if (kingDangerSquares & board->findBitboard(board->nextColour, king))
+	{
+		kingAttackers = getAttackers(board, board->nextColour, board->findBitboard(board->nextColour, king));
+		numOfKingAttackers = bitSum(kingAttackers);
+	}
+	else
+	{
+		kingAttackers = 0;
+		numOfKingAttackers = 0;
+	}
 
 	if (numOfKingAttackers == 1)
 	{
@@ -44,24 +56,22 @@ std::vector<Move> searchForMoves(Board * board)
 			pushMask = 0;
 		}
 	}
-	if(numOfKingAttackers > 1) generateKingMoves(board, moveList, friendlyPieces, enemyPieces, kingDangerSquares);
+	if(numOfKingAttackers > 1) arraySize = generateKingMoves(board, moveList, friendlyPieces, enemyPieces, kingDangerSquares, arraySize);
 	else 
 	{
-		generatePawnMoves(board, moveList, pinnedPieces, pushMask, captureMask);
-		generateKingMoves(board, moveList, friendlyPieces, enemyPieces, kingDangerSquares);
-		generateKnightMoves(board, moveList, friendlyPieces, enemyPieces, pinnedPieces, pushMask, captureMask);
-		generateRookMoves(board, moveList, friendlyPieces, enemyPieces, pinnedPieces, pushMask, captureMask);
-		generateBishopMoves(board, moveList, friendlyPieces, enemyPieces, pinnedPieces, pushMask, captureMask);
-		generateQueenMoves(board, moveList, friendlyPieces, enemyPieces, pinnedPieces, pushMask, captureMask);
-		generateCastlingMoves(board, moveList, friendlyPieces, enemyPieces, kingDangerSquares);
+		arraySize = generatePawnMoves(board, moveList, pinnedPieces, pushMask, captureMask, arraySize);
+		arraySize = generateKingMoves(board, moveList, friendlyPieces, enemyPieces, kingDangerSquares, arraySize);
+		arraySize = generateKnightMoves(board, moveList, friendlyPieces, enemyPieces, pinnedPieces, pushMask, captureMask, arraySize);
+		arraySize = generateRookMoves(board, moveList, friendlyPieces, enemyPieces, pinnedPieces, pushMask, captureMask, arraySize);
+		arraySize = generateBishopMoves(board, moveList, friendlyPieces, enemyPieces, pinnedPieces, pushMask, captureMask, arraySize);
+		arraySize = generateQueenMoves(board, moveList, friendlyPieces, enemyPieces, pinnedPieces, pushMask, captureMask, arraySize);
+		arraySize = generateCastlingMoves(board, moveList, friendlyPieces, enemyPieces, kingDangerSquares, arraySize);
 	}
 
-	moveList.shrink_to_fit();
-
-	return moveList;
+	return arraySize;
 }
 
-void generatePawnMoves(Board* board, std::vector<Move>& Movelist, uint64_t pinnedPieces, uint64_t pushMask, uint64_t captureMask)
+int generatePawnMoves(Board* board, std::array<Move,150>* Movelist, uint64_t pinnedPieces, uint64_t pushMask, uint64_t captureMask, int arraySize)
 {
 	uint64_t pawnPos, pawnMoves, pawnAttacks, pawnDoubleMoves, legalMoves;
 	if (board->nextColour == white)
@@ -95,10 +105,11 @@ void generatePawnMoves(Board* board, std::vector<Move>& Movelist, uint64_t pinne
 			while (pawnDoubleMoves)
 			{
 				uint64_t currentMove = pop(pawnDoubleMoves);
-				Movelist.push_back(Move(pawnPosIndex, bitScanForward(currentMove), pawnDoubleMove , pawn, board));
+				(*Movelist)[arraySize] = Move(pawnPosIndex, bitScanForward(currentMove), pawnDoubleMove , pawn, board);
+				arraySize++;
 			}
 
-			addPawnMoves(pawnPosIndex, pawnMoves, pawnAttacks, board, Movelist);
+			arraySize = addPawnMoves(pawnPosIndex, pawnMoves, pawnAttacks, board, Movelist, arraySize);
 		}
 	}
 	else //Colour is black
@@ -134,15 +145,17 @@ void generatePawnMoves(Board* board, std::vector<Move>& Movelist, uint64_t pinne
 			while (pawnDoubleMoves)
 			{
 				uint64_t currentMove = pop(pawnDoubleMoves);
-				Movelist.push_back(Move(pawnPosIndex, bitScanForward(currentMove), pawnDoubleMove, pawn, board));
+				(*Movelist)[arraySize] = Move(pawnPosIndex, bitScanForward(currentMove), pawnDoubleMove, pawn, board);
+				arraySize++;
 			}
 
-			addPawnMoves(pawnPosIndex, pawnMoves, pawnAttacks, board, Movelist);
+			arraySize = addPawnMoves(pawnPosIndex, pawnMoves, pawnAttacks, board, Movelist, arraySize);
 		}
 	}
+	return arraySize;
 }
 
-void generateKingMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, uint64_t kingDangerSquares)
+int generateKingMoves(Board * board, std::array<Move, 150>* Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, uint64_t kingDangerSquares, int arraySize)
 {
 	uint64_t kingBitboard;
 	if (board->nextColour == white)
@@ -164,12 +177,13 @@ void generateKingMoves(Board * board, std::vector<Move>& Movelist, uint64_t frie
 		while (moves)
 		{
 			uint64_t kingPos = pop(moves);
-			addMoves(kingPosIndex, bitScanForward(kingPos), king, Movelist, enemyPieces, board);
+			arraySize = addMoves(kingPosIndex, bitScanForward(kingPos), king, Movelist, enemyPieces, board, arraySize);
 		}
 	}
+	return arraySize;
 }
 
-void generateKnightMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, uint64_t pinnedPieces, uint64_t pushMask, uint64_t captureMask)
+int generateKnightMoves(Board * board, std::array<Move, 150>* Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, uint64_t pinnedPieces, uint64_t pushMask, uint64_t captureMask, int arraySize)
 {
 	uint64_t legalMoves;
 	//Gets the knight bitboard , filtering out pieces that cannot move due to being pinned
@@ -178,21 +192,23 @@ void generateKnightMoves(Board * board, std::vector<Move>& Movelist, uint64_t fr
     while(knightBitboard)
     {
         uint64_t currentKnight = pop(knightBitboard);
-		uint64_t moveBitboard = knightMovesArray[bitScanForward(currentKnight)] & ~friendlyPieces;
+		int knightPosIndex = bitScanForward(currentKnight);
+
+		uint64_t moveBitboard = knightMovesArray[knightPosIndex] & ~friendlyPieces;
               
 		//Filters out invalid moves while in check
 		moveBitboard &= (pushMask | captureMask);
 
-	    int knightPosIndex = bitScanForward(currentKnight);
     	while (moveBitboard)
 	    {
-	       	uint64_t knightPos = pop(moveBitboard);
-	    	addMoves(knightPosIndex, bitScanForward(knightPos), knight, Movelist, enemyPieces, board);
+	       	uint64_t knightMove = pop(moveBitboard);
+	    	arraySize = addMoves(knightPosIndex, bitScanForward(knightMove), knight, Movelist, enemyPieces, board, arraySize);
     	}
     }
+	return arraySize;
 }
 
-void generateRookMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, uint64_t pinnedPieces, uint64_t pushMask, uint64_t captureMask)
+int generateRookMoves(Board * board, std::array<Move, 150>* Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, uint64_t pinnedPieces, uint64_t pushMask, uint64_t captureMask, int arraySize)
 {
 	uint64_t rookBitboard, legalMoves;
 	if (board->nextColour == white)
@@ -219,12 +235,13 @@ void generateRookMoves(Board * board, std::vector<Move>& Movelist, uint64_t frie
 		while (moves)
 		{
 			uint64_t rookPos = pop(moves);
-			addMoves(currentPos, bitScanForward(rookPos), rook, Movelist, enemyPieces, board);
+			arraySize = addMoves(currentPos, bitScanForward(rookPos), rook, Movelist, enemyPieces, board, arraySize);
 		}
 	}
+	return arraySize;
 }
 
-void generateBishopMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, uint64_t pinnedPieces, uint64_t pushMask, uint64_t captureMask)
+int generateBishopMoves(Board * board, std::array<Move, 150>* Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, uint64_t pinnedPieces, uint64_t pushMask, uint64_t captureMask, int arraySize)
 {
 	uint64_t bishopBitboard, legalMoves;
 	if (board->nextColour == white)
@@ -251,12 +268,13 @@ void generateBishopMoves(Board * board, std::vector<Move>& Movelist, uint64_t fr
 		while (moves)
 		{
 			uint64_t bishopPos = pop(moves);
-			addMoves(currentPos, bitScanForward(bishopPos), bishop, Movelist, enemyPieces, board);
+			arraySize = addMoves(currentPos, bitScanForward(bishopPos), bishop, Movelist, enemyPieces, board, arraySize);
 		}
 	}
+	return arraySize;
 }
 
-void generateQueenMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, uint64_t pinnedPieces, uint64_t pushMask, uint64_t captureMask)
+int generateQueenMoves(Board * board, std::array<Move,150>* Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, uint64_t pinnedPieces, uint64_t pushMask, uint64_t captureMask, int arraySize)
 {
 	uint64_t queenBitboard, legalMoves;
 	if (board->nextColour == white)
@@ -290,38 +308,56 @@ void generateQueenMoves(Board * board, std::vector<Move>& Movelist, uint64_t fri
 		while (moves)
 		{
 			uint64_t queenPos = pop(moves);
-			addMoves(currentPos, bitScanForward(queenPos), queen, Movelist, enemyPieces, board);
+			arraySize = addMoves(currentPos, bitScanForward(queenPos), queen, Movelist, enemyPieces, board,arraySize);
 		}
 	}
+	return arraySize;
 }
 
-void generateCastlingMoves(Board * board, std::vector<Move>& Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, uint64_t kingDangerSquares)
+int generateCastlingMoves(Board * board, std::array<Move,150>* Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, uint64_t kingDangerSquares, int arraySize)
 {
 	if (board->nextColour == white)
 	{
 		if (board->canWhiteCastleKingSide && (board->allPieces & 96) == 0)//Kingside castling
 		{
-			if((112 & kingDangerSquares) == 0) Movelist.push_back(Move(4, 6, kingSideCastling, king, board));
+			if ((112 & kingDangerSquares) == 0)
+			{
+				(*Movelist)[arraySize] = Move(4, 6, kingSideCastling, king, board);
+				arraySize++;
+			}
 		}
 		if(board->canWhiteCastleQueenSide && (board->allPieces & 14) == 0)//Queenside castling
 		{
-			if ((28 & kingDangerSquares) == 0) Movelist.push_back(Move(4, 2, queenSideCastling, king, board));
+			if ((28 & kingDangerSquares) == 0)
+			{
+				(*Movelist)[arraySize] = Move(4, 2, queenSideCastling, king, board);
+				arraySize++;
+			}
 		}
 	}
 	else
 	{
 		if (board->canBlackCastleKingSide && (board->allPieces & 6917529027641081856) == 0)//Kingside castling
 		{
-			if ((8070450532247928832 & kingDangerSquares) == 0) Movelist.push_back(Move(60, 62, kingSideCastling, king, board));
+			if ((8070450532247928832 & kingDangerSquares) == 0)
+			{
+				(*Movelist)[arraySize] = Move(60, 62, kingSideCastling, king, board);
+				arraySize++;
+			}
 		}
 		if (board->canBlackCastleQueenSide && (board->allPieces & 1008806316530991104) == 0)//Queenside castling
 		{
-			if ((2017612633061982208 & kingDangerSquares) == 0) Movelist.push_back(Move(60, 58, queenSideCastling, king, board));
+			if ((2017612633061982208 & kingDangerSquares) == 0)
+			{
+				(*Movelist)[arraySize] = Move(60, 58, queenSideCastling, king, board);
+				arraySize++;
+			}
 		}
 	}
+	return arraySize;
 }
 
-void addPawnMoves(int start, uint64_t quietMoves, uint64_t captureMoves, Board* board, std::vector<Move>& Movelist)
+int addPawnMoves(int start, uint64_t quietMoves, uint64_t captureMoves, Board* board, std::array<Move,150>* Movelist, int arraySize)
 {
 	uint64_t currentMove;
 	int currentPos;
@@ -332,14 +368,16 @@ void addPawnMoves(int start, uint64_t quietMoves, uint64_t captureMoves, Board* 
 		//Pawn promotion
 		if ((board->nextColour == white && currentMove & rank8) || (board->nextColour == black && currentMove & rank1))
 		{
-			Movelist.push_back(Move(start, currentPos, rookPromotion, pawn, board));
-			Movelist.push_back(Move(start, currentPos, knightPromotion, pawn, board));
-			Movelist.push_back(Move(start, currentPos, queenPromotion, pawn, board));
-			Movelist.push_back(Move(start, currentPos, bishopPromotion, pawn, board));
+			(*Movelist)[arraySize] = Move(start, currentPos, rookPromotion, pawn, board);
+			(*Movelist)[arraySize + 1] = Move(start, currentPos, knightPromotion, pawn, board);
+			(*Movelist)[arraySize + 2] = Move(start, currentPos, queenPromotion, pawn, board);
+			(*Movelist)[arraySize + 3] = Move(start, currentPos, bishopPromotion, pawn, board);
+			arraySize += 4;
 		}
 		else
 		{
-			Movelist.push_back(Move(start, currentPos, quietMove, pawn, board));
+			(*Movelist)[arraySize] = Move(start, currentPos, quietMove, pawn, board);
+			arraySize++;
 		}
 	}
 	while (captureMoves)
@@ -349,28 +387,34 @@ void addPawnMoves(int start, uint64_t quietMoves, uint64_t captureMoves, Board* 
 		//Pawn promotion
 		if ((board->nextColour == white && currentMove & rank8) || (board->nextColour == black && currentMove & rank1))
 		{
-			Movelist.push_back(Move(start, currentPos, rookPromotion, pawn, board));
-			Movelist.push_back(Move(start, currentPos, knightPromotion, pawn, board));
-			Movelist.push_back(Move(start, currentPos, queenPromotion, pawn, board));
-			Movelist.push_back(Move(start, currentPos, bishopPromotion, pawn, board));
+			(*Movelist)[arraySize] = Move(start, currentPos, rookPromotion, pawn, board);
+			(*Movelist)[arraySize + 1] = Move(start, currentPos, knightPromotion, pawn, board);
+			(*Movelist)[arraySize + 2] = Move(start, currentPos, queenPromotion, pawn, board);
+			(*Movelist)[arraySize + 3] = Move(start, currentPos, bishopPromotion, pawn, board);
+			arraySize += 4;
 		}
 		else
 		{
-			Movelist.push_back(Move(start, currentPos, capture, pawn, board));
+			(*Movelist)[arraySize] = Move(start, currentPos, capture, pawn, board);
+			arraySize++;
 		}
 	}
+	return arraySize;
 }
 
-void addMoves(int start, int end, pieceType piece, std::vector<Move>& Movelist, uint64_t enemyPieces, Board* board)
+int addMoves(int start, int end, pieceType piece, std::array<Move,150>* Movelist, uint64_t enemyPieces, Board* board, int arraySize)
 {
 	if ((((uint64_t)1 << end) & enemyPieces )!= 0) //If the move is a capture
 	{
-		Movelist.push_back(Move(start, end, capture, piece, board));
+		(*Movelist)[arraySize] = Move(start, end, capture, piece, board);
+		arraySize++;
 	}
 	else
 	{
-		Movelist.push_back(Move(start, end, quietMove, piece, board));
+		(*Movelist)[arraySize] = Move(start, end, quietMove, piece, board);
+		arraySize++;
 	}
+	return arraySize;
 }
 
 uint64_t generateAttackSet(Board * board, colours colour, uint64_t allPieces)

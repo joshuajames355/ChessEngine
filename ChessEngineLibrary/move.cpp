@@ -10,34 +10,48 @@ Move::Move(int newFrom, int newTo, MoveType newMoveType, pieceType newPieceType,
 	to = newTo;
 	from = newFrom;
 	piece = newPieceType;
-	//Removed captured piece from hash
+
 	if (board->allPieces & (uint64_t)1 << to)
 	{
 		capturedPiece = board->getPieceTypeInSquare((uint64_t)1 << to);
 	}
+	else
+	{
+		capturedPiece = blank;
+	}
+
+	canBlackCastleQueenSide = board->canBlackCastleQueenSide;
+	canBlackCastleKingSide = board->canBlackCastleKingSide;
+	canWhiteCastleQueenSide = board->canWhiteCastleQueenSide;
+	canWhiteCastleKingSide = board->canWhiteCastleKingSide;
+	enPassantSquare = board->enPassantSquare;
+	hash = board->zorbistKey;
 }
 
-Board Move::applyMove(Board * board)
+void Move::applyMove(Board * board)
 {
-	Board newBoard = *board;
-	newBoard.enPassantSquare = -1;
-	newBoard.nextColour = switchColour(newBoard.nextColour);
+	updateCastlingRights(board, this);
 
-	updateCastlingRights(&newBoard, this);
+	colours opponentColour = switchColour(board->nextColour);
 
 	//Removes en passant file from hash.
 	if (board->enPassantSquare != -1)
 	{
-		newBoard.zorbistKey ^= ZorbistKeys::enPassantKeys[board->enPassantSquare % 8];
+		board->zorbistKey ^= ZorbistKeys::enPassantKeys[board->enPassantSquare % 8];
+	}
+
+	if (moveType != capture)
+	{
+		board->enPassantSquare = -1;
 	}
 
 	//Removes moved piece from hash.
-	newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[from][piece + 6 * board->nextColour];
+	board->zorbistKey ^= ZorbistKeys::pieceKeys[from][piece + 6 * board->nextColour];
 
 	//Removed captured piece from hash
 	if (board->allPieces & (uint64_t)1 << to)
 	{
-		newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[to][capturedPiece + 6 * newBoard.nextColour];
+		board -> zorbistKey ^= ZorbistKeys::pieceKeys[to][capturedPiece + 6 * opponentColour];
 	}
 
 	switch (moveType)
@@ -45,12 +59,12 @@ Board Move::applyMove(Board * board)
 	case quietMove:
 	{
 		//Moves the piece
-		uint64_t bitboard = newBoard.findBitboard(board->nextColour, piece);
+		uint64_t bitboard = board->findBitboard(board->nextColour, piece);
 		bitboard = (bitboard & ~((uint64_t)1 << from)) | ((uint64_t)1 << to);
-		newBoard.setBitboard(board->nextColour, piece, bitboard);
+		board->setBitboard(board->nextColour, piece, bitboard);
 
 		//Adds moved piece to hash
-		newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[to][piece + 6 * board->nextColour];
+		board->zorbistKey ^= ZorbistKeys::pieceKeys[to][piece + 6 * board->nextColour];
 	}
 	break;
 	case capture:
@@ -60,176 +74,177 @@ Board Move::applyMove(Board * board)
 			//Removes the captued piece under en passent
 			if (board->nextColour == white)
 			{
-				newBoard.removePiece((uint64_t)1 << (to - 8));
-				newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[to - 8][pawn + 6 * newBoard.nextColour];
+				board->removePiece((uint64_t)1 << (to - 8));
+				board->zorbistKey ^= ZorbistKeys::pieceKeys[to - 8][pawn + 6 * opponentColour];
 			}
 			else
 			{
-				newBoard.removePiece((uint64_t)1 << (to + 8));
-				newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[to + 8][pawn + 6 * newBoard.nextColour];
+				board->removePiece((uint64_t)1 << (to + 8));
+				board->zorbistKey ^= ZorbistKeys::pieceKeys[to + 8][pawn + 6 * opponentColour];
 			}
 		}
 		else
 		{
 			//Removes the captued piece
-			newBoard.removePiece((uint64_t)1 << to);
+			board->removePiece((uint64_t)1 << to);
 		}
 
 		//Moves the piece
-		uint64_t bitboard = newBoard.findBitboard(board->nextColour, piece);
+		uint64_t bitboard = board->findBitboard(board->nextColour, piece);
 		bitboard = (bitboard & ~((uint64_t)1 << from)) | ((uint64_t)1 << to);
-		newBoard.setBitboard(board->nextColour, piece, bitboard);
+		board->setBitboard(board->nextColour, piece, bitboard);
 
 		//Adds moved piece to hash
-		newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[to][piece + 6 * board->nextColour];
+		board->zorbistKey ^= ZorbistKeys::pieceKeys[to][piece + 6 * board->nextColour];
+
+		board->enPassantSquare = -1;
 	}
 	break;
 	case knightPromotion:
 	{
 		//Removes the captued piece
-		newBoard.removePiece((uint64_t)1 << to);
+		board->removePiece((uint64_t)1 << to);
 
 		//Removes the moved Piece
-		newBoard.removePiece((uint64_t)1 << from); 
+		board->removePiece((uint64_t)1 << from);
 
 		//Creates the promoted piece
-		uint64_t bitboard = newBoard.findBitboard(board->nextColour, knight);
+		uint64_t bitboard = board->findBitboard(board->nextColour, knight);
 		bitboard |= ((uint64_t)1 << to);
-		newBoard.setBitboard(board->nextColour, knight, bitboard);
+		board->setBitboard(board->nextColour, knight, bitboard);
 
 		//Adds promoted piece to hash
-		newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[to][knight + 6 * board->nextColour];
+		board->zorbistKey ^= ZorbistKeys::pieceKeys[to][knight + 6 * board->nextColour];
 	}
 	break;
 	case bishopPromotion:
 	{
 		//Removes the captued piece
-		newBoard.removePiece((uint64_t)1 << to);
+		board->removePiece((uint64_t)1 << to);
 
 		//Removes the moved Piece
-		newBoard.removePiece((uint64_t)1 << from); 
+		board->removePiece((uint64_t)1 << from);
 
 		//Creates the promoted piece
-		uint64_t bitboard = newBoard.findBitboard(board->nextColour, bishop);
+		uint64_t bitboard = board->findBitboard(board->nextColour, bishop);
 		bitboard |= ((uint64_t)1 << to);
-		newBoard.setBitboard(board->nextColour, bishop, bitboard);
+		board->setBitboard(board->nextColour, bishop, bitboard);
 
 		//Adds promoted piece to hash
-		newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[to][bishop + 6 * board->nextColour];
+		board->zorbistKey ^= ZorbistKeys::pieceKeys[to][bishop + 6 * board->nextColour];
 	}
 	break;
 	case rookPromotion:
 	{
 		//Removes the captued piece
-		newBoard.removePiece((uint64_t)1 << to);
+		board->removePiece((uint64_t)1 << to);
 
 		//Removes the moved Piece
-		newBoard.removePiece((uint64_t)1 << from); 
+		board->removePiece((uint64_t)1 << from);
 
 		//Creates the promoted piece
-		uint64_t bitboard = newBoard.findBitboard(board->nextColour, rook);
+		uint64_t bitboard = board->findBitboard(board->nextColour, rook);
 		bitboard |= ((uint64_t)1 << to);
-		newBoard.setBitboard(board->nextColour, rook, bitboard);
+		board->setBitboard(board->nextColour, rook, bitboard);
 
 		//Adds promoted piece to hash
-		newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[to][rook + 6 * board->nextColour];
+		board->zorbistKey ^= ZorbistKeys::pieceKeys[to][rook + 6 * board->nextColour];
 	}
 	break;
 	case queenPromotion:
 	{
 		//Removes the captued piece
-		newBoard.removePiece((uint64_t)1 << to);
+		board->removePiece((uint64_t)1 << to);
 
 		//Removes the moved Piece
-		newBoard.removePiece((uint64_t)1 << from); 
+		board->removePiece((uint64_t)1 << from);
 
 		//Creates the promoted piece
-		uint64_t bitboard = newBoard.findBitboard(board->nextColour, queen);
+		uint64_t bitboard = board->findBitboard(board->nextColour, queen);
 		bitboard |= ((uint64_t)1 << to);
-		newBoard.setBitboard(board->nextColour, queen, bitboard);
+		board->setBitboard(board->nextColour, queen, bitboard);
 
 		//Adds promoted piece to hash
-		newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[to][queen + 6 * board->nextColour];
+		board->zorbistKey ^= ZorbistKeys::pieceKeys[to][queen + 6 * board->nextColour];
 	}
 	break;
 	case pawnDoubleMove:
 	{
 		//Moves the piece
-		uint64_t bitboard = newBoard.findBitboard(board->nextColour, piece);
+		uint64_t bitboard = board->findBitboard(board->nextColour, piece);
 		bitboard = (bitboard & ~((uint64_t)1 << from)) | ((uint64_t)1 << to);
-		newBoard.setBitboard(board->nextColour, piece, bitboard);
+		board->setBitboard(board->nextColour, piece, bitboard);
 
 		//Sets En passant target square and hash.
 		if (board->nextColour == white)
 		{
-			newBoard.enPassantSquare = to - 8;
-			newBoard.zorbistKey ^= ZorbistKeys::enPassantKeys[newBoard.enPassantSquare % 8];
+			board->enPassantSquare = to - 8;
+			board->zorbistKey ^= ZorbistKeys::enPassantKeys[board->enPassantSquare % 8];
 		}
 		else
 		{
-			newBoard.enPassantSquare = to + 8;
-			newBoard.zorbistKey ^= ZorbistKeys::enPassantKeys[newBoard.enPassantSquare % 8];
+			board->enPassantSquare = to + 8;
+			board->zorbistKey ^= ZorbistKeys::enPassantKeys[board->enPassantSquare % 8];
 		}
 
 		//Adds moved piece to hash
-		newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[to][piece + 6 * board->nextColour];
+		board->zorbistKey ^= ZorbistKeys::pieceKeys[to][piece + 6 * board->nextColour];
 	}
 	break;
 	case kingSideCastling:
 	{
 		//Moves the king
-		uint64_t bitboard = newBoard.findBitboard(board->nextColour, piece);
+		uint64_t bitboard = board->findBitboard(board->nextColour, piece);
 		bitboard = (bitboard & ~((uint64_t)1 << from)) | ((uint64_t)1 << to);
-		newBoard.setBitboard(board->nextColour, piece, bitboard);
+		board->setBitboard(board->nextColour, piece, bitboard);
 		if (board->nextColour == white)
 		{
-			newBoard.whiteRookBitboard = (newBoard.whiteRookBitboard & ~128) | 32; //Moves the rook
+			board->whiteRookBitboard = (board->whiteRookBitboard & ~128) | 32; //Moves the rook
 
 			//Updates hash for rook
-			newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[7][rook + 6 * board->nextColour];
-			newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[5][rook + 6 * board->nextColour];
+			board->zorbistKey ^= ZorbistKeys::pieceKeys[7][rook + 6 * board->nextColour];
+			board->zorbistKey ^= ZorbistKeys::pieceKeys[5][rook + 6 * board->nextColour];
 		}
 		else
 		{
-			newBoard.blackRookBitboard = (newBoard.blackRookBitboard & ~9223372036854775808) | 2305843009213693952; //Moves the rook
+			board->blackRookBitboard = (board->blackRookBitboard & ~9223372036854775808) | 2305843009213693952; //Moves the rook
 
 			//Updates hash for rook
-			newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[63][rook + 6 * board->nextColour];
-			newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[61][rook + 6 * board->nextColour];
+			board->zorbistKey ^= ZorbistKeys::pieceKeys[63][rook + 6 * board->nextColour];
+			board->zorbistKey ^= ZorbistKeys::pieceKeys[61][rook + 6 * board->nextColour];
 		}
 
 		//Adds moved piece to hash
-		newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[to][piece + 6 * board->nextColour];
+		board->zorbistKey ^= ZorbistKeys::pieceKeys[to][piece + 6 * board->nextColour];
 	}
 	break;
 	case queenSideCastling:
 	{
 		//Moves the king
-		uint64_t bitboard = newBoard.findBitboard(board->nextColour, piece);
+		uint64_t bitboard = board->findBitboard(board->nextColour, piece);
 		bitboard = (bitboard & ~((uint64_t)1 << from)) | ((uint64_t)1 << to);
-		newBoard.setBitboard(board->nextColour, piece, bitboard);
+		board->setBitboard(board->nextColour, piece, bitboard);
 		if (board->nextColour == white)
 		{
-			newBoard.whiteRookBitboard = (newBoard.whiteRookBitboard & ~1) | 8; //Moves the rook
+			board->whiteRookBitboard = (board->whiteRookBitboard & ~1) | 8; //Moves the rook
 
 			//Updates hash for rook
-			newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[0][rook + 6 * board->nextColour];
-			newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[3][rook + 6 * board->nextColour];
+			board->zorbistKey ^= ZorbistKeys::pieceKeys[0][rook + 6 * board->nextColour];
+			board->zorbistKey ^= ZorbistKeys::pieceKeys[3][rook + 6 * board->nextColour];
 		}
 		else
 		{
-			newBoard.blackRookBitboard = (newBoard.blackRookBitboard & ~72057594037927936) | 576460752303423488; //Moves the rook
+			board->blackRookBitboard = (board->blackRookBitboard & ~72057594037927936) | 576460752303423488; //Moves the rook
 
 			//Updates hash for rook
-			newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[56][rook + 6 * board->nextColour];
-			newBoard.zorbistKey ^= ZorbistKeys::pieceKeys[59][rook + 6 * board->nextColour];
+			board->zorbistKey ^= ZorbistKeys::pieceKeys[56][rook + 6 * board->nextColour];
+			board->zorbistKey ^= ZorbistKeys::pieceKeys[59][rook + 6 * board->nextColour];
 		}
 	}
 	break;
 	}
-
-	newBoard.update();
-	return newBoard;
+	board->nextColour = switchColour(board->nextColour);
+	board->update();
 }
 
 //Updates castling rights and the zorbist hash keys for castling rights.
@@ -237,7 +252,7 @@ void updateCastlingRights(Board * newBoard, Move * move)
 {
 	if (move->piece == king)
 	{
-		if (newBoard->nextColour == black)
+		if (newBoard->nextColour == white)
 		{
 			if(newBoard->canWhiteCastleKingSide)
 			{
@@ -266,7 +281,7 @@ void updateCastlingRights(Board * newBoard, Move * move)
 	}
 	else if (move->piece == rook)
 	{
-		if (newBoard->nextColour == black)
+		if (newBoard->nextColour == white)
 		{
 			if (newBoard->canWhiteCastleQueenSide && move->from == 0)
 			{
@@ -335,4 +350,157 @@ void updateCastlingRights(Board * newBoard, Move * move)
 			}
 		}
 	}
+}
+
+void Move::undoMove(Board * board)
+{
+	colours opponentColour = board->nextColour;
+	board->nextColour = switchColour(board->nextColour);
+
+	board->canBlackCastleQueenSide = canBlackCastleQueenSide;
+	board->canBlackCastleKingSide = canBlackCastleKingSide;
+	board->canWhiteCastleQueenSide = canWhiteCastleQueenSide;
+	board->canWhiteCastleKingSide = canWhiteCastleKingSide;
+	board->zorbistKey = hash;
+	board->enPassantSquare = enPassantSquare;
+
+	switch (moveType)
+	{
+	case quietMove:
+	{
+		//Moves the piece
+		uint64_t bitboard = board->findBitboard(board->nextColour, piece);
+		bitboard = (bitboard & ~((uint64_t)1 << to)) | ((uint64_t)1 << from);
+		board->setBitboard(board->nextColour, piece, bitboard);
+	}
+	break;
+	case capture:
+	{
+		if (board->enPassantSquare == to)
+		{
+			//Adds the captured piece under en passent
+			if (board->nextColour == white)
+			{
+				board->setBitboard(opponentColour, pawn, board->findBitboard(opponentColour, pawn) | ((uint64_t)1 << (to - 8)));
+			}
+			else
+			{
+				board->setBitboard(opponentColour, pawn, board->findBitboard(opponentColour, pawn) | ((uint64_t)1 << (to + 8)));
+			}
+		}
+		else
+		{
+			//Adds the captured piece
+			board->setBitboard(opponentColour, capturedPiece, board->findBitboard(opponentColour, capturedPiece) | ((uint64_t)1 << to ));
+		}
+
+		//Moves the piece
+		uint64_t bitboard = board->findBitboard(board->nextColour, piece);
+		bitboard = (bitboard & ~((uint64_t)1 << to)) | ((uint64_t)1 << from);
+		board->setBitboard(board->nextColour, piece, bitboard);
+	}
+	break;
+	case knightPromotion:
+	{
+		//Adds the captued piece
+		if(capturedPiece != blank)
+			board->setBitboard(opponentColour, capturedPiece, board->findBitboard(opponentColour, capturedPiece) | ((uint64_t)1 << to));
+
+		//Adds the moved Piece
+		board->setBitboard(board->nextColour, piece, board->findBitboard(board->nextColour, piece) | ((uint64_t)1 << from));
+
+		//Removes the promoted piece
+		uint64_t bitboard = board->findBitboard(board->nextColour, knight);
+		bitboard &= ~((uint64_t)1 << to);
+		board->setBitboard(board->nextColour, knight, bitboard);
+	}
+	break;
+	case bishopPromotion:
+	{
+		//Adds the captued piece
+		if (capturedPiece != blank)
+			board->setBitboard(opponentColour, capturedPiece, board->findBitboard(opponentColour, capturedPiece) | ((uint64_t)1 << to));
+
+		//Adds the moved Piece
+		board->setBitboard(board->nextColour, piece, board->findBitboard(board->nextColour, piece) | ((uint64_t)1 << from));
+
+		//Removes the promoted piece
+		uint64_t bitboard = board->findBitboard(board->nextColour, bishop);
+		bitboard &= ~((uint64_t)1 << to);
+		board->setBitboard(board->nextColour, bishop, bitboard);
+	}
+	break;
+	case rookPromotion:
+	{
+		//Adds the captued piece
+		if (capturedPiece != blank)
+			board->setBitboard(opponentColour, capturedPiece, board->findBitboard(opponentColour, capturedPiece) | ((uint64_t)1 << to));
+
+		//Adds the moved Piece
+		board->setBitboard(board->nextColour, piece, board->findBitboard(board->nextColour, piece) | ((uint64_t)1 << from));
+
+		//Removes the promoted piece
+		uint64_t bitboard = board->findBitboard(board->nextColour, rook);
+		bitboard &= ~((uint64_t)1 << to);
+		board->setBitboard(board->nextColour, rook, bitboard);
+	}
+	break;
+	case queenPromotion:
+	{
+		//Adds the captued piece
+		if (capturedPiece != blank)
+			board->setBitboard(opponentColour, capturedPiece, board->findBitboard(opponentColour, capturedPiece) | ((uint64_t)1 << to));
+
+		//Adds the moved Piece
+		board->setBitboard(board->nextColour, piece, board->findBitboard(board->nextColour, piece) | ((uint64_t)1 << from));
+
+		//Removes the promoted piece
+		uint64_t bitboard = board->findBitboard(board->nextColour, queen);
+		bitboard &= ~((uint64_t)1 << to);
+		board->setBitboard(board->nextColour, queen, bitboard);
+	}
+	break;
+	case pawnDoubleMove:
+	{
+		//Moves the piece
+		uint64_t bitboard = board->findBitboard(board->nextColour, piece);
+		bitboard = (bitboard & ~((uint64_t)1 << to)) | ((uint64_t)1 << from);
+		board->setBitboard(board->nextColour, piece, bitboard);
+	}
+	break;
+	case kingSideCastling:
+	{
+		//Moves the king
+		uint64_t bitboard = board->findBitboard(board->nextColour, piece);
+		bitboard = (bitboard & ~((uint64_t)1 << to)) | ((uint64_t)1 << from);
+		board->setBitboard(board->nextColour, piece, bitboard);
+		if (board->nextColour == white)
+		{
+			board->whiteRookBitboard = (board->whiteRookBitboard & ~32) | 128; //Moves the rook
+		}
+		else
+		{
+			board->blackRookBitboard = (board->blackRookBitboard & ~2305843009213693952) | 9223372036854775808; //Moves the rook
+		}
+	}
+	break;
+	case queenSideCastling:
+	{
+		//Moves the king
+		uint64_t bitboard = board->findBitboard(board->nextColour, piece);
+		bitboard = (bitboard & ~((uint64_t)1 << to)) | ((uint64_t)1 << from);
+		board->setBitboard(board->nextColour, piece, bitboard);
+		if (board->nextColour == white)
+		{
+			board->whiteRookBitboard = (board->whiteRookBitboard & ~8) | 1; //Moves the rook
+		}
+		else
+		{
+			board->blackRookBitboard = (board->blackRookBitboard & ~576460752303423488) | 72057594037927936; //Moves the rook
+
+		}
+	}
+	break;
+	}
+	board->update();
 }
