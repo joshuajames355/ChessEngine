@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="ChessUI">
+    <file>brownSquare.png</file>
+    <file>whiteSquare.png</file>
+  </qresource>
+</RCC>

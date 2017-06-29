@@ -72,18 +72,23 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>F:\Dev\Projects\ChessEngine\ChessEngineLibrary;F:\Dev\googletest\googletest;F:\Dev\googletest\googletest\include;$(IncludePath)</IncludePath>
+    <IncludePath>F:\Dev\googletest\googletest\include;$(IncludePath);$(SolutionDir)\ChessEngineLibrary</IncludePath>
     <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>F:\Dev\googletest\googletest\include;$(IncludePath);$(SolutionDir)\ChessEngineLibrary</IncludePath>
+	<LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)\ChessEngineLibrary;$(IncludePath);F:\Dev\googletest\googletest\include</IncludePath>
+    <IncludePath>F:\Dev\googletest\googletest\include;$(IncludePath);$(SolutionDir)\ChessEngineLibrary</IncludePath>
+	<LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>F:\Dev\googletest\googletest\include;$(IncludePath);$(SolutionDir)\ChessEngineLibrary</IncludePath>
+	<LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

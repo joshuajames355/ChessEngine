@@ -448,7 +448,7 @@ pieceType Board::getPieceTypeInSquare(uint64_t bitboard)
 	else if (bitboard & (blackBishopBitboard | whiteBishopBitboard)) return bishop;
 	else if (bitboard & (blackQueenBitboard | whiteQueenBitboard)) return queen;
 	else if (bitboard & (blackKingBitboard | whiteKingBitboard)) return king;
-	else throw std::runtime_error("getPieceTypeInSquare failed. Piece not on board.");
+	else return blank;
 }
 
 bool Board::isPieceAttacked(int piecePos, colours colour)
