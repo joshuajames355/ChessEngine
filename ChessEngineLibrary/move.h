@@ -32,7 +32,7 @@ struct Move
 
 	bool operator==(const Move& b)
 	{
-		return (from == b.from) && (to == b.to) && (piece = b.piece) && (moveType = b.moveType);
+		return (from == b.from) && (to == b.to) && (piece == b.piece) && (moveType == b.moveType);
 	}
 };
 

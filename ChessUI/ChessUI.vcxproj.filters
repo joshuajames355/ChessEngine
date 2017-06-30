@@ -48,6 +48,9 @@
     <ClCompile Include="BoardDisplay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ChessPiece.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="chessui.h">
@@ -65,6 +68,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="BoardDisplay.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ChessPiece.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

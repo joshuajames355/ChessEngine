@@ -71,6 +71,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BoardDisplay.cpp" />
+    <ClCompile Include="ChessPiece.cpp" />
     <ClCompile Include="chessui.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_chessui.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -112,6 +113,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BoardDisplay.h" />
+    <ClInclude Include="ChessPiece.h" />
     <ClInclude Include="GeneratedFiles\ui_chessui.h" />
   </ItemGroup>
   <ItemGroup>
