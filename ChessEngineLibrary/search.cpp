@@ -30,8 +30,8 @@ Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntr
 {
 	data->nodes++;
 
-	int alpha = -9999;
-	int beta = 9999;
+	int alpha = -30000;
+	int beta = 30000;
 
 	int alphaOriginal = alpha;
 	Move bestMove;
@@ -69,10 +69,11 @@ Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntr
 
 	orderSearch(&moveList, board, arraySize, bestMove, isBestMove);
 
+	int score;
 	for (int x = 0; x < arraySize; x++)
 	{
 		moveList[x].applyMove(board);
-		int score = -negamax(-beta, -alpha, depthLeft - 1, board, data,true, transpositionTable);
+		score = -negamax(-beta, -alpha, depthLeft - 1, board, data,true, transpositionTable);
 		moveList[x].undoMove(board);
 		if (score >= beta)
 		{
@@ -149,12 +150,30 @@ int negamax(int alpha, int beta, int depthLeft, Board* board, searchData* data, 
 		bestMove = entry.bestMove;
 	}
 
+	//CheckMate / StaleMate
+	if (arraySize == 0)
+	{
+		//Checkmate
+		if (board->isPieceAttacked(bitScanForward(board->findBitboard(board->nextColour, king)), board->nextColour))
+		{
+			//Adds the distance to the root node onto the checkmate score.
+			//This is to ensure the search algorithm prioritizes the fastest checkmate
+			return -25000 + (data->depth - depthLeft);
+		}
+		//Stalemate
+		else
+		{
+			return 0;
+		}
+	}
+
 	orderSearch(&moveList, board, arraySize, bestMove, isBestMove);
 
+	int score;
 	for (int x = 0; x < arraySize; x++)
 	{
 		moveList[x].applyMove(board);
-		int score = -negamax(-beta, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable);
+		score = -negamax(-beta, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable);
 		moveList[x].undoMove(board);
 
 		if (score >= beta)
