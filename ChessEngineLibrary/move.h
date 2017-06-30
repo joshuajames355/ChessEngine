@@ -18,6 +18,8 @@ struct Move
 	pieceType piece;
 	pieceType capturedPiece;
 	MoveType moveType;
+
+	int moveRating;
 	
 	//The flags of the board prior to applyMove. Used in undoMove
 	bool canBlackCastleQueenSide;
