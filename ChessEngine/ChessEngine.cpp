@@ -131,4 +131,5 @@ void setupEngine()
 {
 	magicBitboards::setupMagicBitboards();
 	ZorbistKeys::initialize();
+	setupMoveGen();
 }

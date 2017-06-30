@@ -7,6 +7,7 @@
 #include "search.h"
 #include "utils.h"
 #include "transpositionTable.h"
+#include "moveGeneration.h"
 
 
 void engineLoop();
