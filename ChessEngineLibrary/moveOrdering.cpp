@@ -5,8 +5,11 @@ int moveRatingComparisonFunc(Move move1, Move move2)
 	return move1.moveRating > move2.moveRating;
 }
 
-void orderSearch(std::array<Move, 150>* moveList, Board * board, int arraySize, Move TTMove, bool isBestMove)
+void orderSearch(std::array<Move, 150>* moveList, Board * board, int arraySize, Move TTMove, bool isBestMove, killerEntry killerMoves)
 {
+	std::vector<Move> killerMoveVector = killerMoves.getKillerMoves();
+	int MVVLVAScore;
+
 	for (int x = 0; x < arraySize; x++)
 	{
 		if ((*moveList)[x] == TTMove)
@@ -15,9 +18,9 @@ void orderSearch(std::array<Move, 150>* moveList, Board * board, int arraySize, 
 		}
 		else
 		{
-			if((*moveList)[x].moveType == queenPromotion)
+			if ((*moveList)[x].moveType == queenPromotion)
 				(*moveList)[x].moveRating = 4000;
-			else if((*moveList)[x].moveType == rookPromotion)
+			else if ((*moveList)[x].moveType == rookPromotion)
 				(*moveList)[x].moveRating = 3999;
 			else if ((*moveList)[x].moveType == bishopPromotion)
 				(*moveList)[x].moveRating = 3998;
@@ -25,6 +28,9 @@ void orderSearch(std::array<Move, 150>* moveList, Board * board, int arraySize, 
 				(*moveList)[x].moveRating = 3997;
 			else if ((*moveList)[x].moveType == capture)
 				(*moveList)[x].moveRating = 3000 + getMVVLVAScore((*moveList)[x]);
+			//If the move is in the killerMoveTable
+			else if (std::find(killerMoveVector.begin(), killerMoveVector.end(), (*moveList)[x]) != killerMoveVector.begin())
+				(*moveList)[x].moveRating = 2500;
 			else
 			{
 				(*moveList)[x].moveRating = 0;
@@ -78,4 +84,18 @@ bool MVVLVAComparisonFunc(Move move1, Move move2)
 void MVVLVA(std::array<Move, 150>* moveList, Board * board, int arraySize)
 { 
 	std::sort(moveList->begin(), moveList->begin() + arraySize, MVVLVAComparisonFunc);
+}
+
+killerEntry::killerEntry()
+{
+	numKillers = 3;
+	killerMoves.reserve(numKillers);
+}
+
+void killerEntry::addKillerMove(Move move)
+{
+	if (killerMoves.size() < numKillers)
+	{
+		killerMoves.push_back(move);
+	}
 }

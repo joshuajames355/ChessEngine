@@ -33,6 +33,9 @@ Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntr
 	int alpha = -30000;
 	int beta = 30000;
 
+	std::vector<killerEntry>* killerMoveTable = new std::vector<killerEntry>();
+	killerMoveTable->resize(depthLeft);
+
 	int alphaOriginal = alpha;
 	Move bestMove;
 	bool isBestMove = false;
@@ -67,13 +70,13 @@ Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntr
 		bestMove = entry.bestMove;
 	}
 
-	orderSearch(&moveList, board, arraySize, bestMove, isBestMove);
+	orderSearch(&moveList, board, arraySize, bestMove, isBestMove, killerEntry());
 
 	int score;
 	for (int x = 0; x < arraySize; x++)
 	{
 		moveList[x].applyMove(board);
-		score = -negamax(-beta, -alpha, depthLeft - 1, board, data,true, transpositionTable);
+		score = -negamax(-beta, -alpha, depthLeft - 1, board, data,true, transpositionTable, killerMoveTable);
 		moveList[x].undoMove(board);
 		if (score >= beta)
 		{
@@ -112,7 +115,7 @@ Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntr
 	return bestMove;
 }
 
-int negamax(int alpha, int beta, int depthLeft, Board* board, searchData* data, bool isQuiet, TranspositionEntry* transpositionTable)
+int negamax(int alpha, int beta, int depthLeft, Board* board, searchData* data, bool isQuiet, TranspositionEntry* transpositionTable, std::vector<killerEntry>* killerMoveTable)
 {
 	if (depthLeft == 0) return quiescence(alpha, beta, 3, board, data, isQuiet);
 
@@ -167,17 +170,19 @@ int negamax(int alpha, int beta, int depthLeft, Board* board, searchData* data, 
 		}
 	}
 
-	orderSearch(&moveList, board, arraySize, bestMove, isBestMove);
+	orderSearch(&moveList, board, arraySize, bestMove, isBestMove,(*killerMoveTable)[depthLeft]);
 
 	int score;
 	for (int x = 0; x < arraySize; x++)
 	{
 		moveList[x].applyMove(board);
-		score = -negamax(-beta, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable);
+		score = -negamax(-beta, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
 		moveList[x].undoMove(board);
 
 		if (score >= beta)
 		{
+			if(moveList[x].capturedPiece == blank)
+				(*killerMoveTable)[depthLeft].addKillerMove(moveList[x]);
 			return beta;   //  fail hard beta-cutoff
 		}
 		if (score > alpha)
