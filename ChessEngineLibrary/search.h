@@ -10,6 +10,7 @@
 #include "scoring.h"
 #include "move.h"
 #include "utils.h"
+#include "timeManagement.h"
 #include "transpositionTable.h"
 #include "transpositionEntry.h"
 #include "moveOrdering.h"
@@ -21,7 +22,7 @@ struct searchData
 	time_t startTime;
 };
 
-Move startSearch(int searchDepth, Board* board, TranspositionEntry* transpositionTable);
+Move startSearch(Board* board, TranspositionEntry* transpositionTable, timeManagement* timer);
 Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntry* transpositionTable);
 int negamax(int alpha, int beta, int depthLeft, Board* board, searchData* data, bool isQuiet, TranspositionEntry* transpositionTable, std::vector<killerEntry>* killerMoveTable);
 int quiescence(int alpha, int beta, int depthLeft, Board* board, searchData* data, bool isQuiet);

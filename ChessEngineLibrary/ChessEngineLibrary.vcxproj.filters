@@ -78,6 +78,9 @@
     <ClInclude Include="moveOrdering.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="timeManagement.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="board.cpp">
@@ -117,6 +120,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="moveOrdering.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="timeManagement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

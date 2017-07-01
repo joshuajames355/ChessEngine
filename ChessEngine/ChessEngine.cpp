@@ -10,8 +10,6 @@ int main(int argc, char *argv[])
 
 void engineLoop()
 {
-	int SEARCHDEPTH = 4;
-
 	TranspositionEntry* transpositionTable = new TranspositionEntry[TTSize];
 
 	Board board = Board();
@@ -28,7 +26,6 @@ void engineLoop()
 		{
 			std::cout << "id name UNSR Chess System\n";
 			std::cout << "id author UNSR\n";
-			std::cout << "option name SearchDepth type spin default " << SEARCHDEPTH << " min 2 max 20\n";
 			std::cout << "uciok\n";
 		}
 		if (response == "isready")
@@ -43,13 +40,6 @@ void engineLoop()
 		if (response == "quit")
 		{
 			break;
-		}
-		if (words[0] == "setoption" && words[1] == "name")
-		{
-			if (words[2] == "SearchDepth" && words[3] == "value")
-			{
-				SEARCHDEPTH = std::stoi(words[4]);
-			}
 		}
 
 		if (words[0] == "position")
@@ -93,8 +83,26 @@ void engineLoop()
 
 		if (words[0] == "go")
 		{
+			//Default value of 15 mins
+			long int btime = 900000;
+			long int wtime = 900000;
+
+			//Retreives the clock values from the message
+			if (std::find(words.begin(), words.end(), "btime") != words.end())
+			{
+				btime = std::stoi(*(std::find(words.begin(), words.end(), "btime") + 1));
+			}
+			if (std::find(words.begin(), words.end(), "wtime") != words.end())
+			{
+				wtime = std::stoi(*(std::find(words.begin(), words.end(), "wtime") + 1));
+			}
+
+			std::cout << btime << " " << wtime << "\n";
+
+			timeManagement timer = timeManagement(btime, wtime, board.nextColour);
+
 			board.printBoard();
-			std::cout << "bestmove " << notationFromMove(startSearch(SEARCHDEPTH, &board, transpositionTable)) << "\n";
+			std::cout << "bestmove " << notationFromMove(startSearch(&board, transpositionTable, &timer)) << "\n";
 		}
 	}
 

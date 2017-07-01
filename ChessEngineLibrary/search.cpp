@@ -10,17 +10,20 @@ void updateEngine(searchData * data, Move bestMove, int alpha)
 	
 }
 
-Move startSearch(int searchDepth, Board* board, TranspositionEntry* transpositionTable)
+Move startSearch(Board* board, TranspositionEntry* transpositionTable, timeManagement* timer)
 {
 	searchData data;
 	data.startTime = time(0);
 	data.nodes = 0;
 	
 	Move bestMove;
-	for (int x = 1; x <= searchDepth; x++)
+	for (int x = 1; x <= 50; x++)
 	{
 		data.depth = x;
 		bestMove = rootSearch(x, board, &data, transpositionTable);
+
+		if (!timer->isMoreTime())
+			break;
 	}
 	return bestMove;
 }

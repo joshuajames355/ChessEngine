@@ -8,6 +8,7 @@
 #include "utils.h"
 #include "transpositionTable.h"
 #include "moveGeneration.h"
+#include "timeManagement.h"
 
 
 void engineLoop();
