@@ -2,6 +2,8 @@
 
 uint64_t knightMovesArray[64];
 uint64_t kingMovesArray[64];
+uint64_t pawnWhiteAttacksArray[64];
+uint64_t pawnBlackAttacksArray[64];
 
 int searchForMoves(Board * board, std::array<Move,150>* moveList)
 {
@@ -83,24 +85,24 @@ int generatePawnMoves(Board* board, std::array<Move,150>* Movelist, uint64_t pin
 			if (pawnPos & pinnedPieces) legalMoves = generateLegalFilterForPinnedPiece(board, pawnPos);
 			else legalMoves = ~0;
 
+			int pawnPosIndex = bitScanForward(pawnPos);
+
 			pawnMoves = pawnPos << 8 & ~board->allPieces & legalMoves; //Move forward
 			pawnDoubleMoves = ((pawnMoves & rank3) << 8) & ~board->allPieces & legalMoves & pushMask; //Move twice on first turn if first is clear
 			pawnMoves &= pushMask;
 
-			pawnAttacks = pawnPos << 7 & board->blackPieces & ~fileH | pawnPos << 9 & board->blackPieces & ~fileA;
+			pawnAttacks = pawnWhiteAttacksArray[pawnPosIndex] & board->blackPieces;
 
 			//Attack either enemy pieces or the en passent target square.
 			if(board->enPassantSquare != -1)
 			{
 				uint64_t movedPieces = pawnPos | ((uint64_t)1 << board->enPassantSquare >> 8);
-				if(!isPinnedEnPassant(board,movedPieces))
-					pawnAttacks |= pawnPos << 7 & (uint64_t)1 << board->enPassantSquare & ~fileH | pawnPos << 9 & (uint64_t)1 << board->enPassantSquare & ~fileA;
+				if (!isPinnedEnPassant(board, movedPieces))
+					pawnAttacks |= pawnWhiteAttacksArray[pawnPosIndex] & ((uint64_t)1 << board->enPassantSquare);
 			}
 
 
 			pawnAttacks &= legalMoves & captureMask;
-
-			int pawnPosIndex = bitScanForward(pawnPos);
 
 			while (pawnDoubleMoves)
 			{
@@ -121,26 +123,26 @@ int generatePawnMoves(Board* board, std::array<Move,150>* Movelist, uint64_t pin
 			if (pawnPos & pinnedPieces) legalMoves = generateLegalFilterForPinnedPiece(board, pawnPos);
 			else legalMoves = ~0;
 
+			int pawnPosIndex = bitScanForward(pawnPos);
+
 			pawnMoves = pawnPos >> 8 & ~board->allPieces & legalMoves; //Move forward
 			pawnDoubleMoves = ((pawnMoves & rank6) >> 8) & ~board->allPieces & legalMoves & pushMask;  //Move twice on first turn if first is clear
 			pawnMoves &= pushMask;
 
-			pawnAttacks = pawnPos >> 9 & board->whitePieces &  ~fileH | pawnPos >> 7 & board->whitePieces & ~fileA;
+			pawnAttacks = pawnBlackAttacksArray[pawnPosIndex] & board->whitePieces;
 
 			//Attack either enemy pieces or the en passent target square.
 			if(board->enPassantSquare != -1)
 			{
 				uint64_t movedPieces = pawnPos | ((uint64_t)1 << board->enPassantSquare << 8);
 				if(!isPinnedEnPassant(board,movedPieces))
-					pawnAttacks |= (pawnPos >> 9) & (board->whitePieces | (uint64_t)1 << board->enPassantSquare) &  ~fileH | (pawnPos >> 7) & (board->whitePieces | (uint64_t)1 << board->enPassantSquare) & ~fileA;
+					pawnAttacks |= pawnBlackAttacksArray[pawnPosIndex] & ((uint64_t)1 << board->enPassantSquare);
 			}
 			else
 			{
 				pawnAttacks = (pawnPos >> 9) & (board->whitePieces) &  ~fileH | (pawnPos >> 7) & (board->whitePieces) & ~fileA;
 			}
 			pawnAttacks &= legalMoves & captureMask;
-
-			int pawnPosIndex = bitScanForward(pawnPos);
 
 			while (pawnDoubleMoves)
 			{
@@ -640,6 +642,9 @@ void setupMoveGen()
 		kingMoves |= currentPos >> 1 & ~fileH;
 		kingMoves |= currentPos << 7 & ~fileH;
 		kingMovesArray[x] = kingMoves;
+
+		pawnWhiteAttacksArray[x] = currentPos << 7 & ~fileH | currentPos << 9 & ~fileA;
+		pawnBlackAttacksArray[x] = currentPos >> 9 &  ~fileH | currentPos >> 7 & ~fileA;
 	}
 }
 
