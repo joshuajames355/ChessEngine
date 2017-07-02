@@ -17,10 +17,13 @@ Move startSearch(Board* board, TranspositionEntry* transpositionTable, timeManag
 	data.nodes = 0;
 	
 	Move bestMove;
+	int currentScore = calculateScoreDiff(board);
+
 	for (int x = 1; x <= 50; x++)
 	{
 		data.depth = x;
-		bestMove = rootSearch(x, board, &data, transpositionTable);
+		currentScore = MTDF(x, currentScore, board, &data, transpositionTable);
+		bestMove = data.bestMove;
 
 		if (!timer->isMoreTime())
 			break;
@@ -29,12 +32,28 @@ Move startSearch(Board* board, TranspositionEntry* transpositionTable, timeManag
 }
 
 
-Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntry* transpositionTable)
+int MTDF(int depthLeft, int firstGuess, Board* board, searchData* data, TranspositionEntry* transpositionTable)
+{
+	int guess = firstGuess;
+	int upperBound = 30000;
+	int lowerBound = -30000;
+	int beta;
+	while (lowerBound < upperBound)
+	{
+		beta = std::max(guess, lowerBound + 1);
+		guess = rootSearch(beta - 1, beta, depthLeft, board, data, transpositionTable);
+		if (guess < beta)
+			upperBound = guess;
+		else
+			lowerBound = guess;
+	}
+
+	return guess;
+}
+
+int rootSearch(int alpha, int beta, int depthLeft, Board* board, searchData* data, TranspositionEntry* transpositionTable)
 {
 	data->nodes++;
-
-	int alpha = -30000;
-	int beta = 30000;
 
 	std::vector<killerEntry>* killerMoveTable = new std::vector<killerEntry>();
 	killerMoveTable->resize(depthLeft);
@@ -46,14 +65,14 @@ Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntr
 	TranspositionEntry entry = transpositionTable[board->zorbistKey % TTSize];
 
 	std::array<Move, 150> moveList;
-	int arraySize = searchForMoves(board,&moveList);
+	int arraySize = searchForMoves(board, &moveList);
 	if (entry.zorbistKey == board->zorbistKey && std::find(moveList.begin(), moveList.end(), entry.bestMove) != moveList.end())
 	{
 		if (entry.depth >= depthLeft)
 		{
 			if (entry.flag == Exact)
 			{
-				return entry.bestMove;
+				return entry.score;
 			}
 			else if (entry.flag == lowerBound)
 			{
@@ -65,7 +84,7 @@ Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntr
 			}
 			if (alpha >= beta)
 			{
-				return entry.bestMove;
+				return entry.score;
 			}
 		}
 
@@ -79,16 +98,17 @@ Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntr
 	for (int x = 0; x < arraySize; x++)
 	{
 		moveList[x].applyMove(board);
-		score = -negamax(-beta, -alpha, depthLeft - 1, board, data,true, transpositionTable, killerMoveTable);
+		score = -negamax(-beta, -alpha, depthLeft - 1, board, data, true, transpositionTable, killerMoveTable);
 		moveList[x].undoMove(board);
 		if (score >= beta)
 		{
-			return bestMove;   //  fail hard beta-cutoff
+			return beta;   //  fail hard beta-cutoff
 		}
 		if (score > alpha)
 		{
 			alpha = score; // alpha acts like max in MiniMax
 			bestMove = moveList[x];
+			data->bestMove = bestMove;
 		}
 		updateEngine(data, bestMove, alpha);
 	}
@@ -115,8 +135,10 @@ Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntr
 
 	updateEngine(data, bestMove, alpha);
 
-	return bestMove;
+	return alpha;
 }
+
+
 
 int negamax(int alpha, int beta, int depthLeft, Board* board, searchData* data, bool isQuiet, TranspositionEntry* transpositionTable, std::vector<killerEntry>* killerMoveTable)
 {
