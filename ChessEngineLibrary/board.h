@@ -47,6 +47,9 @@ public:
 
 	void generateZorbistKey();
 
+	//Used for detecting three-fold repitition.
+	std::vector<uint64_t> moveHistory;
+
 	int enPassantSquare;
 	colours nextColour;
 

@@ -245,6 +245,8 @@ void Move::applyMove(Board * board)
 	}
 	board->nextColour = switchColour(board->nextColour);
 	board->update();
+
+	board->moveHistory.push_back(board->zorbistKey);
 }
 
 //Updates castling rights and the zorbist hash keys for castling rights.
@@ -354,6 +356,8 @@ void updateCastlingRights(Board * newBoard, Move * move)
 
 void Move::undoMove(Board * board)
 {
+	board->moveHistory.pop_back();
+
 	colours opponentColour = board->nextColour;
 	board->nextColour = switchColour(board->nextColour);
 
