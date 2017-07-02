@@ -24,5 +24,5 @@ struct searchData
 
 Move startSearch(Board* board, TranspositionEntry* transpositionTable, timeManagement* timer);
 Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntry* transpositionTable);
-int negamax(int alpha, int beta, int depthLeft, Board* board, searchData* data, bool isQuiet, TranspositionEntry* transpositionTable, std::vector<killerEntry>* killerMoveTable);
+int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data, bool isQuiet, TranspositionEntry* transpositionTable, std::vector<killerEntry>* killerMoveTable);
 int quiescence(int alpha, int beta, int depthLeft, Board* board, searchData* data, bool isQuiet);

@@ -76,10 +76,25 @@ Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntr
 	orderSearch(&moveList, board, arraySize, bestMove, isBestMove, killerEntry());
 
 	int score;
+	bool isFirstChild = true;
 	for (int x = 0; x < arraySize; x++)
 	{
 		moveList[x].applyMove(board);
-		score = -negamax(-beta, -alpha, depthLeft - 1, board, data,true, transpositionTable, killerMoveTable);
+		if (isFirstChild)
+		{
+			score = -negascout(-beta, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
+			isFirstChild = false;
+		}
+		else
+		{
+			//Try a null window search
+			score = -negascout(-alpha - 1, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
+
+			//If the score is within the bounds , the first child was not the principle variation
+			if (alpha < score && score < beta)
+				//Therefore do a full re-search
+				score = -negascout(-beta, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
+		}
 		moveList[x].undoMove(board);
 		if (score >= beta)
 		{
@@ -118,7 +133,7 @@ Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntr
 	return bestMove;
 }
 
-int negamax(int alpha, int beta, int depthLeft, Board* board, searchData* data, bool isQuiet, TranspositionEntry* transpositionTable, std::vector<killerEntry>* killerMoveTable)
+int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data, bool isQuiet, TranspositionEntry* transpositionTable, std::vector<killerEntry>* killerMoveTable)
 {
 	if (depthLeft == 0) return quiescence(alpha, beta, 3, board, data, isQuiet);
 
@@ -176,10 +191,26 @@ int negamax(int alpha, int beta, int depthLeft, Board* board, searchData* data, 
 	orderSearch(&moveList, board, arraySize, bestMove, isBestMove,(*killerMoveTable)[depthLeft]);
 
 	int score;
+	bool isFirstChild = true;
 	for (int x = 0; x < arraySize; x++)
 	{
 		moveList[x].applyMove(board);
-		score = -negamax(-beta, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
+
+		if (isFirstChild)
+		{
+			score = -negascout(-beta, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
+			isFirstChild = false;
+		}
+		else
+		{
+			//Try a null window search
+			score = -negascout(-alpha - 1, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
+			
+			//If the score is within the bounds , the first child was not the principle variation
+			if(alpha < score && score < beta)
+				//Therefore do a full re-search
+				score = -negascout(-beta, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
+		}
 		moveList[x].undoMove(board);
 
 		if (score >= beta)
