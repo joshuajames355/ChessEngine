@@ -189,7 +189,7 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 	}
 
 	//Threefold repetition 
-	if (std::count(board->moveHistory.begin(), board->moveHistory.end(), *board->moveHistory.end()) >= 3)
+	if (std::count(board->moveHistory.begin(), board->moveHistory.end(), board->moveHistory.back()) >= 3)
 		return 0;
 
 	orderSearch(&moveList, board, arraySize, bestMove, isBestMove,(*killerMoveTable)[depthLeft]);
