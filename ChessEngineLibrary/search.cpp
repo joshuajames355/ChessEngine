@@ -53,6 +53,7 @@ Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntr
 		{
 			if (entry.flag == Exact)
 			{
+				delete killerMoveTable;
 				return entry.bestMove;
 			}
 			else if (entry.flag == lowerBound)
@@ -65,6 +66,7 @@ Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntr
 			}
 			if (alpha >= beta)
 			{
+				delete killerMoveTable;
 				return entry.bestMove;
 			}
 		}
@@ -76,14 +78,28 @@ Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntr
 	orderSearch(&moveList, board, arraySize, bestMove, isBestMove, killerEntry());
 
 	int score;
-	bool isFirstChild = true;
 	for (int x = 0; x < arraySize; x++)
 	{
 		moveList[x].applyMove(board);
-		if (isFirstChild)
+		if (x == 0)
 		{
 			score = -negascout(-beta, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
-			isFirstChild = false;
+		}
+		//Late Move Reductions
+		else if(x > 4 && depthLeft >= 3 &&
+						 moveList[x].moveType != capture &&
+						 moveList[x].moveType != queenPromotion &&
+						 moveList[x].moveType != rookPromotion &&
+						 moveList[x].moveType != knightPromotion &&
+						 moveList[x].moveType != bishopPromotion)
+		{
+			//Try a null window search at a reduced depth
+			score = -negascout(-alpha - 1, -alpha, depthLeft - 2, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
+
+			//If the score is within the bounds , the first child was not the principle variation
+			if (alpha < score && score < beta)
+				//Therefore do a full re-search
+				score = -negascout(-beta, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
 		}
 		else
 		{
@@ -98,6 +114,7 @@ Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntr
 		moveList[x].undoMove(board);
 		if (score >= beta)
 		{
+			delete killerMoveTable;
 			return bestMove;   //  fail hard beta-cutoff
 		}
 		if (score > alpha)
@@ -130,6 +147,7 @@ Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntr
 
 	updateEngine(data, bestMove, alpha);
 
+	delete killerMoveTable;
 	return bestMove;
 }
 
@@ -195,23 +213,37 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 	orderSearch(&moveList, board, arraySize, bestMove, isBestMove,(*killerMoveTable)[depthLeft]);
 
 	int score;
-	bool isFirstChild = true;
 	for (int x = 0; x < arraySize; x++)
 	{
 		moveList[x].applyMove(board);
 
-		if (isFirstChild)
+		if (x == 0)
 		{
 			score = -negascout(-beta, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
-			isFirstChild = false;
+		}
+		//Late Move Reductions
+		else if (x > 4 && depthLeft >= 3 &&
+			moveList[x].moveType != capture &&
+			moveList[x].moveType != queenPromotion &&
+			moveList[x].moveType != rookPromotion &&
+			moveList[x].moveType != knightPromotion &&
+			moveList[x].moveType != bishopPromotion)
+		{
+			//Try a null window search at a reduced depth
+			score = -negascout(-alpha - 1, -alpha, depthLeft - 2, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
+
+			//If the score is within the bounds , the first child was not the principle variation
+			if (alpha < score && score < beta)
+				//Therefore do a full re-search
+				score = -negascout(-beta, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
 		}
 		else
 		{
 			//Try a null window search
 			score = -negascout(-alpha - 1, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
-			
+
 			//If the score is within the bounds , the first child was not the principle variation
-			if(alpha < score && score < beta)
+			if (alpha < score && score < beta)
 				//Therefore do a full re-search
 				score = -negascout(-beta, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
 		}
