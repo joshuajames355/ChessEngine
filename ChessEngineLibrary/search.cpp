@@ -1,11 +1,11 @@
 #include "search.h"
 
-void updateEngine(searchData * data, Move bestMove, int alpha)
+void updateEngine(searchData * data, Move* bestMove, int alpha)
 {
 	std::cout << "info depth " << data->depth;
 	std::cout << " nodes " << data->nodes;
 	std::cout << " nps " << (uint64_t)((data->nodes) / difftime(time(NULL), data->startTime));
-	std::cout << " pv " << notationFromMove(bestMove);
+	std::cout << " pv " << notationFromMove(*bestMove);
 	std::cout << " score upperbound " << alpha << "\n";
 	
 }
@@ -75,7 +75,7 @@ Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntr
 		bestMove = entry.bestMove;
 	}
 
-	orderSearch(&moveList, board, arraySize, bestMove, isBestMove, killerEntry());
+	orderSearch(&moveList, board, arraySize, &bestMove, isBestMove, killerEntry());
 
 	int score;
 	for (int x = 0; x < arraySize; x++)
@@ -122,7 +122,7 @@ Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntr
 			alpha = score; // alpha acts like max in MiniMax
 			bestMove = moveList[x];
 		}
-		updateEngine(data, bestMove, alpha);
+		updateEngine(data, &bestMove, alpha);
 	}
 
 	TranspositionEntry newEntry = TranspositionEntry();
@@ -145,7 +145,7 @@ Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntr
 
 	transpositionTable[board->zorbistKey % TTSize] = newEntry;
 
-	updateEngine(data, bestMove, alpha);
+	updateEngine(data, &bestMove, alpha);
 
 	delete killerMoveTable;
 	return bestMove;
@@ -210,7 +210,7 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 	if (std::count(board->moveHistory.begin(), board->moveHistory.end(), board->moveHistory.back()) >= 3)
 		return 0;
 
-	orderSearch(&moveList, board, arraySize, bestMove, isBestMove,(*killerMoveTable)[depthLeft]);
+	orderSearch(&moveList, board, arraySize, &bestMove, isBestMove,(*killerMoveTable)[depthLeft]);
 
 	int score;
 	for (int x = 0; x < arraySize; x++)

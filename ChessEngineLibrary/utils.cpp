@@ -59,7 +59,7 @@ Move moveFromNotation(std::string moveNotation, Board * board)
 	int to = row * 8 + column;
 	uint64_t fromBitboard = (uint64_t)1 << from;
 	colours aiColour;
-	pieceType piece;
+	pieceType piece = blank;
 	if ((fromBitboard & board->whitePieces) != 0) //Is a white piece
 	{
 		aiColour = white;

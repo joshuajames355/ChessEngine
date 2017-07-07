@@ -10,6 +10,7 @@ Move::Move(int newFrom, int newTo, MoveType newMoveType, pieceType newPieceType,
 	to = newTo;
 	from = newFrom;
 	piece = newPieceType;
+	moveRating = 0;
 
 	if (board->allPieces & (uint64_t)1 << to)
 	{
