@@ -11,11 +11,12 @@ int main(int argc, char *argv[])
 void engineLoop()
 {
 	TranspositionEntry* transpositionTable = new TranspositionEntry[TTSize];
+	std::unordered_map<uint64_t, std::string> openingBook;
+	loadPolygotBook("komodo.bin", &openingBook);
 
 	Board board = Board();
 	board.defaults();
 	bool hasSetupEngine = false;
-
 	while (true)
 	{
 		std::string response;
@@ -102,7 +103,7 @@ void engineLoop()
 			timeManagement timer = timeManagement(btime, wtime, board.nextColour);
 
 			board.printBoard();
-			std::cout << "bestmove " << notationFromMove(startSearch(&board, transpositionTable, &timer)) << "\n";
+			std::cout << "bestmove " << notationFromMove(startSearch(&board, transpositionTable, &timer, &openingBook)) << "\n";
 		}
 	}
 

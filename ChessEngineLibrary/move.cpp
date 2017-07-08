@@ -35,6 +35,9 @@ void Move::applyMove(Board * board)
 
 	colours opponentColour = switchColour(board->nextColour);
 
+	//Switch's the colour of the hash
+	board->zorbistKey ^= ZorbistKeys::whiteMoveKey;
+
 	//Removes en passant file from hash.
 	if (board->enPassantSquare != -1)
 	{

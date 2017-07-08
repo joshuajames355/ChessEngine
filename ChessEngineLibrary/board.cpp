@@ -623,8 +623,8 @@ void Board::generateZorbistKey()
 			}
 		}
 	}
-	if (nextColour == black)
-		hash ^= ZorbistKeys::blackMoveKey;
+	if (nextColour == white)
+		hash ^= ZorbistKeys::whiteMoveKey;
 	if(canBlackCastleQueenSide)
 		hash ^= ZorbistKeys::blackQueenSideCastlingKey;
 	if (canBlackCastleKingSide)

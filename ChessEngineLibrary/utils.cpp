@@ -183,3 +183,92 @@ Move moveFromNotation(std::string moveNotation, Board * board)
 		return Move(from, to, quietMove, piece, board);
 	}
 }
+
+bool isLittleEndian()
+{
+	short int number = 0x1;
+	char *numPtr = (char*)&number;
+	return (numPtr[0] == 1);
+}
+
+void loadPolygotBook(std::string filename, std::unordered_map<uint64_t, std::string>* openingBook)
+{
+	std::ifstream input(filename, std::ios::binary);
+
+	int counter = 0;
+
+	char* buffer64Bit = new char[64];
+	char* buffer16Bit = new char[16];
+
+	bool bIsLittleEndian = isLittleEndian();
+
+	uint64_t key = 0;
+	uint16_t move = 0;
+
+	if (input.is_open())
+	{
+		input.seekg(0, std::ios::end);
+		int size = input.tellg();
+
+		//char* memblock = new char[size];
+		//input.read(memblock, size);
+		//input.close();
+
+		while (counter < size)
+		{
+			input.seekg(counter, std::ios::beg);
+			input.read(reinterpret_cast<char*>(&key), sizeof(key));
+			//key = *buffer64Bit;
+			if(bIsLittleEndian)
+			{
+				key = _byteswap_uint64(key);
+			}
+
+			counter += sizeof(key);
+
+			input.seekg(counter, std::ios::beg);
+			input.read(reinterpret_cast<char*>(&move), sizeof(move));
+			if (bIsLittleEndian)
+			{
+				move = _byteswap_ushort(move);
+			}
+
+			counter += sizeof(move);
+
+			int toFile = 7 & move;
+			int toRow = (56 & move) >> 3;
+			int fromFile = (448 & move) >> 6;
+			int fromRow = (3584 & move) >> 9;
+			int promotionPiece = (28672 & move) >> 12;
+
+			int from = fromRow * 8 + fromFile;
+			int to = toRow * 8 + toFile;
+			Move newMove;
+			newMove.from = from;
+			newMove.to = to;
+			if (promotionPiece == 1)
+				newMove.moveType = knightPromotion;
+			else if (promotionPiece == 2)
+				newMove.moveType = bishopPromotion;
+			else if (promotionPiece == 3)
+				newMove.moveType = rookPromotion;
+			else if (promotionPiece == 4)
+				newMove.moveType = queenPromotion;
+		
+			//Todo Castling
+
+			(*openingBook)[key] = notationFromMove(newMove);
+
+			//48 more bits
+			counter += sizeof(move) * 3;
+
+		}
+
+
+	}
+	else
+	{
+		std::cout << "Failed to find " + filename + "\n";
+	}
+
+}

@@ -10,8 +10,14 @@ void updateEngine(searchData * data, Move* bestMove, int alpha)
 	
 }
 
-Move startSearch(Board* board, TranspositionEntry* transpositionTable, timeManagement* timer)
+Move startSearch(Board* board, TranspositionEntry* transpositionTable, timeManagement* timer, std::unordered_map<uint64_t, std::string>* openingBook)
 {
+	//If the key is in the opening book
+	if (openingBook->find(board->zorbistKey) != openingBook->end())
+	{
+		return moveFromNotation((*openingBook)[board->zorbistKey], board);
+	}
+
 	searchData data;
 	data.startTime = time(0);
 	data.nodes = 0;
