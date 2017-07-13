@@ -16,10 +16,14 @@
 #include "piece.h"
 #include "move.h"
 #include "moveGeneration.h"
+#include "PawnPromotionDialog.h"
 
 class BoardDisplay :
 	public QGraphicsView
 {
+
+	Q_OBJECT
+
 public:
 	BoardDisplay(QWidget *parent);
 	~BoardDisplay();
@@ -33,7 +37,7 @@ private:
 	std::vector<ChessPiece*> chessPieces;
 	void updateChessPieces();
 
-	QPixmap piecePixmaps[6][2];
+	std::array<std::array<QPixmap,2>, 6> piecePixmaps;
 	void loadChessPiecePixmaps();
 
 	bool isPieceBeingDragged;

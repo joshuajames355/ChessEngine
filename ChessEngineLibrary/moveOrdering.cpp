@@ -75,9 +75,9 @@ int getMVVLVAScore(Move* move)
 	return tradeScores[move->capturedPiece][move->piece];
 }
 
-bool MVVLVAComparisonFunc(Move* move1, Move* move2)
+bool MVVLVAComparisonFunc(Move move1, Move move2)
 {
-	return getMVVLVAScore(move1) > getMVVLVAScore(move2);
+	return getMVVLVAScore(&move1) > getMVVLVAScore(&move2);
 }
 
 //Most valuable victim , least valuable attacker

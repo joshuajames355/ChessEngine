@@ -104,9 +104,24 @@ void BoardDisplay::mouseReleaseEvent(QMouseEvent * event)
 				move = Move(movingPiece->getPiecePosition(), newPos, kingSideCastling, king, &chessBoard);
 			else if ((chessBoard.allPieces & moveToBitboard) == 0 && newPos - movingPiece->getPiecePosition() == -2 && movingPiece->getPieceType() == king)
 				move = Move(movingPiece->getPiecePosition(), newPos, queenSideCastling, king, &chessBoard);
+
+			//Pawn Promotion Moves
+			else if (movingPiece->getPieceType() == pawn && (moveToBitboard & (rank1 | rank8)) > 0)
+			{
+				MoveType type = quietMove;
+				while (type == quietMove)
+				{
+					PawnPromotionDialog pawnDialog;
+					pawnDialog.setupDialogBox(&piecePixmaps, chessBoard.nextColour);
+					pawnDialog.exec();
+					type = pawnDialog.getCurrentType();
+				}
+				move = Move(movingPiece->getPiecePosition(), newPos, type, movingPiece->getPieceType(), &chessBoard);
+			}
+
 			else if ((chessBoard.allPieces & moveToBitboard) == 0)
 				move = Move(movingPiece->getPiecePosition(), newPos, quietMove, movingPiece->getPieceType(), &chessBoard);
-			else if((chessBoard.allPieces & moveToBitboard) != 0)
+			else if ((chessBoard.allPieces & moveToBitboard) != 0)
 				move = Move(movingPiece->getPiecePosition(), newPos, capture, movingPiece->getPieceType(), &chessBoard);
 		}
 	}
