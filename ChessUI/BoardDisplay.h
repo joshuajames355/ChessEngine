@@ -29,6 +29,7 @@ public:
 	~BoardDisplay();
 
 private:
+	qreal positionLabelSize;
 	qreal squareSize;
 	QGraphicsPixmapItem boardSquares[8][8];
 	QGraphicsScene graphicsScene;
@@ -52,5 +53,14 @@ private:
 
 	int moveListSize;
 	std::array<Move, 150> moveList;
+
+	std::array<QGraphicsTextItem*, 8> positionLabelsTop;
+	std::array<QGraphicsTextItem*, 8> positionLabelsBottom;
+	std::array<QGraphicsTextItem*, 8> positionLabelsLeft;
+	std::array<QGraphicsTextItem*, 8> positionLabelsRight;
+
+
+protected:
+	virtual void wheelEvent(QWheelEvent * event) {};
 };
 

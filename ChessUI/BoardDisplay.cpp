@@ -6,6 +6,10 @@ BoardDisplay::BoardDisplay(QWidget *parent) : QGraphicsView(parent)
 {
 	movingPiece = nullptr;
 
+	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+
 	setScene(&graphicsScene);
 	graphicsScene.setBackgroundBrush(Qt::green);
 
@@ -14,8 +18,11 @@ BoardDisplay::BoardDisplay(QWidget *parent) : QGraphicsView(parent)
 	QPixmap whiteSquarePixmap;
 	whiteSquarePixmap.load("whiteSquare.png");
 
+	positionLabelSize = 50;
 	squareSize = 100;
 	pieceSize = 75;
+
+	resize(100 * 8, 100 * 8);
 
 	//Setup move generation
 	magicBitboards temp = magicBitboards();
@@ -23,6 +30,7 @@ BoardDisplay::BoardDisplay(QWidget *parent) : QGraphicsView(parent)
 	setupBitboardUtils();
 	setupMoveGen();
 
+	//Adds the chess squares.
 	for (int x = 0; x < 8; x++)
 	{
 		for (int y = 0; y < 8; y++)
@@ -35,7 +43,7 @@ BoardDisplay::BoardDisplay(QWidget *parent) : QGraphicsView(parent)
 
 			//Sets the offsets for the squares , flipping vertically as all internal chess representations start from 
 			//bottom left hand corner, and qt starts from the top left.
-			boardSquares[x][y].setOffset(squareSize * x, squareSize * (8 - y));
+			boardSquares[x][y].setOffset(positionLabelSize + squareSize * x, positionLabelSize + squareSize * (7 - y));
 
 			boardSquares[x][y].setScale(squareSize / boardSquares[x][y].boundingRect().width());
 
@@ -43,6 +51,47 @@ BoardDisplay::BoardDisplay(QWidget *parent) : QGraphicsView(parent)
 
 			graphicsScene.addItem(&boardSquares[x][y]);
 		}
+	}
+
+	QFont font = QFont("Times", 15, QFont::Bold);
+
+	//Adds the position Labels
+	for (int x = 0; x < 8; x++)
+	{
+		char equivalentLetter = 'a' + x;
+		char numericalLetter = '8' - x;
+
+		//Top
+		QGraphicsTextItem*  newLabel = new QGraphicsTextItem;
+		newLabel->setFont(font);
+		newLabel->setPos(1.5 * positionLabelSize + squareSize * x, 0.5 * positionLabelSize);
+		newLabel->setPlainText(QString(equivalentLetter));
+		graphicsScene.addItem(newLabel);
+		positionLabelsTop[x] = newLabel;
+
+		//Bottom
+		newLabel = new QGraphicsTextItem;
+		newLabel->setFont(font);
+		newLabel->setPos(1.5 * positionLabelSize + squareSize * x, 1.5 * positionLabelSize + 8 * squareSize);
+		newLabel->setPlainText(QString(equivalentLetter));
+		graphicsScene.addItem(newLabel);
+		positionLabelsBottom[x] = newLabel;
+
+		//Left
+		newLabel = new QGraphicsTextItem;
+		newLabel->setFont(font);
+		newLabel->setPos(0.5 * positionLabelSize, 1.5 * positionLabelSize + x * squareSize);
+		newLabel->setPlainText(QString(numericalLetter));
+		graphicsScene.addItem(newLabel);
+		positionLabelsLeft[x] = newLabel;
+
+		//Right
+		newLabel = new QGraphicsTextItem;
+		newLabel->setFont(font);
+		newLabel->setPos(1.5 * positionLabelSize + squareSize * 8, 1.5 * positionLabelSize + x * squareSize);
+		newLabel->setPlainText(QString(numericalLetter));
+		graphicsScene.addItem(newLabel);
+		positionLabelsRight[x] = newLabel;
 	}
 
 	chessBoard.defaults();
@@ -73,7 +122,7 @@ void BoardDisplay::mouseMoveEvent(QMouseEvent * event)
 {
 	if (isPieceBeingDragged && movingPiece != nullptr)
 	{
-		movingPiece->setOffset(event->x() - pieceSize, event->y() + pieceSize);
+		movingPiece->setOffset(positionLabelSize + event->x() - pieceSize, positionLabelSize + event->y() - pieceSize);
 	}
 }
 
@@ -180,8 +229,8 @@ void BoardDisplay::updateChessPieces()
 
 			currentChessPiece->setPixmap(piecePixmaps[currentType][currentColour]);
 
-			qreal widthOffset = squareSize * (counter % 8) + squareSize / 2 - currentChessPiece->boundingRect().width() / 2;
-			qreal heightOffset = squareSize * (8 - (counter / 8)) + squareSize / 2 - currentChessPiece->boundingRect().height() / 2;
+			qreal widthOffset = positionLabelSize + squareSize * (counter % 8) + squareSize / 2 - currentChessPiece->boundingRect().width() / 2;
+			qreal heightOffset = positionLabelSize + squareSize * (7 - (counter / 8)) + squareSize / 2 - currentChessPiece->boundingRect().height() / 2;
 			currentChessPiece->setOffset(widthOffset, heightOffset);
 
 			currentChessPiece->setPiecePosition(counter);
