@@ -11,3 +11,5 @@
 
 std::string notationFromMove(const Move& move);
 Move moveFromNotation(std::string moveNotation, Board* board);
+
+std::string notationFromPiecePos(int piecePos);

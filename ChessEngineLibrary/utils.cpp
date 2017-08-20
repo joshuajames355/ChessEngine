@@ -2,50 +2,26 @@
 
 std::string notationFromMove(const Move & move)
 {
-	std::string ans;
-
-	int column = (move.from % 8);
-	int temp = move.from;
-	int row = 1;
-	for (; temp > 7; temp -= 8)
-	{
-		row++;
-	}
-	char rowChar = row + '0';
-	char columnChar = column + 'a' ;
-	ans += columnChar;
-	ans += rowChar;
-
-	column = (move.to % 8);
-	temp = move.to;
-	row = 1;
-	for (; temp > 7; temp -= 8)
-	{
-		row++;
-	}
-	rowChar = row + '0';
-	columnChar = column + 'a';
-	ans += columnChar;
-	ans += rowChar;
+	std::string notation = notationFromPiecePos(move.from) + notationFromPiecePos(move.to);
 
 	if (move.moveType == knightPromotion)
 	{
-		ans += "n";
+		notation += "n";
 	}
 	else if (move.moveType == rookPromotion)
 	{
-		ans += "r";
+		notation += "r";
 	}
 	else if (move.moveType == bishopPromotion)
 	{
-		ans += "b";
+		notation += "b";
 	}
 	else if (move.moveType == queenPromotion)
 	{
-		ans += "q";
+		notation += "q";
 	}
 	
-	return ans;
+	return notation;
 }
 
 Move moveFromNotation(std::string moveNotation, Board * board)
@@ -182,4 +158,19 @@ Move moveFromNotation(std::string moveNotation, Board * board)
 	{
 		return Move(from, to, quietMove, piece, board);
 	}
+}
+
+std::string notationFromPiecePos(int piecePos)
+{
+	std::string notation;
+
+	int column = (piecePos % 8);
+	int row = 1 + piecePos / 8;
+
+	char rowChar = row + '0';
+	char columnChar = column + 'a';
+	notation += columnChar;
+	notation += rowChar;
+	
+	return notation;
 }

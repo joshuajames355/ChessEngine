@@ -37,7 +37,9 @@ public:
 	void defaults();
 	void printBoard();
 	void update();
+
 	void loadFromFen(std::string fen);
+	std::string exportAsFen();
 
 	uint64_t findBitboard(colours colour , pieceType piece);
 	void setBitboard(colours colour, pieceType piece, uint64_t bitboard);

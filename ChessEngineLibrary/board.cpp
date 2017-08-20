@@ -281,6 +281,116 @@ void Board::loadFromFen(std::string fen)
 
 }
 
+//Outputs the state of the board in the fen format. 
+//see this link for more details https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation
+std::string Board::exportAsFen()
+{
+	std::string fenString;
+
+	int emptySquaresCounter = 0;
+
+	//Outputs the position of all pieces.
+	int counter = 56;
+	while (counter >= 0)
+	{
+		uint64_t currentPieceBitboard = (uint64_t)1 << counter;
+		pieceType currentSquarePiece = getPieceTypeInSquare(currentPieceBitboard);
+
+		if (currentSquarePiece == blank)
+		{
+			emptySquaresCounter++;
+		}
+		else
+		{
+			if (emptySquaresCounter > 0)
+			{
+				fenString += emptySquaresCounter;
+				emptySquaresCounter = 0;
+			}
+
+			char pieceChar;
+			switch (currentSquarePiece)
+			{
+			case pawn:
+				pieceChar = 'p';
+				break;
+			case knight:
+				pieceChar = 'n';
+				break;
+			case bishop:
+				pieceChar = 'b';
+				break;
+			case rook:
+				pieceChar = 'r';
+				break;
+			case queen:
+				pieceChar = 'q';
+				break;
+			case king:
+				pieceChar = 'k';
+				break;
+			}
+
+			//Converts to uppercase if the piece is white
+			if ((whitePieces & currentPieceBitboard) > 0) pieceChar = toupper(pieceChar);
+
+			fenString += pieceChar;
+		}
+
+		counter++;
+		if (counter % 8 == 0)
+		{
+			if (emptySquaresCounter > 0)
+			{
+				char emptySquareCounterChar = '0' + emptySquaresCounter;
+				fenString += emptySquareCounterChar;
+				emptySquaresCounter = 0;
+			}
+			if(counter != 8) fenString += "/";
+			counter -= 16;
+		}
+	}
+
+	fenString += ' ';
+
+	//Next player to move
+	if (nextColour == white) fenString += "w";
+	else fenString += "b";
+
+	fenString += ' ';
+
+	//Castling Rights
+	if (canWhiteCastleKingSide) fenString += "K";
+	if (canWhiteCastleQueenSide) fenString += "Q";
+	if (canBlackCastleKingSide) fenString += "k";
+	if (canBlackCastleQueenSide) fenString += "q";
+	if (!canWhiteCastleKingSide && !canWhiteCastleQueenSide && !canBlackCastleKingSide && !canBlackCastleQueenSide)
+		fenString += "-";
+
+	fenString += " ";
+
+	if (enPassantSquare != -1) 
+	{
+		std::string notation;
+
+		int column = (enPassantSquare % 8);
+		int row = 1 + enPassantSquare / 8;
+
+		char rowChar = row + '0';
+		char columnChar = column + 'a';
+		notation += columnChar;
+		notation += rowChar;
+
+		fenString += notation;
+	}
+	else fenString += "-";
+
+	//Halfmove clock and fullmove number are not currently tracked by this class.
+	fenString += " 0 0";
+
+	return fenString;
+}
+
 uint64_t Board::findBitboard(colours colour, pieceType piece)
 {
 	if (colour == white)

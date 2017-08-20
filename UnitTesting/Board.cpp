@@ -120,6 +120,14 @@ TEST(Board, loadFromFen)
 	EXPECT_EQ(fenBoard.canWhiteCastleKingSide, false);
 }
 
+TEST(Board, exportAsFen)
+{
+	Board board;
+	board.defaults();
+
+	EXPECT_EQ(board.exportAsFen().substr(0,53), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - ");
+}
+
 TEST(Board, IsPieceAttacked)
 {
 	Board board;
