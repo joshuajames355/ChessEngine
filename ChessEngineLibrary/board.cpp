@@ -3,19 +3,24 @@
 
 Board::Board()
 {
+	clearBoard();
+}
+
+void Board::clearBoard()
+{
 	whitePawnBitboard = emptyBitboard;
-	whiteRookBitboard = emptyBitboard; 
-	whiteKnightBitboard = emptyBitboard; 
-	whiteBishopBitboard = emptyBitboard; 
-	whiteQueenBitboard = emptyBitboard; 
-	whiteKingBitboard = emptyBitboard; 
+	whiteRookBitboard = emptyBitboard;
+	whiteKnightBitboard = emptyBitboard;
+	whiteBishopBitboard = emptyBitboard;
+	whiteQueenBitboard = emptyBitboard;
+	whiteKingBitboard = emptyBitboard;
 
 	blackPawnBitboard = emptyBitboard;
-	blackRookBitboard = emptyBitboard; 
+	blackRookBitboard = emptyBitboard;
 	blackKnightBitboard = emptyBitboard;
 	blackBishopBitboard = emptyBitboard;
-	blackQueenBitboard = emptyBitboard; 
-	blackKingBitboard = emptyBitboard; 
+	blackQueenBitboard = emptyBitboard;
+	blackKingBitboard = emptyBitboard;
 
 	nextColour = white;
 	enPassantSquare = -1;
@@ -142,6 +147,8 @@ void Board::update()
 
 void Board::loadFromFen(std::string fen)
 {
+	clearBoard();
+
 	int currentPosInBoard = 56;
 	int currentCharPos = 0;
 	char currentChar = 'X';
@@ -149,6 +156,7 @@ void Board::loadFromFen(std::string fen)
 	while (!isspace(currentChar))
 	{
 		currentChar = fen[currentCharPos];
+
 		if (currentChar == 'p')
 		{
 			blackPawnBitboard |= (uint64_t)1 << currentPosInBoard;
@@ -215,7 +223,7 @@ void Board::loadFromFen(std::string fen)
 		}
 		else
 		{
-			currentPosInBoard += currentChar - '0';
+			currentPosInBoard += (currentChar - '0');
 		}
 		currentCharPos++;
 	}
@@ -304,9 +312,10 @@ std::string Board::exportAsFen()
 		{
 			if (emptySquaresCounter > 0)
 			{
-				fenString += emptySquaresCounter;
+				fenString += std::to_string(emptySquaresCounter);
 				emptySquaresCounter = 0;
 			}
+
 
 			char pieceChar;
 			switch (currentSquarePiece)
@@ -335,6 +344,7 @@ std::string Board::exportAsFen()
 			if ((whitePieces & currentPieceBitboard) > 0) pieceChar = toupper(pieceChar);
 
 			fenString += pieceChar;
+		
 		}
 
 		counter++;

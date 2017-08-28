@@ -104,6 +104,43 @@ BoardDisplay::~BoardDisplay()
 {
 }
 
+void BoardDisplay::loadFromFile() 
+{
+	QString filename = QFileDialog::getOpenFileName(this,
+		tr("Open file"), "", tr("Chess Files (*.pgn *.fen)"));
+
+	std::ifstream file;
+	file.open(filename.toStdString());
+
+	std::stringstream strStream;
+	strStream << file.rdbuf();
+
+	std::string fileContents = strStream.str();
+
+	//PGN file type
+	if (fileContents[0] == '[')
+	{
+		//TODO
+	}
+	else
+	{
+		chessBoard.loadFromFen(fileContents);
+	}
+
+	updateChessPieces();
+}
+
+void BoardDisplay::saveToFile()
+{
+	std::string fenData = chessBoard.exportAsFen();
+	QString filename = QFileDialog::getSaveFileName(this,
+		tr("Open file"), "", tr("Chess Files (*.pgn *.fen)"));
+
+	std::ofstream file(filename.toStdString());
+	file << fenData;
+	file.close();
+}
+
 void BoardDisplay::mousePressEvent(QMouseEvent * event)
 {
 	for (int x = 0; x < chessPieces.size(); x++)

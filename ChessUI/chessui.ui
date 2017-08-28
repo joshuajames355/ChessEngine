@@ -56,6 +56,8 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionOpen"/>
+    <addaction name="actionSave"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
@@ -79,6 +81,22 @@
     <bool>false</bool>
    </attribute>
   </widget>
+  <action name="actionOpen">
+   <property name="text">
+    <string>Open</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -86,10 +104,47 @@
    <class>BoardDisplay</class>
    <extends>QGraphicsView</extends>
    <header>BoardDisplay.h</header>
+   <slots>
+    <slot>loadFromFile()</slot>
+    <slot>saveToFile()</slot>
+   </slots>
   </customwidget>
  </customwidgets>
  <resources>
   <include location="chessui.qrc"/>
  </resources>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionOpen</sender>
+   <signal>triggered()</signal>
+   <receiver>graphicsView</receiver>
+   <slot>loadFromFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>509</x>
+     <y>512</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSave</sender>
+   <signal>triggered()</signal>
+   <receiver>graphicsView</receiver>
+   <slot>saveToFile()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>590</x>
+     <y>513</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>509</x>
+     <y>512</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

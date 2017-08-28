@@ -126,6 +126,12 @@ TEST(Board, exportAsFen)
 	board.defaults();
 
 	EXPECT_EQ(board.exportAsFen().substr(0,53), "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - ");
+
+	board.loadFromFen("rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2");
+	board.printBoard();
+
+	EXPECT_EQ(board.exportAsFen().substr(0, 59), "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - ");
+	
 }
 
 TEST(Board, IsPieceAttacked)

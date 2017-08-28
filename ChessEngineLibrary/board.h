@@ -34,6 +34,7 @@ class Board
 {
 public:
 	Board();
+	void clearBoard();
 	void defaults();
 	void printBoard();
 	void update();

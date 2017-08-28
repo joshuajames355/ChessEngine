@@ -4,11 +4,14 @@
 #include <QGraphicsPixmapItem>
 #include <QPixmap>
 #include <QMouseEvent>
+#include <QFileDialog>
 
 #include <algorithm>
 #include <vector>
 #include <array>
 #include <stdint.h>
+#include <fstream>
+#include <sstream>
 
 #include "magicBitboards.h"
 #include "ChessPiece.h"
@@ -27,6 +30,10 @@ class BoardDisplay :
 public:
 	BoardDisplay(QWidget *parent);
 	~BoardDisplay();
+
+public slots:
+	void loadFromFile();
+	void saveToFile();
 
 private:
 	qreal positionLabelSize;
