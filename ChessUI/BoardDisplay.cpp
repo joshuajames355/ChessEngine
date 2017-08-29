@@ -22,6 +22,8 @@ BoardDisplay::BoardDisplay(QWidget *parent) : QGraphicsView(parent)
 	squareSize = 100;
 	pieceSize = 75;
 
+	setMinimumSize(squareSize * 8 + positionLabelSize * 2, squareSize * 8 + positionLabelSize * 2);
+
 	resize(100 * 8, 100 * 8);
 
 	//Setup move generation
@@ -97,48 +99,6 @@ BoardDisplay::BoardDisplay(QWidget *parent) : QGraphicsView(parent)
 	chessBoard.defaults();
 	loadChessPiecePixmaps();
 	updateChessPieces();
-}
-
-
-BoardDisplay::~BoardDisplay()
-{
-}
-
-void BoardDisplay::loadFromFile() 
-{
-	QString filename = QFileDialog::getOpenFileName(this,
-		tr("Open file"), "", tr("Chess Files (*.pgn *.fen)"));
-
-	std::ifstream file;
-	file.open(filename.toStdString());
-
-	std::stringstream strStream;
-	strStream << file.rdbuf();
-
-	std::string fileContents = strStream.str();
-
-	//PGN file type
-	if (fileContents[0] == '[')
-	{
-		//TODO
-	}
-	else
-	{
-		chessBoard.loadFromFen(fileContents);
-	}
-
-	updateChessPieces();
-}
-
-void BoardDisplay::saveToFile()
-{
-	std::string fenData = chessBoard.exportAsFen();
-	QString filename = QFileDialog::getSaveFileName(this,
-		tr("Open file"), "", tr("Chess Files (*.pgn *.fen)"));
-
-	std::ofstream file(filename.toStdString());
-	file << fenData;
-	file.close();
 }
 
 void BoardDisplay::mousePressEvent(QMouseEvent * event)
@@ -237,6 +197,17 @@ void BoardDisplay::mouseReleaseEvent(QMouseEvent * event)
 	isPieceBeingDragged = false;
 	movingPiece = nullptr;
 
+}
+
+void BoardDisplay::setBoard(Board newBoard)
+{
+	chessBoard = newBoard;
+	updateChessPieces();
+}
+
+Board BoardDisplay::getBoard()
+{
+	return chessBoard;
 }
 
 void BoardDisplay::updateChessPieces()

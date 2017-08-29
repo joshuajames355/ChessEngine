@@ -66,6 +66,24 @@
     <ClCompile Include="GeneratedFiles\Release\moc_BoardDisplay.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="OptionsMenuDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_OptionsMenuDialog.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_OptionsMenuDialog.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_GameManager.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_GameManager.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="chessui.h">
@@ -81,6 +99,12 @@
       <Filter>Header Files</Filter>
     </CustomBuild>
     <CustomBuild Include="BoardDisplay.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="OptionsMenuDialog.h">
+      <Filter>Header Files</Filter>
+    </CustomBuild>
+    <CustomBuild Include="GameManager.h">
       <Filter>Header Files</Filter>
     </CustomBuild>
   </ItemGroup>

@@ -20,20 +20,17 @@
 #include "move.h"
 #include "moveGeneration.h"
 #include "PawnPromotionDialog.h"
+#include "OptionsMenuDialog.h"
 
 class BoardDisplay :
 	public QGraphicsView
 {
-
 	Q_OBJECT
 
 public:
 	BoardDisplay(QWidget *parent);
-	~BoardDisplay();
-
-public slots:
-	void loadFromFile();
-	void saveToFile();
+	void setBoard(Board newBoard);
+	Board getBoard();
 
 private:
 	qreal positionLabelSize;
@@ -66,8 +63,10 @@ private:
 	std::array<QGraphicsTextItem*, 8> positionLabelsLeft;
 	std::array<QGraphicsTextItem*, 8> positionLabelsRight;
 
-
+	bool isAiPlaying;
+	colours AIColour;
+	
 protected:
-	virtual void wheelEvent(QWheelEvent * event) {};
+	virtual void wheelEvent(QWheelEvent * event) {}; //Overrides the scroll event to disable zooming the graphicsView.
 };
 

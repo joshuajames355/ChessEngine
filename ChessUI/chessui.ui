@@ -6,36 +6,24 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1182</width>
-    <height>1015</height>
+    <width>1198</width>
+    <height>1053</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>ChessUI</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="BoardDisplay" name="graphicsView">
+   <widget class="GameManager" name="gameManager" native="true">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>30</y>
+      <x>100</x>
+      <y>60</y>
       <width>900</width>
       <height>900</height>
      </rect>
     </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
     <property name="minimumSize">
-     <size>
-      <width>900</width>
-      <height>900</height>
-     </size>
-    </property>
-    <property name="maximumSize">
      <size>
       <width>900</width>
       <height>900</height>
@@ -48,7 +36,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1182</width>
+     <width>1198</width>
      <height>21</height>
     </rect>
    </property>
@@ -58,6 +46,7 @@
     </property>
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
+    <addaction name="actionOptions"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
@@ -97,16 +86,23 @@
     <string>Ctrl+S</string>
    </property>
   </action>
+  <action name="actionOptions">
+   <property name="text">
+    <string>Options</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>BoardDisplay</class>
-   <extends>QGraphicsView</extends>
-   <header>BoardDisplay.h</header>
+   <class>GameManager</class>
+   <extends>QWidget</extends>
+   <header>GameManager.h</header>
+   <container>1</container>
    <slots>
     <slot>loadFromFile()</slot>
     <slot>saveToFile()</slot>
+    <slot>displayOptionsMenu()</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -117,7 +113,7 @@
   <connection>
    <sender>actionOpen</sender>
    <signal>triggered()</signal>
-   <receiver>graphicsView</receiver>
+   <receiver>gameManager</receiver>
    <slot>loadFromFile()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -125,24 +121,40 @@
      <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>509</x>
-     <y>512</y>
+     <x>589</x>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>actionSave</sender>
    <signal>triggered()</signal>
-   <receiver>graphicsView</receiver>
+   <receiver>gameManager</receiver>
    <slot>saveToFile()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>590</x>
-     <y>513</y>
+     <x>-1</x>
+     <y>-1</y>
     </hint>
     <hint type="destinationlabel">
-     <x>509</x>
-     <y>512</y>
+     <x>589</x>
+     <y>592</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionOptions</sender>
+   <signal>triggered()</signal>
+   <receiver>gameManager</receiver>
+   <slot>displayOptionsMenu()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>549</x>
+     <y>542</y>
     </hint>
    </hints>
   </connection>
