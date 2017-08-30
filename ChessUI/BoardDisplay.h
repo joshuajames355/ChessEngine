@@ -31,6 +31,11 @@ public:
 	BoardDisplay(QWidget *parent);
 	void setBoard(Board newBoard);
 	Board getBoard();
+	void setIsPlayersTurn(bool newIsPlayersTurn) { isPlayersTurn = newIsPlayersTurn; };
+	void applyMove(Move newMove);
+
+signals:
+	void newTurn();
 
 private:
 	qreal positionLabelSize;
@@ -63,8 +68,7 @@ private:
 	std::array<QGraphicsTextItem*, 8> positionLabelsLeft;
 	std::array<QGraphicsTextItem*, 8> positionLabelsRight;
 
-	bool isAiPlaying;
-	colours AIColour;
+	bool isPlayersTurn;
 	
 protected:
 	virtual void wheelEvent(QWheelEvent * event) {}; //Overrides the scroll event to disable zooming the graphicsView.

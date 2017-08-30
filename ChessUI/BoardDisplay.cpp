@@ -5,6 +5,7 @@
 BoardDisplay::BoardDisplay(QWidget *parent) : QGraphicsView(parent)
 {
 	movingPiece = nullptr;
+	isPlayersTurn = true;
 
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -103,6 +104,7 @@ BoardDisplay::BoardDisplay(QWidget *parent) : QGraphicsView(parent)
 
 void BoardDisplay::mousePressEvent(QMouseEvent * event)
 {
+	if (!isPlayersTurn) return;
 	for (int x = 0; x < chessPieces.size(); x++)
 	{
 		if (chessPieces[x]->isUnderMouse() && chessPieces[x]->getColour() == chessBoard.nextColour)
@@ -189,9 +191,7 @@ void BoardDisplay::mouseReleaseEvent(QMouseEvent * event)
 	}
 	else if(isPieceBeingDragged && movingPiece != nullptr)
 	{
-		playedMoves.push_back(move);
-		move.applyMove(&chessBoard);
-		updateChessPieces();
+		applyMove(move);
 	}
 
 	isPieceBeingDragged = false;
@@ -208,6 +208,14 @@ void BoardDisplay::setBoard(Board newBoard)
 Board BoardDisplay::getBoard()
 {
 	return chessBoard;
+}
+
+void BoardDisplay::applyMove(Move newMove)
+{
+	playedMoves.push_back(newMove);
+	newMove.applyMove(&chessBoard);
+	updateChessPieces();
+	emit newTurn();
 }
 
 void BoardDisplay::updateChessPieces()

@@ -48,7 +48,14 @@
     <addaction name="actionSave"/>
     <addaction name="actionOptions"/>
    </widget>
+   <widget class="QMenu" name="menuDebug">
+    <property name="title">
+     <string>Debug</string>
+    </property>
+    <addaction name="actionEngine_Output"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuDebug"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -91,6 +98,11 @@
     <string>Options</string>
    </property>
   </action>
+  <action name="actionEngine_Output">
+   <property name="text">
+    <string>Engine Output</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -103,6 +115,7 @@
     <slot>loadFromFile()</slot>
     <slot>saveToFile()</slot>
     <slot>displayOptionsMenu()</slot>
+    <slot>displayEngineOutputMenu()</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -147,6 +160,22 @@
    <signal>triggered()</signal>
    <receiver>gameManager</receiver>
    <slot>displayOptionsMenu()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>549</x>
+     <y>542</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionEngine_Output</sender>
+   <signal>triggered()</signal>
+   <receiver>gameManager</receiver>
+   <slot>displayEngineOutputMenu()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>

@@ -5,6 +5,9 @@
 GameManager::GameManager(QWidget *parent) : QWidget(parent)
 {
 	boardDisplay = new BoardDisplay(this);
+
+	connect(boardDisplay, SIGNAL(newTurn()), this, SLOT(newTurn()));
+	connect(&aiManager, SIGNAL(newMove(Move)), this, SLOT(aiNewMove(Move)));
 }
 
 GameManager::~GameManager()
@@ -56,4 +59,33 @@ void GameManager::displayOptionsMenu()
 	dialog.setupDialogBox(&currentOptions);
 	dialog.exec();
 	currentOptions = dialog.getOptions();
+	newTurn();
+}
+
+void GameManager::newTurn()
+{
+	if (!currentOptions.isAi || (currentOptions.isAi & currentOptions.aiColour != boardDisplay->getBoard().nextColour))
+	{
+		boardDisplay->setIsPlayersTurn(true);
+	}
+	else
+	{
+		boardDisplay->setIsPlayersTurn(false);
+	}
+
+	if (currentOptions.isAi && currentOptions.aiColour == boardDisplay->getBoard().nextColour)
+	{
+		aiManager.startAI();
+		aiManager.findMove(boardDisplay->getBoard());
+	}
+}
+
+void GameManager::displayEngineOutputMenu()
+{
+	aiManager.showEngineOutputDialog();
+}
+
+void GameManager::aiNewMove(Move newMove)
+{
+	boardDisplay->applyMove(newMove);
 }

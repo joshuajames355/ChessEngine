@@ -4,6 +4,7 @@
 #include "BoardDisplay.h"
 #include "board.h"
 #include "OptionsMenuDialog.h"
+#include "AIManager.h"
 
 
 class GameManager :
@@ -19,9 +20,15 @@ public slots:
 	void loadFromFile();
 	void saveToFile();
 	void displayOptionsMenu();
+	void displayEngineOutputMenu();
+
+private slots:
+	void newTurn();
+	void aiNewMove(Move newMove);
 
 private:
 	BoardDisplay* boardDisplay;
 	Options currentOptions;
+	AIManager aiManager;
 };
 
