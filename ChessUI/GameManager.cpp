@@ -20,37 +20,43 @@ void GameManager::loadFromFile()
 	QString filename = QFileDialog::getOpenFileName(this,
 		tr("Open file"), "", tr("Chess Files (*.pgn *.fen)"));
 
-	std::ifstream file;
-	file.open(filename.toStdString());
-
-	std::stringstream strStream;
-	strStream << file.rdbuf();
-
-	std::string fileContents = strStream.str();
-
-	//PGN file type
-	if (fileContents[0] == '[')
+	if (filename.count() > 0)
 	{
-		//TODO
-	}
-	else
-	{
-		Board newBoard;
-		newBoard.loadFromFen(fileContents);
-		boardDisplay->setBoard(newBoard);
+		std::ifstream file;
+		file.open(filename.toStdString());
+
+		std::stringstream strStream;
+		strStream << file.rdbuf();
+
+		std::string fileContents = strStream.str();
+
+		//PGN file type
+		if (fileContents[0] == '[')
+		{
+			//TODO
+		}
+		else
+		{
+			Board newBoard;
+			newBoard.loadFromFen(fileContents);
+			boardDisplay->setBoard(newBoard);
+		}
 	}
 	
 }
 
 void GameManager::saveToFile()
 {
-	std::string fenData = boardDisplay->getBoard().exportAsFen();
 	QString filename = QFileDialog::getSaveFileName(this,
 		tr("Open file"), "", tr("Chess Files (*.pgn *.fen)"));
 
-	std::ofstream file(filename.toStdString());
-	file << fenData;
-	file.close();
+	if (filename.count() < 0)
+	{
+		std::string fenData = boardDisplay->getBoard().exportAsFen();
+		std::ofstream file(filename.toStdString());
+		file << fenData;
+		file.close();
+	}
 }
 
 void GameManager::displayOptionsMenu()
