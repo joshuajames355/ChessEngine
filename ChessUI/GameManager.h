@@ -22,6 +22,7 @@ public slots:
 	void displayOptionsMenu();
 	void displayEngineOutputMenu();
 	void flipBoard();
+	void newGame();
 
 private slots:
 	void newTurn();

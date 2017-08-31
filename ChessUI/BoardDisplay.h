@@ -34,6 +34,7 @@ public:
 	void setIsPlayersTurn(bool newIsPlayersTurn) { isPlayersTurn = newIsPlayersTurn; };
 	void applyMove(Move newMove);
 	void flipBoard();
+	void newGame();
 
 signals:
 	void newTurn();

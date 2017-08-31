@@ -90,6 +90,11 @@ void GameManager::flipBoard()
 	boardDisplay->flipBoard();
 }
 
+void GameManager::newGame()
+{
+	boardDisplay->newGame();
+}
+
 void GameManager::aiNewMove(Move newMove)
 {
 	boardDisplay->applyMove(newMove);

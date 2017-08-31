@@ -55,11 +55,8 @@ BoardDisplay::BoardDisplay(QWidget *parent) : QGraphicsView(parent)
 	}
 
 	addPositionLabels();
-
-
-	chessBoard.defaults();
 	loadChessPiecePixmaps();
-	updateChessPieces();
+	newGame();
 }
 
 void BoardDisplay::addPositionLabels()
@@ -226,6 +223,12 @@ void BoardDisplay::applyMove(Move newMove)
 void BoardDisplay::flipBoard()
 {
 	isBoardFlipped = !isBoardFlipped;
+	updateChessPieces();
+}
+
+void BoardDisplay::newGame()
+{
+	chessBoard.defaults();
 	updateChessPieces();
 }
 

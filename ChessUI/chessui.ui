@@ -44,9 +44,11 @@
     <property name="title">
      <string>File</string>
     </property>
+    <addaction name="actionNew_Game"/>
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
     <addaction name="actionOptions"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuDebug">
     <property name="title">
@@ -115,6 +117,14 @@
     <string>Flip Board</string>
    </property>
   </action>
+  <action name="actionNew_Game">
+   <property name="text">
+    <string>New Game</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -129,6 +139,7 @@
     <slot>displayOptionsMenu()</slot>
     <slot>displayEngineOutputMenu()</slot>
     <slot>flipBoard()</slot>
+    <slot>newGame()</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -205,6 +216,22 @@
    <signal>triggered()</signal>
    <receiver>gameManager</receiver>
    <slot>flipBoard()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>549</x>
+     <y>542</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionNew_Game</sender>
+   <signal>triggered()</signal>
+   <receiver>gameManager</receiver>
+   <slot>newGame()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
