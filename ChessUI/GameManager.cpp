@@ -85,6 +85,11 @@ void GameManager::displayEngineOutputMenu()
 	aiManager.showEngineOutputDialog();
 }
 
+void GameManager::flipBoard()
+{
+	boardDisplay->flipBoard();
+}
+
 void GameManager::aiNewMove(Move newMove)
 {
 	boardDisplay->applyMove(newMove);

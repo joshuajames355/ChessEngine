@@ -14,11 +14,6 @@ BoardDisplay::BoardDisplay(QWidget *parent) : QGraphicsView(parent)
 	setScene(&graphicsScene);
 	graphicsScene.setBackgroundBrush(Qt::green);
 
-	QPixmap blackSquarePixmap;
-	blackSquarePixmap.load("blackSquare.png");
-	QPixmap whiteSquarePixmap;
-	whiteSquarePixmap.load("whiteSquare.png");
-
 	positionLabelSize = 50;
 	squareSize = 100;
 	pieceSize = 75;
@@ -32,6 +27,9 @@ BoardDisplay::BoardDisplay(QWidget *parent) : QGraphicsView(parent)
 	temp.setupMagicBitboards();
 	setupBitboardUtils();
 	setupMoveGen();
+
+	blackSquarePixmap.load("blackSquare.png");
+	whiteSquarePixmap.load("whiteSquare.png");
 
 	//Adds the chess squares.
 	for (int x = 0; x < 8; x++)
@@ -56,9 +54,18 @@ BoardDisplay::BoardDisplay(QWidget *parent) : QGraphicsView(parent)
 		}
 	}
 
+	addPositionLabels();
+
+
+	chessBoard.defaults();
+	loadChessPiecePixmaps();
+	updateChessPieces();
+}
+
+void BoardDisplay::addPositionLabels()
+{
 	QFont font = QFont("Times", 15, QFont::Bold);
 
-	//Adds the position Labels
 	for (int x = 0; x < 8; x++)
 	{
 		char equivalentLetter = 'a' + x;
@@ -96,10 +103,6 @@ BoardDisplay::BoardDisplay(QWidget *parent) : QGraphicsView(parent)
 		graphicsScene.addItem(newLabel);
 		positionLabelsRight[x] = newLabel;
 	}
-
-	chessBoard.defaults();
-	loadChessPiecePixmaps();
-	updateChessPieces();
 }
 
 void BoardDisplay::mousePressEvent(QMouseEvent * event)
@@ -138,6 +141,8 @@ void BoardDisplay::mouseReleaseEvent(QMouseEvent * event)
 				if (boardSquares[x][y].isUnderMouse())
 				{
 					newPos = y * 8 + x;
+					if (isBoardFlipped)
+						newPos = 63 - newPos;
 				}
 			}
 		}
@@ -218,6 +223,12 @@ void BoardDisplay::applyMove(Move newMove)
 	emit newTurn();
 }
 
+void BoardDisplay::flipBoard()
+{
+	isBoardFlipped = !isBoardFlipped;
+	updateChessPieces();
+}
+
 void BoardDisplay::updateChessPieces()
 {
 	//Deletes pieces
@@ -230,7 +241,10 @@ void BoardDisplay::updateChessPieces()
 
 	for (int counter = 0; counter < 64; counter++)
 	{
-		uint64_t currentPosBitboard = (uint64_t)1 << counter;
+		uint64_t currentPosBitboard;
+		if (!isBoardFlipped) currentPosBitboard = (uint64_t)1 << counter;
+		else currentPosBitboard = (uint64_t)1 << (63-counter);
+
 		pieceType currentType = chessBoard.getPieceTypeInSquare(currentPosBitboard);
 		
 		if (currentType != blank)
@@ -246,10 +260,14 @@ void BoardDisplay::updateChessPieces()
 			currentChessPiece->setPixmap(piecePixmaps[currentType][currentColour]);
 
 			qreal widthOffset = positionLabelSize + squareSize * (counter % 8) + squareSize / 2 - currentChessPiece->boundingRect().width() / 2;
-			qreal heightOffset = positionLabelSize + squareSize * (7 - (counter / 8)) + squareSize / 2 - currentChessPiece->boundingRect().height() / 2;
+			qreal heightOffset = heightOffset = positionLabelSize + squareSize * (7 - (counter / 8)) + squareSize / 2 - currentChessPiece->boundingRect().height() / 2;
+		
 			currentChessPiece->setOffset(widthOffset, heightOffset);
 
-			currentChessPiece->setPiecePosition(counter);
+			if (!isBoardFlipped)
+				currentChessPiece->setPiecePosition(counter);
+			else currentChessPiece->setPiecePosition(63 - counter);
+
 			currentChessPiece->setColour(currentColour);
 			currentChessPiece->setPieceType(currentType);
 

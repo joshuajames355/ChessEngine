@@ -33,11 +33,14 @@ public:
 	Board getBoard();
 	void setIsPlayersTurn(bool newIsPlayersTurn) { isPlayersTurn = newIsPlayersTurn; };
 	void applyMove(Move newMove);
+	void flipBoard();
 
 signals:
 	void newTurn();
 
 private:
+	QPixmap blackSquarePixmap;
+	QPixmap whiteSquarePixmap;
 	qreal positionLabelSize;
 	qreal squareSize;
 	QGraphicsPixmapItem boardSquares[8][8];
@@ -52,6 +55,7 @@ private:
 
 	bool isPieceBeingDragged;
 	ChessPiece* movingPiece;
+	void addPositionLabels();
 	void mousePressEvent(QMouseEvent * event);
 	void mouseMoveEvent(QMouseEvent * event);
 	void mouseReleaseEvent(QMouseEvent * event);
@@ -69,7 +73,9 @@ private:
 	std::array<QGraphicsTextItem*, 8> positionLabelsRight;
 
 	bool isPlayersTurn;
-	
+	bool isBoardFlipped;
+
+
 protected:
 	virtual void wheelEvent(QWheelEvent * event) {}; //Overrides the scroll event to disable zooming the graphicsView.
 };

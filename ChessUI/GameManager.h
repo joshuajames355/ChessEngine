@@ -21,6 +21,7 @@ public slots:
 	void saveToFile();
 	void displayOptionsMenu();
 	void displayEngineOutputMenu();
+	void flipBoard();
 
 private slots:
 	void newTurn();

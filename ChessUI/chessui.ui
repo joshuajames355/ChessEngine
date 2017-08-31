@@ -54,7 +54,14 @@
     </property>
     <addaction name="actionEngine_Output"/>
    </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionFlip_Board"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
    <addaction name="menuDebug"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
@@ -103,6 +110,11 @@
     <string>Engine Output</string>
    </property>
   </action>
+  <action name="actionFlip_Board">
+   <property name="text">
+    <string>Flip Board</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -116,6 +128,7 @@
     <slot>saveToFile()</slot>
     <slot>displayOptionsMenu()</slot>
     <slot>displayEngineOutputMenu()</slot>
+    <slot>flipBoard()</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -176,6 +189,22 @@
    <signal>triggered()</signal>
    <receiver>gameManager</receiver>
    <slot>displayEngineOutputMenu()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>549</x>
+     <y>542</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionFlip_Board</sender>
+   <signal>triggered()</signal>
+   <receiver>gameManager</receiver>
+   <slot>flipBoard()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
