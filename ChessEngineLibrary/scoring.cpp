@@ -2,20 +2,181 @@
 
 int calculateScoreDiff(Board* board)
 {
-	int positionalScore = calculatePositionalScore(board);
-	return  positionalScore;
-}
-
-int calculatePositionalScore(Board* board)
-{
 	bool lateGame = isLateGame(board);
 
+	int score = calculatePawnStructureScore(board);
+	score += calculateMaterialScore(board, lateGame);
+	score += calculateRookPositionScore(board);
+	return score;
+}
+
+int calculatePawnStructureScore(Board* board)
+{
+	int blackScore = 0;
+	int whiteScore = 0;
+	const uint64_t fileMasks[8] = { fileA, fileB, fileC, fileD, fileE, fileF, fileG, fileH };
+
+	//Checks for double and triple pawns.
+	for (int x = 0; x < 8; x++)
+	{
+		int pawnsInRank = bitSum(board->whitePawnBitboard & fileMasks[x]);
+		if (pawnsInRank > 1)
+		{
+			whiteScore -= 10 * (pawnsInRank - 1);
+		}
+
+		pawnsInRank = bitSum(board->blackPawnBitboard & fileMasks[x]);
+		if (pawnsInRank > 1)
+		{
+			blackScore -= 10 * (pawnsInRank - 1);
+		}
+	}
+
+	uint64_t currentPawn;
+	int currentPos;
+
+	const uint64_t whitePassedPawnMasks[8] = { 0xffffffffffffff00, 0xffffffffffff0000, 0xffffffffff000000,
+		0xffffffff00000000, 0xffffff0000000000, 0xffff000000000000, 0xff00000000000000, 0 };
+	const uint64_t neighbouringFileMasks[8] = { fileB, fileA + fileC, fileB + fileD, fileC + fileE, fileD + fileF, fileE + fileG, fileF + fileH, fileG };
+	const uint64_t whiteBackwardsPawnMasks[8] = { 0xff, 0xffff, 0xffffff, 0xffffffff, 0xffffffffff, 
+		0xffffffffffff, 0xffffffffffffff, 0xffffffffffffffff };
+	const uint64_t blackPassedPawnMasks[8] = { 0, 0xff, 0xffff, 0xffffff, 0xffffffff, 0xffffffffff,
+		0xffffffffffff, 0xffffffffffffff};
+	const uint64_t blackBackwardsPawnMasks[8] = { 0xffffffffffffffff, 0xffffffffffffff00, 0xffffffffffff0000, 0xffffffffff000000,
+		0xffffffff00000000,  0xffffff0000000000, 0xffff000000000000, 0xff00000000000000 };
+
+	uint64_t whitePawnBitboard = board->whitePawnBitboard;
+	while (whitePawnBitboard)
+	{
+		currentPawn = pop(whitePawnBitboard);
+		currentPos = bitScanForward(currentPawn);
+
+		//Passed pawns
+		if (board->blackPawnBitboard & whitePassedPawnMasks[currentPos / 8] == 0)
+		{
+			whiteScore += 20 * (currentPos / 8);
+		}
+
+		//Isolated Pawns
+		if (board->whitePawnBitboard & neighbouringFileMasks[currentPos % 8] == 0)
+		{
+			whiteScore -= 20;
+		}
+		//Backwards Pawns
+		else if(board->whitePawnBitboard & whiteBackwardsPawnMasks[currentPos / 8] == 0)
+		{
+			whiteScore -= 8;
+		}
+	}
+
+	uint64_t blackPawnBitboard = board->blackPawnBitboard;
+	while (blackPawnBitboard)
+	{
+		currentPawn = pop(blackPawnBitboard);
+		currentPos = bitScanForward(currentPawn);
+
+		//Passed pawns
+		if (board->whitePawnBitboard & blackPassedPawnMasks[currentPos / 8] == 0)
+		{
+			blackScore += 20 * (7 - (currentPos / 8));
+		}
+
+		//Isolated Pawns
+		if (board->blackPawnBitboard & neighbouringFileMasks[currentPos % 8] == 0)
+		{
+			blackScore -= 20;
+		}
+		//Backwards Pawns
+		else if (board->blackPawnBitboard & blackBackwardsPawnMasks[currentPos / 8] == 0)
+		{
+			blackScore -= 8;
+		}
+	}
+
+	if (board->nextColour == black)
+	{
+		return blackScore - whiteScore;
+	}
+	else
+	{
+		return whiteScore - blackScore;
+	}
+}
+
+int calculateRookPositionScore(Board * board)
+{
+	int whiteScore = 0;
+	int blackScore = 0;
+
+	uint64_t currentRook;
+	const uint64_t fileMasks[8] = { fileA, fileB, fileC, fileD, fileE, fileF, fileG, fileH };
+	int currentPos;
+
+	uint64_t whiteRookBitboard = board->whiteRookBitboard;
+	while (whiteRookBitboard)
+	{
+		currentRook = pop(whiteRookBitboard);
+		currentPos = bitScanForward(currentRook);
+
+		//If the file of the rook contains no pawns.
+		if (((board->whitePawnBitboard | board->blackPawnBitboard) & fileMasks[currentPos % 8]) == 0)
+		{
+			whiteScore += 15;
+		}
+		//If the file has black pawns but no white pawns.
+		else if (board->whitePawnBitboard & fileMasks[currentPos % 8] == 0)
+		{
+			whiteScore += 10;
+		}
+
+		if ((currentPos / 8) == 6)
+		{
+			whiteScore += 20;
+		}
+	}
+
+	uint64_t blackRookBitboard = board->blackRookBitboard;
+	while (blackRookBitboard)
+	{
+		currentRook = pop(blackRookBitboard);
+		currentPos = bitScanForward(currentRook);
+
+		//If the file of the rook contains no pawns.
+		if (((board->whitePawnBitboard | board->blackPawnBitboard) & fileMasks[currentPos % 8]) == 0)
+		{
+			blackScore += 15;
+		}
+		//If the file has white pawns but no black pawns.
+		else if (board->blackPawnBitboard & fileMasks[currentPos % 8] == 0)
+		{
+			blackScore += 10;
+		}
+
+		if ((currentPos / 8) == 1)
+		{
+			blackScore += 20;
+		}
+	}
+
+	if (board->nextColour == black)
+	{
+		return blackScore - whiteScore;
+	}
+	else
+	{
+		return whiteScore - blackScore;
+	}
+}
+
+int calculateMaterialScore(Board * board, bool lateGame)
+{
 	int whiteScore = 0;
 	whiteScore += pieceSquareData::pawnSquare.calcScore(board->whitePawnBitboard, white);
 	whiteScore += pieceSquareData::knightSquare.calcScore(board->whiteKnightBitboard, white);
 	whiteScore += pieceSquareData::bishopSquare.calcScore(board->whiteBishopBitboard, white);
-	whiteScore += pieceSquareData::rookSquare.calcScore(board->whiteRookBitboard, white);
-	whiteScore += pieceSquareData::queenSquare.calcScore(board->whiteQueenBitboard, white);
+
+	whiteScore += bitSum(board->whiteRookBitboard) * 500;
+	whiteScore += bitSum(board->whiteQueenBitboard) * 900;
 	if (!lateGame)
 	{
 		whiteScore += pieceSquareData::midGameKingSquare.calcScore(board->whiteKingBitboard, white);
@@ -29,8 +190,8 @@ int calculatePositionalScore(Board* board)
 	blackScore += pieceSquareData::pawnSquare.calcScore(board->blackPawnBitboard, black);
 	blackScore += pieceSquareData::knightSquare.calcScore(board->blackKnightBitboard, black);
 	blackScore += pieceSquareData::bishopSquare.calcScore(board->blackBishopBitboard, black);
-	blackScore += pieceSquareData::rookSquare.calcScore(board->blackRookBitboard, black);
-	blackScore += pieceSquareData::queenSquare.calcScore(board->blackQueenBitboard, black);
+	blackScore += bitSum(board->blackRookBitboard) * 500;
+	blackScore += bitSum(board->blackQueenBitboard) * 900;
 	if (!lateGame)
 	{
 		blackScore += pieceSquareData::midGameKingSquare.calcScore(board->blackKingBitboard, black);
