@@ -7,6 +7,8 @@ int calculateScoreDiff(Board* board)
 	int score = calculatePawnStructureScore(board);
 	score += calculateMaterialScore(board, lateGame);
 	score += calculateRookPositionScore(board);
+	if(!isLateGame) score += calculateKingSafetyScore(board);
+
 	return score;
 }
 
@@ -63,7 +65,7 @@ int calculatePawnStructureScore(Board* board)
 			whiteScore -= 20;
 		}
 		//Backwards Pawns
-		else if(board->whitePawnBitboard & whiteBackwardsPawnMasks[currentPos / 8] == 0)
+		else if(board->whitePawnBitboard & neighbouringFileMasks[currentPos % 8] & whiteBackwardsPawnMasks[currentPos / 8] == 0)
 		{
 			whiteScore -= 8;
 		}
@@ -87,7 +89,7 @@ int calculatePawnStructureScore(Board* board)
 			blackScore -= 20;
 		}
 		//Backwards Pawns
-		else if (board->blackPawnBitboard & blackBackwardsPawnMasks[currentPos / 8] == 0)
+		else if (board->blackPawnBitboard & neighbouringFileMasks[currentPos % 8] & blackBackwardsPawnMasks[currentPos / 8] == 0)
 		{
 			blackScore -= 8;
 		}
@@ -209,6 +211,118 @@ int calculateMaterialScore(Board * board, bool lateGame)
 	{
 		return whiteScore - blackScore;
 	}
+}
+
+int calculateKingSafetyScore(Board * board)
+{
+	if (board->nextColour == white) return calculateKingSafetyScoreForColour(board, white) - calculateKingSafetyScoreForColour(board, black);
+	if (board->nextColour == white) return calculateKingSafetyScoreForColour(board, black) - calculateKingSafetyScoreForColour(board, white);
+}
+
+int calculateKingSafetyScoreForColour(Board * board, colours colour)
+{
+	const uint64_t fileMasks[8] = { fileA, fileB, fileC, fileD, fileE, fileF, fileG, fileH };
+	const uint64_t startingRankMask = rank2 ? colour == white : rank7;
+
+	int score = 0;
+	const uint64_t kingBitboard = board->findBitboard(colour, king);
+	const uint64_t pawnBitboard = board->findBitboard(colour, pawn);
+	const uint64_t enemyPawnBitboard = board->findBitboard(switchColour(colour), pawn);
+
+	//If the king is in the three left hand files.
+	if (kingBitboard & 506381209866536711)
+	{
+		//Iterate through the three files.
+		for (int x = 0; x < 3; x++)
+		{
+			uint64_t fileMask = fileMasks[x];
+
+			//File is not open
+			if (pawnBitboard && fileMask)
+			{
+				//if the pawn has moved from its starting position, give a penalty
+				if (!(pawnBitboard && fileMask && startingRankMask))
+				{
+					score -= 20;
+				}
+			}
+			//Give a penalty for an open file.
+			else
+			{
+				score -= 25;
+
+				//Give a penalty for their being no enemy pawns on the file.
+				if (!(enemyPawnBitboard && fileMask))
+				{
+					score -= 15;
+				}
+			}
+		}
+	}
+	//If the king is in the three right hand files.
+	else if (kingBitboard & 16204198715729174752)
+	{
+		//Iterate through the three files.
+		for (int x = 5; x < 8; x++)
+		{
+			uint64_t fileMask = fileMasks[x];
+
+			//File is not open
+			if (pawnBitboard && fileMask)
+			{
+				//if the pawn has moved from its starting position, give a penalty
+				if (!(pawnBitboard && fileMask && startingRankMask))
+				{
+					score -= 20;
+				}
+			}
+			//Give a penalty for an open file.
+			else
+			{
+				score -= 25;
+
+				//Give a penalty for their being no enemy pawns on the file.
+				if (!(enemyPawnBitboard && fileMask))
+				{
+					score -= 15;
+				}
+			}
+		}
+	}
+
+	//King in the middle two files.
+	else
+	{
+		const int kingFile = bitScanForward(kingBitboard) % 8;
+
+		//Iterate through the three files on and adjacent to the king.
+		for (int x = kingFile - 1; x < kingFile + 2; x++)
+		{
+			uint64_t fileMask = fileMasks[x];
+
+			//File is not open
+			if (pawnBitboard && fileMask)
+			{
+				//if the pawn has moved from its starting position, give a penalty
+				if (!(pawnBitboard && fileMask && startingRankMask))
+				{
+					score -= 20;
+				}
+			}
+			//Give a penalty for an open file.
+			else
+			{
+				score -= 25;
+
+				//Give a penalty for their being no enemy pawns on the file.
+				if (!(enemyPawnBitboard && fileMask))
+				{
+					score -= 15;
+				}
+			}
+		}
+	}
+	return score;
 }
 
 bool isLateGame(Board * board)
