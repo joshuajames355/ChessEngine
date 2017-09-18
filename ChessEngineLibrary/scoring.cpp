@@ -216,13 +216,15 @@ int calculateMaterialScore(Board * board, bool lateGame)
 int calculateKingSafetyScore(Board * board)
 {
 	if (board->nextColour == white) return calculateKingSafetyScoreForColour(board, white) - calculateKingSafetyScoreForColour(board, black);
-	if (board->nextColour == white) return calculateKingSafetyScoreForColour(board, black) - calculateKingSafetyScoreForColour(board, white);
+	else return calculateKingSafetyScoreForColour(board, black) - calculateKingSafetyScoreForColour(board, white);
 }
 
 int calculateKingSafetyScoreForColour(Board * board, colours colour)
 {
 	const uint64_t fileMasks[8] = { fileA, fileB, fileC, fileD, fileE, fileF, fileG, fileH };
 	const uint64_t startingRankMask = rank2 ? colour == white : rank7;
+	const uint64_t movedOnceMask = rank3 ? colour == white : rank6;
+	const uint64_t movedTwiceMask = rank4 ? colour == white : rank5;
 
 	int score = 0;
 	const uint64_t kingBitboard = board->findBitboard(colour, king);
@@ -236,25 +238,50 @@ int calculateKingSafetyScoreForColour(Board * board, colours colour)
 		for (int x = 0; x < 3; x++)
 		{
 			uint64_t fileMask = fileMasks[x];
+			
+			//Half the scores for files 2 and 5
+			const float scoreMultiplier = 1 ? x != 2 : 0.5;
 
 			//File is not open
-			if (pawnBitboard && fileMask)
+			if (pawnBitboard & fileMask)
 			{
-				//if the pawn has moved from its starting position, give a penalty
-				if (!(pawnBitboard && fileMask && startingRankMask))
+				//If the pawn has moved
+				if (pawnBitboard & fileMask & startingRankMask == 0)
 				{
-					score -= 20;
-				}
+					//if the pawn has moved more than once, give a penalty
+					if (pawnBitboard & fileMask & movedOnceMask  == 0)
+					{
+						score -= 20 * scoreMultiplier;
+					}
+					else
+					{
+						score -= 10 * scoreMultiplier;
+					}
+				}			
 			}
 			//Give a penalty for an open file.
 			else
 			{
-				score -= 25;
+				score -= 25 * scoreMultiplier;
 
-				//Give a penalty for their being no enemy pawns on the file.
-				if (!(enemyPawnBitboard && fileMask))
+			}
+
+			//Give a penalty for their being no enemy pawns on the file. Semi-open
+			if (enemyPawnBitboard & fileMask == 0)
+			{
+				score -= 15 * scoreMultiplier;
+			}
+			else
+			{
+				//If the pawn is in front of your starting rank
+				if (enemyPawnBitboard & movedOnceMask & fileMask)
 				{
-					score -= 15;
+					score -= 10 * scoreMultiplier;
+				}
+				//If the pawn is on your front rank.
+				else if (enemyPawnBitboard & movedTwiceMask & fileMask)
+				{
+					score -= 5 * scoreMultiplier;
 				}
 			}
 		}
@@ -267,24 +294,49 @@ int calculateKingSafetyScoreForColour(Board * board, colours colour)
 		{
 			uint64_t fileMask = fileMasks[x];
 
+			//Half the scores for files 2 and 5
+			const float scoreMultiplier = 1 ? x != 5 : 0.5;
+
 			//File is not open
-			if (pawnBitboard && fileMask)
+			if (pawnBitboard & fileMask)
 			{
-				//if the pawn has moved from its starting position, give a penalty
-				if (!(pawnBitboard && fileMask && startingRankMask))
+				//If the pawn has moved
+				if (pawnBitboard & fileMask & startingRankMask == 0)
 				{
-					score -= 20;
+					//if the pawn has moved more than once, give a penalty
+					if (pawnBitboard & fileMask & movedOnceMask == 0)
+					{
+						score -= 20 * scoreMultiplier;
+					}
+					else
+					{
+						score -= 10 * scoreMultiplier;
+					}
 				}
 			}
 			//Give a penalty for an open file.
 			else
 			{
-				score -= 25;
+				score -= 25 * scoreMultiplier;
 
-				//Give a penalty for their being no enemy pawns on the file.
-				if (!(enemyPawnBitboard && fileMask))
+			}
+
+			//Give a penalty for their being no enemy pawns on the file. Semi-open
+			if (enemyPawnBitboard & fileMask == 0)
+			{
+				score -= 15 * scoreMultiplier;
+			}
+			else
+			{
+				//If the pawn is in front of your starting rank
+				if (enemyPawnBitboard & movedOnceMask & fileMask)
 				{
-					score -= 15;
+					score -= 10 * scoreMultiplier;
+				}
+				//If the pawn is on your front rank.
+				else if (enemyPawnBitboard & movedTwiceMask & fileMask)
+				{
+					score -= 5 * scoreMultiplier;
 				}
 			}
 		}
@@ -300,25 +352,10 @@ int calculateKingSafetyScoreForColour(Board * board, colours colour)
 		{
 			uint64_t fileMask = fileMasks[x];
 
-			//File is not open
-			if (pawnBitboard && fileMask)
+			//If the file is fully open
+			if (fileMask & (board->whitePawnBitboard | board->blackPawnBitboard) == 0)
 			{
-				//if the pawn has moved from its starting position, give a penalty
-				if (!(pawnBitboard && fileMask && startingRankMask))
-				{
-					score -= 20;
-				}
-			}
-			//Give a penalty for an open file.
-			else
-			{
-				score -= 25;
-
-				//Give a penalty for their being no enemy pawns on the file.
-				if (!(enemyPawnBitboard && fileMask))
-				{
-					score -= 15;
-				}
+				score -= 10;
 			}
 		}
 	}
