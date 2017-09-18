@@ -54,18 +54,18 @@ int calculatePawnStructureScore(Board* board)
 		currentPos = bitScanForward(currentPawn);
 
 		//Passed pawns
-		if (board->blackPawnBitboard & whitePassedPawnMasks[currentPos / 8] == 0)
+		if ((board->blackPawnBitboard & whitePassedPawnMasks[currentPos / 8] & (neighbouringFileMasks[currentPos % 8] | fileMasks[currentPos % 8])) == 0)
 		{
 			whiteScore += 20 * (currentPos / 8);
 		}
 
 		//Isolated Pawns
-		if (board->whitePawnBitboard & neighbouringFileMasks[currentPos % 8] == 0)
+		if ((board->whitePawnBitboard & neighbouringFileMasks[currentPos % 8]) == 0)
 		{
 			whiteScore -= 20;
 		}
 		//Backwards Pawns
-		else if(board->whitePawnBitboard & neighbouringFileMasks[currentPos % 8] & whiteBackwardsPawnMasks[currentPos / 8] == 0)
+		else if((board->whitePawnBitboard & neighbouringFileMasks[currentPos % 8] & whiteBackwardsPawnMasks[currentPos / 8]) == 0)
 		{
 			whiteScore -= 8;
 		}
@@ -78,18 +78,19 @@ int calculatePawnStructureScore(Board* board)
 		currentPos = bitScanForward(currentPawn);
 
 		//Passed pawns
-		if (board->whitePawnBitboard & blackPassedPawnMasks[currentPos / 8] == 0)
+
+		if ((board->whitePawnBitboard & blackPassedPawnMasks[currentPos / 8] & (neighbouringFileMasks[currentPos % 8] | fileMasks[currentPos % 8])) == 0)
 		{
 			blackScore += 20 * (7 - (currentPos / 8));
 		}
 
 		//Isolated Pawns
-		if (board->blackPawnBitboard & neighbouringFileMasks[currentPos % 8] == 0)
+		if ((board->blackPawnBitboard & neighbouringFileMasks[currentPos % 8]) == 0)
 		{
 			blackScore -= 20;
 		}
 		//Backwards Pawns
-		else if (board->blackPawnBitboard & neighbouringFileMasks[currentPos % 8] & blackBackwardsPawnMasks[currentPos / 8] == 0)
+		else if ((board->blackPawnBitboard & neighbouringFileMasks[currentPos % 8] & blackBackwardsPawnMasks[currentPos / 8]) == 0)
 		{
 			blackScore -= 8;
 		}
@@ -126,7 +127,7 @@ int calculateRookPositionScore(Board * board)
 			whiteScore += 15;
 		}
 		//If the file has black pawns but no white pawns.
-		else if (board->whitePawnBitboard & fileMasks[currentPos % 8] == 0)
+		else if ((board->whitePawnBitboard & fileMasks[currentPos % 8]) == 0)
 		{
 			whiteScore += 10;
 		}
@@ -149,7 +150,7 @@ int calculateRookPositionScore(Board * board)
 			blackScore += 15;
 		}
 		//If the file has white pawns but no black pawns.
-		else if (board->blackPawnBitboard & fileMasks[currentPos % 8] == 0)
+		else if ((board->blackPawnBitboard & fileMasks[currentPos % 8]) == 0)
 		{
 			blackScore += 10;
 		}
@@ -246,10 +247,10 @@ int calculateKingSafetyScoreForColour(Board * board, colours colour)
 			if (pawnBitboard & fileMask)
 			{
 				//If the pawn has moved
-				if (pawnBitboard & fileMask & startingRankMask == 0)
+				if ((pawnBitboard & fileMask & startingRankMask) == 0)
 				{
 					//if the pawn has moved more than once, give a penalty
-					if (pawnBitboard & fileMask & movedOnceMask  == 0)
+					if ((pawnBitboard & fileMask & movedOnceMask)  == 0)
 					{
 						score -= 20 * scoreMultiplier;
 					}
@@ -267,7 +268,7 @@ int calculateKingSafetyScoreForColour(Board * board, colours colour)
 			}
 
 			//Give a penalty for their being no enemy pawns on the file. Semi-open
-			if (enemyPawnBitboard & fileMask == 0)
+			if ((enemyPawnBitboard & fileMask) == 0)
 			{
 				score -= 15 * scoreMultiplier;
 			}
@@ -301,10 +302,10 @@ int calculateKingSafetyScoreForColour(Board * board, colours colour)
 			if (pawnBitboard & fileMask)
 			{
 				//If the pawn has moved
-				if (pawnBitboard & fileMask & startingRankMask == 0)
+				if ((pawnBitboard & fileMask & startingRankMask) == 0)
 				{
 					//if the pawn has moved more than once, give a penalty
-					if (pawnBitboard & fileMask & movedOnceMask == 0)
+					if ((pawnBitboard & fileMask & movedOnceMask) == 0)
 					{
 						score -= 20 * scoreMultiplier;
 					}
@@ -322,7 +323,7 @@ int calculateKingSafetyScoreForColour(Board * board, colours colour)
 			}
 
 			//Give a penalty for their being no enemy pawns on the file. Semi-open
-			if (enemyPawnBitboard & fileMask == 0)
+			if ((enemyPawnBitboard & fileMask) == 0)
 			{
 				score -= 15 * scoreMultiplier;
 			}
@@ -353,7 +354,7 @@ int calculateKingSafetyScoreForColour(Board * board, colours colour)
 			uint64_t fileMask = fileMasks[x];
 
 			//If the file is fully open
-			if (fileMask & (board->whitePawnBitboard | board->blackPawnBitboard) == 0)
+			if ((fileMask & (board->whitePawnBitboard | board->blackPawnBitboard)) == 0)
 			{
 				score -= 10;
 			}
