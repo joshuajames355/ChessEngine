@@ -30,6 +30,8 @@ void Board::clearBoard()
 	canWhiteCastleQueenSide = false;
 	canWhiteCastleKingSide = false;
 
+	kingDangerSquares = 0;
+
 	generateZorbistKey();
 	update();
 }
@@ -143,6 +145,14 @@ void Board::update()
 	whitePieces = whitePawnBitboard | whiteRookBitboard | whiteKnightBitboard | whiteBishopBitboard | whiteKingBitboard | whiteQueenBitboard;
 
 	allPieces = whitePieces | blackPieces;
+}
+
+void Board::nextMove()
+{
+	nextColour = switchColour(nextColour);
+	kingDangerSquares = 0;
+	moveHistory.push_back(zorbistKey);
+	update();
 }
 
 void Board::loadFromFen(std::string fen)
@@ -757,4 +767,83 @@ void Board::generateZorbistKey()
 		hash ^= ZorbistKeys::enPassantKeys[enPassantSquare % 8]; //Adds the hash for the column the of en passant square
 
 	zorbistKey = hash;
+}
+
+bool Board::isInCheck()
+{
+	if (kingDangerSquares == 0)	generateKingDangerSquares();
+	return kingDangerSquares & findBitboard(nextColour, king);
+}
+
+uint64_t Board::getKingDangerSquares()
+{
+	if (kingDangerSquares == 0)	generateKingDangerSquares();
+	return kingDangerSquares;
+}
+
+void Board::generateKingDangerSquares()
+{
+	const uint64_t allPiecesExceptKing = allPieces & ~findBitboard(nextColour, king);
+	const colours oppositeColour = switchColour(nextColour);
+
+	uint64_t attackSet = 0;
+	uint64_t currentPos;
+
+	uint64_t pawnBitboard = findBitboard(oppositeColour, pawn);
+	if (oppositeColour == white)
+	{
+		while (pawnBitboard)
+		{
+			currentPos = pop(pawnBitboard);
+			attackSet |= currentPos << 7 & ~fileH | currentPos << 9 & ~fileA;
+		}
+	}
+	else
+	{
+		while (pawnBitboard)
+		{
+			currentPos = pop(pawnBitboard);
+			attackSet |= (currentPos >> 9) & ~fileH | (currentPos >> 7) & ~fileA;
+		}
+	}
+
+	uint64_t knightBitboard = findBitboard(oppositeColour, knight);
+	while (knightBitboard)
+	{
+		currentPos = pop(knightBitboard);
+		attackSet |= knightMovesArray[bitScanForward(currentPos)];
+	}
+
+	uint64_t kingBitboard = findBitboard(oppositeColour, king);
+	while (kingBitboard)
+	{
+		currentPos = pop(kingBitboard);
+		attackSet |= kingMovesArray[bitScanForward(currentPos)];
+	}
+
+	uint64_t rookBitboard = findBitboard(oppositeColour, rook) | findBitboard(oppositeColour, queen);
+	while (rookBitboard)
+	{
+		currentPos = pop(rookBitboard);
+		int piecePos = bitScanForward(currentPos);
+
+		uint64_t occupancy = magicBitboards::rookMask[piecePos] & allPiecesExceptKing;
+		uint64_t magicResult = occupancy * magicBitboards::magicNumberRook[piecePos];
+		int arrayIndex = magicResult >> magicBitboards::magicNumberShiftRook[piecePos];
+		attackSet |= magicBitboards::magicMovesRook[piecePos][arrayIndex];
+	}
+
+	uint64_t bishopBitboard = findBitboard(oppositeColour, bishop) | findBitboard(oppositeColour, queen);
+	while (bishopBitboard)
+	{
+		currentPos = pop(bishopBitboard);
+		int piecePos = bitScanForward(currentPos);
+
+		uint64_t occupancy = magicBitboards::bishopMask[piecePos] & allPiecesExceptKing;
+		uint64_t magicResult = occupancy * magicBitboards::magicNumberBishop[piecePos];
+		int arrayIndex = magicResult >> magicBitboards::magicNumberShiftBishop[piecePos];
+		attackSet |= magicBitboards::magicMovesBishop[piecePos][arrayIndex];
+	}
+
+	kingDangerSquares = attackSet;
 }

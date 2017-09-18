@@ -1,9 +1,9 @@
 #include "moveGeneration.h"
 
-uint64_t knightMovesArray[64];
-uint64_t kingMovesArray[64];
-uint64_t pawnWhiteAttacksArray[64];
-uint64_t pawnBlackAttacksArray[64];
+uint64_t knightMovesArray[64] = {0};
+uint64_t kingMovesArray[64] = { 0 };
+uint64_t pawnWhiteAttacksArray[64] = { 0 };
+uint64_t pawnBlackAttacksArray[64] = { 0 };
 
 int searchForMoves(Board * board, std::array<Move,150>* moveList)
 {
@@ -26,7 +26,7 @@ int searchForMoves(Board * board, std::array<Move,150>* moveList)
 	uint64_t captureMask = 0xFFFFFFFFFFFFFFFF;
 	uint64_t pushMask = 0xFFFFFFFFFFFFFFFF;
 
-	uint64_t kingDangerSquares = generateAttackSet(board, switchColour(board->nextColour), board->allPieces & ~board->findBitboard(board->nextColour, king));
+	uint64_t kingDangerSquares = board->getKingDangerSquares();
 	uint64_t pinnedPieces = getPinnedPieces(board);
 
 	uint64_t kingAttackers;
@@ -419,70 +419,6 @@ int addMoves(int start, int end, pieceType piece, std::array<Move,150>* Movelist
 	return arraySize;
 }
 
-uint64_t generateAttackSet(Board * board, colours colour, uint64_t allPieces)
-{
-	uint64_t attackSet = 0;
-	uint64_t currentPos;
-
-	uint64_t pawnBitboard = board->findBitboard(colour, pawn);
-	if (colour == white)
-	{
-		while (pawnBitboard)
-		{
-			currentPos = pop(pawnBitboard);
-			attackSet |= currentPos << 7 & ~fileH | currentPos << 9 & ~fileA;
-		}
-	}
-	else
-	{
-		while (pawnBitboard)
-		{
-			currentPos = pop(pawnBitboard);
-			attackSet |= (currentPos >> 9) & ~fileH | (currentPos >> 7) & ~fileA;
-		}
-	}
-
-	uint64_t knightBitboard = board->findBitboard(colour, knight);
-	while (knightBitboard)
-	{
-		currentPos = pop(knightBitboard);
-		attackSet |= knightMovesArray[bitScanForward(currentPos)];
-	}
-
-	uint64_t kingBitboard = board->findBitboard(colour, king);
-	while (kingBitboard)
-	{
-		currentPos = pop(kingBitboard);
-		attackSet |= kingMovesArray[bitScanForward(currentPos)];
-	}
-
-	uint64_t rookBitboard = board->findBitboard(colour, rook) | board->findBitboard(colour, queen);
-	while (rookBitboard)
-	{
-		currentPos = pop(rookBitboard);
-		int piecePos = bitScanForward(currentPos);
-
-		uint64_t occupancy = magicBitboards::rookMask[piecePos] & allPieces;
-		uint64_t magicResult = occupancy * magicBitboards::magicNumberRook[piecePos];
-		int arrayIndex = magicResult >> magicBitboards::magicNumberShiftRook[piecePos];
-		attackSet |= magicBitboards::magicMovesRook[piecePos][arrayIndex];
-	}
-
-	uint64_t bishopBitboard = board->findBitboard(colour, bishop) | board->findBitboard(colour, queen);
-	while (bishopBitboard)
-	{
-		currentPos = pop(bishopBitboard);
-		int piecePos = bitScanForward(currentPos);
-
-		uint64_t occupancy = magicBitboards::bishopMask[piecePos] & allPieces;
-		uint64_t magicResult = occupancy * magicBitboards::magicNumberBishop[piecePos];
-		int arrayIndex = magicResult >> magicBitboards::magicNumberShiftBishop[piecePos];
-		attackSet |= magicBitboards::magicMovesBishop[piecePos][arrayIndex];
-	}
-
-	return attackSet;
-}
-
 uint64_t getPinnedPieces(Board * board)
 {
 	uint64_t pinnedPieces = 0;
@@ -612,40 +548,6 @@ uint64_t getAttackers(Board * board, colours colour, uint64_t targetBitboard)
 	attackers |= magicMoves & (board->findBitboard(opponentColour, bishop) | (board->findBitboard(opponentColour, queen)));
 
 	return attackers;
-}
-
-void setupMoveGen()
-{
-	uint64_t currentPos, knightMoves, kingMoves;
-	for (int x = 0; x < 64; x++)
-	{
-		currentPos = (uint64_t)1 << x;
-
-		knightMoves = 0;
-		knightMoves |= currentPos << 15 & ~fileH;
-		knightMoves |= currentPos << 17 & ~fileA;
-		knightMoves |= currentPos << 06 & ~fileH & ~fileG;
-		knightMoves |= currentPos << 10 & ~fileA & ~fileB;
-		knightMoves |= currentPos >> 10 & ~fileH & ~fileG;
-		knightMoves |= currentPos >> 06 & ~fileA & ~fileB;
-		knightMoves |= currentPos >> 17 & ~fileH;
-		knightMoves |= currentPos >> 15 & ~fileA;
-		knightMovesArray[x] = knightMoves;
-
-		kingMoves = 0;
-		kingMoves |= currentPos << 8;
-		kingMoves |= currentPos << 9 & ~fileA;
-		kingMoves |= currentPos << 1 & ~fileA;
-		kingMoves |= currentPos >> 7 & ~fileA;
-		kingMoves |= currentPos >> 8;
-		kingMoves |= currentPos >> 9 & ~fileH;
-		kingMoves |= currentPos >> 1 & ~fileH;
-		kingMoves |= currentPos << 7 & ~fileH;
-		kingMovesArray[x] = kingMoves;
-
-		pawnWhiteAttacksArray[x] = currentPos << 7 & ~fileH | currentPos << 9 & ~fileA;
-		pawnBlackAttacksArray[x] = currentPos >> 9 &  ~fileH | currentPos >> 7 & ~fileA;
-	}
 }
 
 bool isPinnedEnPassant(Board* board, uint64_t pieces)

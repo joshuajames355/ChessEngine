@@ -193,7 +193,7 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 	if (arraySize == 0)
 	{
 		//Checkmate
-		if (board->isPieceAttacked(bitScanForward(board->findBitboard(board->nextColour, king)), board->nextColour))
+		if (board->isInCheck())
 		{
 			//Adds the distance to the root node onto the checkmate score.
 			//This is to ensure the search algorithm prioritizes the fastest checkmate
@@ -306,7 +306,7 @@ int quiescence(int alpha, int beta, int depthLeft, Board* board, searchData * da
 	for (int x = 0; x < arraySize; x++)
 	{
 		moveList[x].applyMove(board);
-		score = -quiescence(-beta, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture);
+		score = -quiescence(-beta, -alpha, depthLeft - 1, board, data, !continueQuiescence( board, &moveList[x]));
 		moveList[x].undoMove(board);
 		if (score >= beta)
 		{
@@ -319,6 +319,13 @@ int quiescence(int alpha, int beta, int depthLeft, Board* board, searchData * da
 	}
 
 	return alpha;
+}
 
+bool continueQuiescence(Board * board, Move * nextMove)
+{
+	if (board->isInCheck()) return true;
+	if (nextMove->moveType == capture || nextMove->moveType == rookPromotion ||
+		nextMove->moveType == queenPromotion || bishopPromotion || queenPromotion) return true;
+	return false;
 }
 

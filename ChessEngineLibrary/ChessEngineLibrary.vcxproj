@@ -78,7 +78,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -91,6 +91,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -122,7 +123,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -146,6 +147,7 @@
     <ClInclude Include="magicBitboards.h" />
     <ClInclude Include="move.h" />
     <ClInclude Include="moveGeneration.h" />
+    <ClInclude Include="moveGenerationTables.h" />
     <ClInclude Include="moveOrdering.h" />
     <ClInclude Include="piece.h" />
     <ClInclude Include="pieceSquare.h" />
@@ -162,6 +164,7 @@
     <ClCompile Include="magicBitboards.cpp" />
     <ClCompile Include="move.cpp" />
     <ClCompile Include="moveGeneration.cpp" />
+    <ClCompile Include="moveGenerationTables.cpp" />
     <ClCompile Include="moveOrdering.cpp" />
     <ClCompile Include="piece.cpp" />
     <ClCompile Include="pieceSquare.cpp" />

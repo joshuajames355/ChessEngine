@@ -26,3 +26,4 @@ Move startSearch(Board* board, TranspositionEntry* transpositionTable, timeManag
 Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntry* transpositionTable);
 int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data, bool isQuiet, TranspositionEntry* transpositionTable, std::vector<killerEntry>* killerMoveTable);
 int quiescence(int alpha, int beta, int depthLeft, Board* board, searchData* data, bool isQuiet);
+bool continueQuiescence(Board* board, Move* nextMove);
