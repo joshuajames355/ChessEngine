@@ -847,3 +847,10 @@ void Board::generateKingDangerSquares()
 
 	kingDangerSquares = attackSet;
 }
+
+void Board::doNullMove()
+{
+	nextColour = switchColour(nextColour);
+	kingDangerSquares = 0;
+	zorbistKey ^= ZorbistKeys::blackMoveKey;
+}

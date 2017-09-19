@@ -62,10 +62,12 @@ public:
 	uint64_t blackPieces;
 	uint64_t allPieces;
 
-
-	uint64_t kingDangerSquares;
-
 	bool isInCheck();
 	uint64_t getKingDangerSquares();
 	void generateKingDangerSquares();
+
+	//This will either setup for or undo a null move
+	void doNullMove();
+
+	uint64_t kingDangerSquares;
 };
