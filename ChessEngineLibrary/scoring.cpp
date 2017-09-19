@@ -216,6 +216,8 @@ int calculateMaterialScore(Board * board, bool lateGame)
 
 int calculateKingSafetyScore(Board * board)
 {
+	//int whiteScore = calculateKingSafetyScoreForColour(board, white);
+	//int blackScore = calculateKingSafetyScoreForColour(board, black);
 	if (board->nextColour == white) return calculateKingSafetyScoreForColour(board, white) - calculateKingSafetyScoreForColour(board, black);
 	else return calculateKingSafetyScoreForColour(board, black) - calculateKingSafetyScoreForColour(board, white);
 }
@@ -223,9 +225,9 @@ int calculateKingSafetyScore(Board * board)
 int calculateKingSafetyScoreForColour(Board * board, colours colour)
 {
 	const uint64_t fileMasks[8] = { fileA, fileB, fileC, fileD, fileE, fileF, fileG, fileH };
-	const uint64_t startingRankMask = rank2 ? colour == white : rank7;
-	const uint64_t movedOnceMask = rank3 ? colour == white : rank6;
-	const uint64_t movedTwiceMask = rank4 ? colour == white : rank5;
+	const uint64_t startingRankMask = colour == white ? rank2 : rank7;
+	const uint64_t movedOnceMask = colour == white ? rank3 : rank6;
+	const uint64_t movedTwiceMask = colour == white ? rank4 : rank5;
 
 	int score = 0;
 	const uint64_t kingBitboard = board->findBitboard(colour, king);
@@ -241,7 +243,8 @@ int calculateKingSafetyScoreForColour(Board * board, colours colour)
 			uint64_t fileMask = fileMasks[x];
 			
 			//Half the scores for files 2 and 5
-			const float scoreMultiplier = 1 ? x != 2 : 0.5;
+			const float scoreMultiplier = x != 2 ? 1 : 0.5;
+			int fileScore = 0;
 
 			//File is not open
 			if (pawnBitboard & fileMask)
@@ -252,40 +255,43 @@ int calculateKingSafetyScoreForColour(Board * board, colours colour)
 					//if the pawn has moved more than once, give a penalty
 					if ((pawnBitboard & fileMask & movedOnceMask)  == 0)
 					{
-						score -= 20 * scoreMultiplier;
+						fileScore -= 20;
 					}
 					else
 					{
-						score -= 10 * scoreMultiplier;
+						fileScore -= 10;
 					}
 				}			
 			}
 			//Give a penalty for an open file.
 			else
 			{
-				score -= 25 * scoreMultiplier;
+				fileScore -= 25;
 
 			}
 
 			//Give a penalty for their being no enemy pawns on the file. Semi-open
 			if ((enemyPawnBitboard & fileMask) == 0)
 			{
-				score -= 15 * scoreMultiplier;
+				fileScore -= 15;
 			}
 			else
 			{
 				//If the pawn is in front of your starting rank
 				if (enemyPawnBitboard & movedOnceMask & fileMask)
 				{
-					score -= 10 * scoreMultiplier;
+					fileScore -= 10;
 				}
 				//If the pawn is on your front rank.
 				else if (enemyPawnBitboard & movedTwiceMask & fileMask)
 				{
-					score -= 5 * scoreMultiplier;
+					fileScore -= 5;
 				}
 			}
+
+			score += fileScore * scoreMultiplier;
 		}
+
 	}
 	//If the king is in the three right hand files.
 	else if (kingBitboard & 16204198715729174752)
@@ -296,7 +302,8 @@ int calculateKingSafetyScoreForColour(Board * board, colours colour)
 			uint64_t fileMask = fileMasks[x];
 
 			//Half the scores for files 2 and 5
-			const float scoreMultiplier = 1 ? x != 5 : 0.5;
+			const float scoreMultiplier = x != 5 ? 1 : 0.5;
+			int fileScore = 0;
 
 			//File is not open
 			if (pawnBitboard & fileMask)
@@ -307,39 +314,40 @@ int calculateKingSafetyScoreForColour(Board * board, colours colour)
 					//if the pawn has moved more than once, give a penalty
 					if ((pawnBitboard & fileMask & movedOnceMask) == 0)
 					{
-						score -= 20 * scoreMultiplier;
+						fileScore -= 20;
 					}
 					else
 					{
-						score -= 10 * scoreMultiplier;
+						fileScore -= 10;
 					}
 				}
 			}
 			//Give a penalty for an open file.
 			else
 			{
-				score -= 25 * scoreMultiplier;
+				fileScore -= 25;
 
 			}
 
 			//Give a penalty for their being no enemy pawns on the file. Semi-open
 			if ((enemyPawnBitboard & fileMask) == 0)
 			{
-				score -= 15 * scoreMultiplier;
+				fileScore -= 15;
 			}
 			else
 			{
 				//If the pawn is in front of your starting rank
 				if (enemyPawnBitboard & movedOnceMask & fileMask)
 				{
-					score -= 10 * scoreMultiplier;
+					fileScore -= 10;
 				}
 				//If the pawn is on your front rank.
 				else if (enemyPawnBitboard & movedTwiceMask & fileMask)
 				{
-					score -= 5 * scoreMultiplier;
+					fileScore -= 5;
 				}
 			}
+			score += fileScore * scoreMultiplier;
 		}
 	}
 
