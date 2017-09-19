@@ -216,8 +216,6 @@ int calculateMaterialScore(Board * board, bool lateGame)
 
 int calculateKingSafetyScore(Board * board)
 {
-	//int whiteScore = calculateKingSafetyScoreForColour(board, white);
-	//int blackScore = calculateKingSafetyScoreForColour(board, black);
 	if (board->nextColour == white) return calculateKingSafetyScoreForColour(board, white) - calculateKingSafetyScoreForColour(board, black);
 	else return calculateKingSafetyScoreForColour(board, black) - calculateKingSafetyScoreForColour(board, white);
 }

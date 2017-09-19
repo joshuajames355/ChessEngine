@@ -37,3 +37,13 @@ TEST(Scoring, kingStructureScore)
 	board.loadFromFen("k7/ppp5/1PP5/8/7p/6pP/5PP1/6K1 b - - 0 1 ");
 	EXPECT_EQ(calculateKingSafetyScore(&board), -30 +32);
 }
+
+TEST(Scoring, rookPositionalScore)
+{
+	Board board;
+	board.loadFromFen("k1r1r3/8/8/8/8/8/2P2P2/5R1K w - - 0 1");
+	EXPECT_EQ(calculateRookPositionScore(&board), 0 - 25);
+
+	board.loadFromFen("k3r3/5pR1/8/8/8/8/8/5R1K w - - 0 1");
+	EXPECT_EQ(calculateRookPositionScore(&board), 45 - 15);
+}
