@@ -68,6 +68,7 @@ public:
 
 	//This will either setup for or undo a null move
 	void doNullMove();
+	void undoNullMove();
 
 	uint64_t kingDangerSquares;
 };

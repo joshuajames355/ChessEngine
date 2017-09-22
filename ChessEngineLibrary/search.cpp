@@ -22,8 +22,8 @@ Move startSearch(Board* board, TranspositionEntry* transpositionTable, timeManag
 		data.depth = x;
 		bestMove = rootSearch(x, board, &data, transpositionTable);
 
-		//if (!timer->isMoreTime())
-			//break;
+		if (!timer->isMoreTime())
+			break;
 	}
 	return bestMove;
 }
@@ -84,7 +84,7 @@ Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntr
 		moveList[x].applyMove(board);
 		if (x == 0)
 		{
-			score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, true, false);
+			score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, true);
 		}
 		//Late Move Reductions
 		else if(x > 4 && depthLeft >= 3 &&
@@ -95,22 +95,22 @@ Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntr
 						 moveList[x].moveType != bishopPromotion)
 		{
 			//Try a null window search at a reduced depth
-			score = -negascout(-alpha - 1, -alpha, depthLeft - 2, board, data, transpositionTable, killerMoveTable, false, false);
+			score = -negascout(-alpha - 1, -alpha, depthLeft - 2, board, data, transpositionTable, killerMoveTable, false);
 
 			//If the score is within the bounds , the first child was not the principle variation
 			if (alpha < score && score < beta)
 				//Therefore do a full re-search
-				score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, false, false);
+				score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, false);
 		}
 		else
 		{
 			//Try a null window search
-			score = -negascout(-alpha - 1, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, false, false);
+			score = -negascout(-alpha - 1, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, false);
 
 			//If the score is within the bounds , the first child was not the principle variation
 			if (alpha < score && score < beta)
 				//Therefore do a full re-search
-				score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, false, false);
+				score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, false);
 		}
 		moveList[x].undoMove(board);
 		if (score >= beta)
@@ -152,7 +152,7 @@ Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntr
 	return bestMove;
 }
 
-int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data, TranspositionEntry* transpositionTable, std::vector<killerEntry>* killerMoveTable,bool hasBeenNullMove , bool isPrevMoveNull)
+int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data, TranspositionEntry* transpositionTable, std::vector<killerEntry>* killerMoveTable , bool isPrevMoveNull)
 {
 	if (depthLeft == 0) return quiescence(alpha, beta, 3, board, data, true);
 
@@ -202,7 +202,7 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 		{
 			//Adds the distance to the root node onto the checkmate score.
 			//This is to ensure the search algorithm prioritizes the fastest checkmate
-			return -25000 + (data->depth - depthLeft);
+			return -25000 - (data->depth - depthLeft);
 		}
 		//Stalemate
 		else
@@ -217,14 +217,16 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 		board->doNullMove();
 
 		//Do a null seach at a reduced depth.
-		//int nullScore = -negascout(- beta, -beta + 1, depthLeft - 3, board, data, transpositionTable, killerMoveTable, true);
-		negascout(-beta, -beta + 1, depthLeft - 3, board, data, transpositionTable, killerMoveTable, true, true);
-		board->doNullMove();
-
+		int nullScore = -negascout(- beta, -alpha, depthLeft - 3, board, data, transpositionTable, killerMoveTable, true);
+		board->undoNullMove();
 		//If the score has improved enough to make a cutoff even with a null move
-		//Then this position would almost certainly produce a cutoff without the null
-		//Move
-		//if (nullScore >= beta) return nullScore; //Cutoff
+		//Then this position would almost certainly produce a cutoff without the null move
+
+		if (nullScore > beta)
+		{
+			return nullScore; //Cutoff
+			
+		}
 	}
 
 	orderSearch(&moveList, board, arraySize, &bestMove, isBestMove, (*killerMoveTable)[depthLeft]);
@@ -236,7 +238,7 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 
 		if (x == 0)
 		{
-			score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, hasBeenNullMove, false);
+			score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, false);
 		}
 		//Late Move Reductions
 		else if (x > 4 && depthLeft >= 3 &&
@@ -247,28 +249,28 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 			moveList[x].moveType != bishopPromotion)
 		{
 			//Try a null window search at a reduced depth
-			score = -negascout(-alpha - 1, -alpha, depthLeft - 2, board, data, transpositionTable, killerMoveTable, hasBeenNullMove, false);
+			score = -negascout(-alpha - 1, -alpha, depthLeft - 2, board, data, transpositionTable, killerMoveTable, false);
 
 			//If the score is within the bounds , the first child was not the principle variation
 			if (alpha < score && score < beta)
 			//Therefore do a full re-search
-			score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, hasBeenNullMove, false);
+			score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, false);
 		}
 		else
 		{
 			//Try a null window search
-			score = -negascout(-alpha - 1, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, hasBeenNullMove, false);
+			score = -negascout(-alpha - 1, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, false);
 
 			//If the score is within the bounds , the first child was not the principle variation
 			if (alpha < score && score < beta)
 			//Therefore do a full re-search
-			score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, hasBeenNullMove, false);
+			score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, false);
 		}
 		moveList[x].undoMove(board);
 
 		if (score >= beta)
 		{
-			if (moveList[x].capturedPiece == blank && !hasBeenNullMove)
+			if (moveList[x].capturedPiece == blank)
 				(*killerMoveTable)[depthLeft].addKillerMove(moveList[x]);
 			return beta;   //  fail hard beta-cutoff
 		}
@@ -280,28 +282,27 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 
 	}
 	
-	if (!hasBeenNullMove)
-	{
-		TranspositionEntry newEntry = TranspositionEntry();
-		newEntry.score = alpha;
-		if (alpha <= alphaOriginal)
-		{
-			newEntry.flag = upperBound;
-		}
-		else if (alpha >= beta)
-		{
-			newEntry.flag = lowerBound;
-		}
-		else
-		{
-			newEntry.flag = Exact;
-		}
-		newEntry.depth = depthLeft;
-		newEntry.bestMove = bestMove;
-		newEntry.zorbistKey = board->zorbistKey;
 
-		transpositionTable[board->zorbistKey % TTSize] = newEntry;
+	TranspositionEntry newEntry = TranspositionEntry();
+	newEntry.score = alpha;
+	if (alpha <= alphaOriginal)
+	{
+		newEntry.flag = upperBound;
 	}
+	else if (alpha >= beta)
+	{
+		newEntry.flag = lowerBound;
+	}
+	else
+	{
+		newEntry.flag = Exact;
+	}
+	newEntry.depth = depthLeft;
+	newEntry.bestMove = bestMove;
+	newEntry.zorbistKey = board->zorbistKey;
+
+	transpositionTable[board->zorbistKey % TTSize] = newEntry;
+	
 	return alpha;
 }
 
@@ -360,11 +361,15 @@ bool canDoNullSearch(Board * board)
 	if (board->nextColour == white) 
 	{
 		if ((board->whitePawnBitboard | board->whiteKingBitboard) == board->whitePieces) return false;
+		if (bitSum(board->whitePieces) < 5) return false;
 	}
 	else
 	{
 		if ((board->blackPawnBitboard | board->blackKingBitboard) == board->blackPieces) return false;
+		if (bitSum(board->blackPieces) < 5) return false;
 	}
+
+
 	return true;
 }
 

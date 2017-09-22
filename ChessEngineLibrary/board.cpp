@@ -587,28 +587,21 @@ bool Board::isPieceAttacked(int piecePos, colours colour)
 
 	if (colour == white)
 	{
-		if ((pieceBitboard << 7) & blackPawnBitboard & ~fileH || (pieceBitboard << 9) & blackPawnBitboard & ~fileA)
+		if (pawnWhiteAttacksArray[piecePos] & whitePawnBitboard)
 		{
 			return true;
 		}
 	}
 	else
 	{
-		if ((pieceBitboard >> 9) & whitePawnBitboard & ~fileH || (pieceBitboard >> 7) & whitePawnBitboard & ~fileA)
+		if (pawnBlackAttacksArray[piecePos] & blackPawnBitboard)
 		{
 			return true;
 		}
 	}
 
 	//KnightMoves
-	uint64_t knightMoves= (pieceBitboard << 15) & ~fileH; //2 up 1 left
-	knightMoves |= (pieceBitboard << 17) & ~fileA; //2 up 1 Right
-	knightMoves |= (pieceBitboard << 06) & ~fileH & ~fileG;//1 up 2 left
-	knightMoves |= (pieceBitboard << 10) & ~fileA & ~fileB;//1 up 2 right
-	knightMoves |= (pieceBitboard >> 10) & ~fileH & ~fileG;//1 down 2 left
-	knightMoves |= (pieceBitboard >> 06) & ~fileA & ~fileB;//1 down 2 right
-	knightMoves |= (pieceBitboard >> 17) & ~fileH;//2 down 1 left
-	knightMoves |= (pieceBitboard >> 15) & ~fileA;//2 down 1 right
+	uint64_t knightMoves = knightMovesArray[piecePos];
 
 	if (colour == white)
 	{
@@ -625,25 +618,18 @@ bool Board::isPieceAttacked(int piecePos, colours colour)
 		}
 	}
 
-	uint64_t moves = pieceBitboard << 8;
-	moves |= pieceBitboard << 9 & ~fileA;
-	moves |= pieceBitboard << 1 & ~fileA;
-	moves |= pieceBitboard >> 7 & ~fileA;
-	moves |= pieceBitboard >> 8;
-	moves |= pieceBitboard >> 9 & ~fileH;
-	moves |= pieceBitboard >> 1 & ~fileH;
-	moves |= pieceBitboard << 7 & ~fileH;
+	uint64_t kingMoves = kingMovesArray[piecePos];
 
 	if (colour == white)
 	{
-		if (knightMoves & blackKingBitboard)
+		if (kingMoves & blackKingBitboard)
 		{
 			return true;
 		}
 	}
 	else
 	{
-		if (knightMoves & whiteKingBitboard)
+		if (kingMoves & whiteKingBitboard)
 		{
 			return true;
 		}
@@ -795,7 +781,7 @@ void Board::generateKingDangerSquares()
 		while (pawnBitboard)
 		{
 			currentPos = pop(pawnBitboard);
-			attackSet |= currentPos << 7 & ~fileH | currentPos << 9 & ~fileA;
+			attackSet |= pawnWhiteAttacksArray[bitScanForward(currentPos)];
 		}
 	}
 	else
@@ -803,7 +789,7 @@ void Board::generateKingDangerSquares()
 		while (pawnBitboard)
 		{
 			currentPos = pop(pawnBitboard);
-			attackSet |= (currentPos >> 9) & ~fileH | (currentPos >> 7) & ~fileA;
+			attackSet |= pawnBlackAttacksArray[bitScanForward(currentPos)];
 		}
 	}
 
@@ -849,6 +835,14 @@ void Board::generateKingDangerSquares()
 }
 
 void Board::doNullMove()
+{
+	nextColour = switchColour(nextColour);
+	kingDangerSquares = 0;
+	enPassantSquare = -1;
+	zorbistKey ^= ZorbistKeys::blackMoveKey;
+}
+
+void Board::undoNullMove()
 {
 	nextColour = switchColour(nextColour);
 	kingDangerSquares = 0;
