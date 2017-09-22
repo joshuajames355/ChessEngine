@@ -76,8 +76,15 @@ int searchForMoves(Board * board, std::array<Move,150>* moveList)
 int generatePawnMoves(Board* board, std::array<Move,150>* Movelist, uint64_t pinnedPieces, uint64_t pushMask, uint64_t captureMask, int arraySize)
 {
 	uint64_t pawnPos, pawnMoves, pawnAttacks, pawnDoubleMoves, legalMoves;
+
 	if (board->nextColour == white)
 	{
+		//Adds en-passant position to capture moves
+		if (captureMask != 0xFFFFFFFFFFFFFFFF && bitScanForward(captureMask & board->blackPawnBitboard) + 8 == board->enPassantSquare)
+		{
+			captureMask |= (uint64_t)1 << board->enPassantSquare;
+		}
+
 		uint64_t pawnBitboard = board->whitePawnBitboard;
 		while (pawnBitboard)
 		{
@@ -116,6 +123,12 @@ int generatePawnMoves(Board* board, std::array<Move,150>* Movelist, uint64_t pin
 	}
 	else //Colour is black
 	{
+		//Adds en-passant position to capture move
+		if (captureMask != 0xFFFFFFFFFFFFFFFF && bitScanForward(captureMask & board->whitePawnBitboard) - 8 == board->enPassantSquare)
+		{
+			captureMask |= (uint64_t)1 >> board->enPassantSquare;
+		}
+
 		uint64_t pawnBitboard = board->blackPawnBitboard;
 		while (pawnBitboard)
 		{
