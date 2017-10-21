@@ -1,13 +1,21 @@
 #include "search.h"
 
-void updateEngine(searchData * data, Move* bestMove, int alpha)
+void updateUI(searchData * data, Move currentMove, int currentMoveNumber, std::string pvLine)
 {
 	std::cout << "info depth " << data->depth;
 	std::cout << " nodes " << data->nodes;
 	std::cout << " nps " << (uint64_t)((data->nodes) / difftime(time(NULL), data->startTime));
-	std::cout << " pv " << notationFromMove(*bestMove);
-	std::cout << " score upperbound " << alpha << "\n";
-	
+	std::cout << " pv " << pvLine;
+	std::cout << " currmove " << notationFromMove(currentMove);
+	std::cout << " currmovenumber " << currentMoveNumber << "\n";
+}
+
+void finalUIUpdate(searchData * data, std::string pvLine)
+{
+	std::cout << "info depth " << data->depth;
+	std::cout << " nodes " << data->nodes;
+	std::cout << " nps " << (uint64_t)((data->nodes) / difftime(time(NULL), data->startTime));
+	std::cout << " pv " << pvLine << "\n";
 }
 
 Move startSearch(Board* board, TranspositionEntry* transpositionTable, timeManagement* timer)
@@ -16,144 +24,30 @@ Move startSearch(Board* board, TranspositionEntry* transpositionTable, timeManag
 	data.startTime = time(0);
 	data.nodes = 0;
 	
-	Move bestMove;
+	PVData bestMove;
 	for (int x = 1; x <= 50; x++)
 	{
 		data.depth = x;
-		bestMove = rootSearch(x, board, &data, transpositionTable);
+
+		//bestMove = rootSearch(x, board, &data, transpositionTable);
+		std::vector<killerEntry>* killerMoveTable = new std::vector<killerEntry>();
+		killerMoveTable->resize(x + 1);
+
+		negascout(-30000, 3000, x, board, &data, transpositionTable, killerMoveTable);
+		delete killerMoveTable;
+
+		bestMove = extractPVLine(board, transpositionTable);
 
 		if (!timer->isMoreTime())
 			break;
 	}
-	return bestMove;
+	finalUIUpdate(&data, bestMove.line);
+	return bestMove.bestMove;
 }
 
-
-Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntry* transpositionTable)
+int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data, TranspositionEntry* transpositionTable, std::vector<killerEntry>* killerMoveTable)
 {
-	data->nodes++;
-
-	int alpha = -30000;
-	int beta = 30000;
-
-	std::vector<killerEntry>* killerMoveTable = new std::vector<killerEntry>();
-	killerMoveTable->resize(depthLeft);
-
-	int alphaOriginal = alpha;
-	Move bestMove;
-	bool isBestMove = false;
-
-	TranspositionEntry entry = transpositionTable[board->zorbistKey % TTSize];
-
-	std::array<Move, 150> moveList;
-	int arraySize = searchForMoves(board,&moveList);
-	if (entry.zorbistKey == board->zorbistKey && std::find(moveList.begin(), moveList.end(), entry.bestMove) != moveList.end())
-	{
-		if (entry.depth >= depthLeft)
-		{
-			if (entry.flag == Exact)
-			{
-				delete killerMoveTable;
-				return entry.bestMove;
-			}
-			else if (entry.flag == lowerBound)
-			{
-				alpha = std::max(alpha, entry.score);
-			}
-			else if (entry.flag == upperBound)
-			{
-				beta = std::max(beta, entry.score);
-			}
-			if (alpha >= beta)
-			{
-				delete killerMoveTable;
-				return entry.bestMove;
-			}
-		}
-
-		isBestMove = true;
-		bestMove = entry.bestMove;
-	}
-
-	orderSearch(&moveList, board, arraySize, &bestMove, isBestMove, killerEntry());
-
-	int score;
-	for (int x = 0; x < arraySize; x++)
-	{
-		moveList[x].applyMove(board);
-		if (x == 0)
-		{
-			score = -negascout(-beta, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
-		}
-		//Late Move Reductions
-		else if(x > 4 && depthLeft >= 3 &&
-						 moveList[x].moveType != capture &&
-						 moveList[x].moveType != queenPromotion &&
-						 moveList[x].moveType != rookPromotion &&
-						 moveList[x].moveType != knightPromotion &&
-						 moveList[x].moveType != bishopPromotion)
-		{
-			//Try a null window search at a reduced depth
-			score = -negascout(-alpha - 1, -alpha, depthLeft - 2, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
-
-			//If the score is within the bounds , the first child was not the principle variation
-			if (alpha < score && score < beta)
-				//Therefore do a full re-search
-				score = -negascout(-beta, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
-		}
-		else
-		{
-			//Try a null window search
-			score = -negascout(-alpha - 1, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
-
-			//If the score is within the bounds , the first child was not the principle variation
-			if (alpha < score && score < beta)
-				//Therefore do a full re-search
-				score = -negascout(-beta, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
-		}
-		moveList[x].undoMove(board);
-		if (score >= beta)
-		{
-			delete killerMoveTable;
-			return bestMove;   //  fail hard beta-cutoff
-		}
-		if (score > alpha)
-		{
-			alpha = score; // alpha acts like max in MiniMax
-			bestMove = moveList[x];
-		}
-		updateEngine(data, &bestMove, alpha);
-	}
-
-	TranspositionEntry newEntry = TranspositionEntry();
-	newEntry.score = alpha;
-	if (alpha <= alphaOriginal)
-	{
-		newEntry.flag = upperBound;
-	}
-	else if (alpha >= beta)
-	{
-		newEntry.flag = lowerBound;
-	}
-	else
-	{
-		newEntry.flag = Exact;
-	}
-	newEntry.depth = depthLeft;
-	newEntry.bestMove = bestMove;
-	newEntry.zorbistKey = board->zorbistKey;
-
-	transpositionTable[board->zorbistKey % TTSize] = newEntry;
-
-	updateEngine(data, &bestMove, alpha);
-
-	delete killerMoveTable;
-	return bestMove;
-}
-
-int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data, bool isQuiet, TranspositionEntry* transpositionTable, std::vector<killerEntry>* killerMoveTable)
-{
-	if (depthLeft == 0) return quiescence(alpha, beta, 3, board, data, isQuiet);
+	if (depthLeft == 0) return quiescence(alpha, beta, 3, board, data, false);
 
 	data->nodes++;
 	int alphaOriginal = alpha;
@@ -215,11 +109,17 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 	int score;
 	for (int x = 0; x < arraySize; x++)
 	{
-		moveList[x].applyMove(board);
+		//If First node
+		if (depthLeft == data->depth)
+		{
+			PVData bestMove = extractPVLine(board, transpositionTable);
+			updateUI(data, moveList[x], x + 1, bestMove.line);
+		}
 
+		moveList[x].applyMove(board);
 		if (x == 0)
 		{
-			score = -negascout(-beta, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
+			score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable);
 		}
 		//Late Move Reductions
 		else if (x > 4 && depthLeft >= 3 &&
@@ -230,22 +130,22 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 			moveList[x].moveType != bishopPromotion)
 		{
 			//Try a null window search at a reduced depth
-			score = -negascout(-alpha - 1, -alpha, depthLeft - 2, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
+			score = -negascout(-alpha - 1, -alpha, depthLeft - 2, board, data, transpositionTable, killerMoveTable);
 
 			//If the score is within the bounds , the first child was not the principle variation
 			if (alpha < score && score < beta)
 				//Therefore do a full re-search
-				score = -negascout(-beta, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
+				score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable);
 		}
 		else
 		{
 			//Try a null window search
-			score = -negascout(-alpha - 1, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
+			score = -negascout(-alpha - 1, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable);
 
 			//If the score is within the bounds , the first child was not the principle variation
 			if (alpha < score && score < beta)
 				//Therefore do a full re-search
-				score = -negascout(-beta, -alpha, depthLeft - 1, board, data, moveList[x].moveType != capture, transpositionTable, killerMoveTable);
+				score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable);
 		}
 		moveList[x].undoMove(board);
 
@@ -327,5 +227,23 @@ bool continueQuiescence(Board * board, Move * nextMove)
 	if (nextMove->moveType == capture || nextMove->moveType == rookPromotion ||
 		nextMove->moveType == queenPromotion || bishopPromotion || queenPromotion) return true;
 	return false;
+}
+
+PVData extractPVLine(Board * board, TranspositionEntry * transpositionTable)
+{
+	PVData pv;
+
+	TranspositionEntry entry = transpositionTable[board->zorbistKey % TTSize];
+	if (entry.zorbistKey == board->zorbistKey) //The move has previously been searched
+	{
+		pv.bestMove = entry.bestMove;
+		pv.line += notationFromMove(entry.bestMove) + " ";
+
+		entry.bestMove.applyMove(board);
+		pv.line += extractPVLine(board, transpositionTable).line;
+		entry.bestMove.undoMove(board);
+	}
+
+	return pv;
 }
 

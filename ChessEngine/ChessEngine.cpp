@@ -102,7 +102,10 @@ void engineLoop()
 			timeManagement timer = timeManagement(btime, wtime, board.nextColour);
 
 			board.printBoard();
-			std::cout << "bestmove " << notationFromMove(startSearch(&board, transpositionTable, &timer)) << "\n";
+
+			Move pv = startSearch(&board, transpositionTable, &timer);
+
+			std::cout << "bestmove " << notationFromMove(pv) << "\n";
 		}
 	}
 
