@@ -297,7 +297,7 @@ int quiescence(int alpha, int beta, int depthLeft, Board* board, searchData * da
 	int score = calculateScoreDiff(board);
 	if (score >= beta) return beta;
 	if (alpha < score) alpha = score;
-	if (depthLeft == 0) return alpha;
+	//if (depthLeft == 0) return alpha;
 
 	std::array<Move, 150> moveList;
 	int arraySize = searchForMoves(board, &moveList);

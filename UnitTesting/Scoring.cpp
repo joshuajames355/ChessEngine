@@ -6,7 +6,7 @@
 TEST(Scoring, positionalScore)
 {
 	Board board;
-	board.whiteRookBitboard = 1;
+	board.setBitboard(white,rook, 1);
 	board.update();
 	board.nextColour = white;
 	EXPECT_EQ(calculatePositionalScore(&board), 0 + 500);
@@ -14,7 +14,7 @@ TEST(Scoring, positionalScore)
 	EXPECT_EQ(calculatePositionalScore(&board), 0 - 500);
 
 	board = Board();
-	board.whitePawnBitboard = 512;
+	board.setBitboard(white, pawn, 512);
 	board.update();
 	board.nextColour = white;
 	EXPECT_EQ(calculatePositionalScore(&board), 10 + 100);
@@ -22,7 +22,7 @@ TEST(Scoring, positionalScore)
 	EXPECT_EQ(calculatePositionalScore(&board), -10 - 100);
 
 	board = Board();
-	board.whiteKnightBitboard = 2048;
+	board.setBitboard(white, knight, 2048);
 	board.update();
 	board.nextColour = white;
 	EXPECT_EQ(calculatePositionalScore(&board), 5 + 320);
@@ -30,7 +30,7 @@ TEST(Scoring, positionalScore)
 	EXPECT_EQ(calculatePositionalScore(&board), -5 - 320);
 
 	board = Board();
-	board.blackKnightBitboard = 4503599627370496;
+	board.setBitboard(black, knight, 4503599627370496); 
 	board.update();
 	board.nextColour = white;
 	EXPECT_EQ(calculatePositionalScore(&board), -5 - 320);

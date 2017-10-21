@@ -11,33 +11,33 @@ int calculatePositionalScore(Board* board)
 	bool lateGame = isLateGame(board);
 
 	int whiteScore = 0;
-	whiteScore += pieceSquareData::pawnSquare.calcScore(board->whitePawnBitboard, white);
-	whiteScore += pieceSquareData::knightSquare.calcScore(board->whiteKnightBitboard, white);
-	whiteScore += pieceSquareData::bishopSquare.calcScore(board->whiteBishopBitboard, white);
-	whiteScore += pieceSquareData::rookSquare.calcScore(board->whiteRookBitboard, white);
-	whiteScore += pieceSquareData::queenSquare.calcScore(board->whiteQueenBitboard, white);
+	whiteScore += pieceSquareData::pawnSquare.calcScore(board->getPieceBitboard(white, pawn), white);
+	whiteScore += pieceSquareData::knightSquare.calcScore(board->getPieceBitboard(white, king), white);
+	whiteScore += pieceSquareData::bishopSquare.calcScore(board->getPieceBitboard(white, bishop), white);
+	whiteScore += pieceSquareData::rookSquare.calcScore(board->getPieceBitboard(white, rook), white);
+	whiteScore += pieceSquareData::queenSquare.calcScore(board->getPieceBitboard(white, queen), white);
 	if (!lateGame)
 	{
-		whiteScore += pieceSquareData::midGameKingSquare.calcScore(board->whiteKingBitboard, white);
+		whiteScore += pieceSquareData::midGameKingSquare.calcScore(board->getPieceBitboard(white, king), white);
 	}
 	else
 	{
-		whiteScore += pieceSquareData::lateGameKingSquare.calcScore(board->whiteKingBitboard, white);
+		whiteScore += pieceSquareData::lateGameKingSquare.calcScore(board->getPieceBitboard(white, king), white);
 	}
 
 	int blackScore = 0;
-	blackScore += pieceSquareData::pawnSquare.calcScore(board->blackPawnBitboard, black);
-	blackScore += pieceSquareData::knightSquare.calcScore(board->blackKnightBitboard, black);
-	blackScore += pieceSquareData::bishopSquare.calcScore(board->blackBishopBitboard, black);
-	blackScore += pieceSquareData::rookSquare.calcScore(board->blackRookBitboard, black);
-	blackScore += pieceSquareData::queenSquare.calcScore(board->blackQueenBitboard, black);
+	blackScore += pieceSquareData::pawnSquare.calcScore(board->getPieceBitboard(black, pawn), black);
+	blackScore += pieceSquareData::knightSquare.calcScore(board->getPieceBitboard(black, knight) , black);
+	blackScore += pieceSquareData::bishopSquare.calcScore(board->getPieceBitboard(black, bishop), black);
+	blackScore += pieceSquareData::rookSquare.calcScore(board->getPieceBitboard(black, rook), black);
+	blackScore += pieceSquareData::queenSquare.calcScore(board->getPieceBitboard(black, queen), black);
 	if (!lateGame)
 	{
-		blackScore += pieceSquareData::midGameKingSquare.calcScore(board->blackKingBitboard, black);
+		blackScore += pieceSquareData::midGameKingSquare.calcScore(board->getPieceBitboard(black, king), black);
 	}
 	else
 	{
-		blackScore += pieceSquareData::lateGameKingSquare.calcScore(board->blackKingBitboard, black);
+		blackScore += pieceSquareData::lateGameKingSquare.calcScore(board->getPieceBitboard(black, king), black);
 	}
 
 	if (board->nextColour == black)
@@ -53,33 +53,33 @@ int calculatePositionalScore(Board* board)
 bool isLateGame(Board * board)
 {
 	bool lateGame = false;
-	if (board->whiteQueenBitboard + board->blackQueenBitboard == 0)
+	if (board->getPieceBitboard(white, queen) + board->getPieceBitboard(black, queen) == 0)
 	{
 		lateGame = true;
 	}
-	else if (bitSum(board->whiteQueenBitboard) < 2 && bitSum(board->blackQueenBitboard) < 2) //Can not be late game if either side has two queens.
+	else if (bitSum(board->getPieceBitboard(white, queen)) < 2 && bitSum(board->getPieceBitboard(black, queen)) < 2) //Can not be late game if either side has two queens.
 	{
 		bool blackLateGame = false;
 		bool whiteLateGame = false;
-		if (bitSum(board->blackQueenBitboard) == 1)
+		if (bitSum(board->getPieceBitboard(black, queen)) == 1)
 		{
-			int majorPiece = bitSum(board->blackRookBitboard);
-			int minorPieces = bitSum(board->blackKnightBitboard) + bitSum(board->blackBishopBitboard);
+			int majorPiece = bitSum(board->getPieceBitboard(black, rook));
+			int minorPieces = bitSum(board->getPieceBitboard(black, knight)) + bitSum(board->getPieceBitboard(black, bishop));
 			if (majorPiece == 0 && minorPieces <= 1)
 			{
 				blackLateGame = true;
 			}
 		}
-		else if (bitSum(board->whiteQueenBitboard) == 1)
+		else if (bitSum(board->getPieceBitboard(white, queen)) == 1)
 		{
-			int majorPiece = bitSum(board->whiteRookBitboard);
-			int minorPieces = bitSum(board->whiteKnightBitboard) + bitSum(board->whiteBishopBitboard);
+			int majorPiece = bitSum(board->getPieceBitboard(white, rook));
+			int minorPieces = bitSum(board->getPieceBitboard(white, knight)) + bitSum(board->getPieceBitboard(white, bishop));
 			if (majorPiece == 0 && minorPieces <= 1)
 			{
 				whiteLateGame = true;
 			}
 		}
-		if (whiteLateGame && blackLateGame || blackLateGame && bitSum(board->whiteQueenBitboard) == 0 || whiteLateGame && bitSum(board->blackQueenBitboard) == 0)
+		if (whiteLateGame && blackLateGame || blackLateGame && bitSum(board->getPieceBitboard(white, queen)) == 0 || whiteLateGame && bitSum(board->getPieceBitboard(black, queen)) == 0)
 		{
 			lateGame = true;
 		}

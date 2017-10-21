@@ -23,7 +23,7 @@ public:
 	void loadFromFen(std::string fen);
 	std::string exportAsFen();
 
-	uint64_t findBitboard(colours colour , pieceType piece);
+	uint64_t getPieceBitboard(colours colour , pieceType piece);
 	void setBitboard(colours colour, pieceType piece, uint64_t bitboard);
 	void removePiece(uint64_t bitboard);
 	pieceType getPieceTypeInSquare(uint64_t bitboard);
@@ -44,6 +44,7 @@ public:
 
 	uint64_t zorbistKey;
 
+	/*
 	uint64_t whitePawnBitboard;
 	uint64_t whiteKnightBitboard;
 	uint64_t whiteBishopBitboard;
@@ -51,12 +52,13 @@ public:
 	uint64_t whiteQueenBitboard;
 	uint64_t whiteKingBitboard;
 	
-	uint64_t blackPawnBitboard;
-	uint64_t blackKnightBitboard;
+	uint64_t pieceBitboards[black][pawn];
+	uint64_t pieceBitboards[black][knight];
 	uint64_t blackBishopBitboard;
-	uint64_t blackRookBitboard;
+	uint64_t pieceBitboards[black][rook];
 	uint64_t blackQueenBitboard;
 	uint64_t blackKingBitboard;
+	*/
 
 	uint64_t whitePieces;
 	uint64_t blackPieces;
@@ -68,4 +70,7 @@ public:
 	bool isInCheck();
 	uint64_t getKingDangerSquares();
 	void generateKingDangerSquares();
+
+private:
+	uint64_t pieceBitboards[2][6];
 };
