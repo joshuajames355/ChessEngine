@@ -7,6 +7,7 @@
 #include "move.h"
 #include "board.h"
 #include "magicBitboards.h"
+#include "moveGenerationTables.h"
 
 int searchForMoves(Board* board, std::array<Move,150>* moveList);
 
@@ -26,4 +27,3 @@ uint64_t getPinnedPieces(Board* board);
 uint64_t generateLegalFilterForPinnedPiece(Board* board, uint64_t pinnedPiece);
 uint64_t getAttackers(Board* board, colours colour, uint64_t targetBitboard);
 bool isPinnedEnPassant(Board* board, uint64_t pieces);
-void setupMoveGen();

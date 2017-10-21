@@ -39,27 +39,27 @@ Move moveFromNotation(std::string moveNotation, Board * board)
 	if ((fromBitboard & board->whitePieces) != 0) //Is a white piece
 	{
 		aiColour = white;
-		if ((fromBitboard & board->whiteBishopBitboard) != 0)
+		if ((fromBitboard & board->getPieceBitboard(white, bishop)) != 0)
 		{
 			piece = bishop;
 		}
-		else if ((fromBitboard & board->whiteQueenBitboard) != 0)
+		else if ((fromBitboard & board->getPieceBitboard(white, queen)) != 0)
 		{
 			piece = queen;
 		}
-		else if ((fromBitboard & board->whiteKingBitboard) != 0)
+		else if ((fromBitboard & board->getPieceBitboard(white, king)) != 0)
 		{
 			piece = king;
 		}
-		else if ((fromBitboard & board->whiteRookBitboard) != 0)
+		else if ((fromBitboard & board->getPieceBitboard(white, rook)) != 0)
 		{
 			piece = rook;
 		}
-		else if ((fromBitboard & board->whiteKnightBitboard) != 0)
+		else if ((fromBitboard & board->getPieceBitboard(white, knight)) != 0)
 		{
 			piece = knight;
 		}
-		else if ((fromBitboard & board->whitePawnBitboard) != 0)
+		else if ((fromBitboard & board->getPieceBitboard(white, pawn)) != 0)
 		{
 			piece = pawn;
 		}
@@ -67,27 +67,27 @@ Move moveFromNotation(std::string moveNotation, Board * board)
 	else if ((fromBitboard & board->blackPieces) != 0)
 	{
 		aiColour = black;
-		if ((fromBitboard & board->blackBishopBitboard) != 0)
+		if ((fromBitboard & board->getPieceBitboard(black, bishop)) != 0)
 		{
 			piece = bishop;
 		}
-		else if ((fromBitboard & board->blackQueenBitboard) != 0)
+		else if ((fromBitboard & board->getPieceBitboard(black, queen)) != 0)
 		{
 			piece = queen;
 		}
-		else if ((fromBitboard & board->blackKingBitboard) != 0)
+		else if ((fromBitboard & board->getPieceBitboard(black, king)) != 0)
 		{
 			piece = king;
 		}
-		else if ((fromBitboard & board->blackRookBitboard) != 0)
+		else if ((fromBitboard & board->getPieceBitboard(black, rook)) != 0)
 		{
 			piece = rook;
 		}
-		else if ((fromBitboard & board->blackKnightBitboard) != 0)
+		else if ((fromBitboard & board->getPieceBitboard(black, knight)) != 0)
 		{
 			piece = knight;
 		}
-		else if ((fromBitboard & board->blackPawnBitboard) != 0)
+		else if ((fromBitboard & board->getPieceBitboard(black, pawn)) != 0)
 		{
 			piece = pawn;
 		}

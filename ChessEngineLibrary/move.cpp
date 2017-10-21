@@ -60,7 +60,7 @@ void Move::applyMove(Board * board)
 	case quietMove:
 	{
 		//Moves the piece
-		uint64_t bitboard = board->findBitboard(board->nextColour, piece);
+		uint64_t bitboard = board->getPieceBitboard(board->nextColour, piece);
 		bitboard = (bitboard & ~((uint64_t)1 << from)) | ((uint64_t)1 << to);
 		board->setBitboard(board->nextColour, piece, bitboard);
 
@@ -91,7 +91,7 @@ void Move::applyMove(Board * board)
 		}
 
 		//Moves the piece
-		uint64_t bitboard = board->findBitboard(board->nextColour, piece);
+		uint64_t bitboard = board->getPieceBitboard(board->nextColour, piece);
 		bitboard = (bitboard & ~((uint64_t)1 << from)) | ((uint64_t)1 << to);
 		board->setBitboard(board->nextColour, piece, bitboard);
 
@@ -110,7 +110,7 @@ void Move::applyMove(Board * board)
 		board->removePiece((uint64_t)1 << from);
 
 		//Creates the promoted piece
-		uint64_t bitboard = board->findBitboard(board->nextColour, knight);
+		uint64_t bitboard = board->getPieceBitboard(board->nextColour, knight);
 		bitboard |= ((uint64_t)1 << to);
 		board->setBitboard(board->nextColour, knight, bitboard);
 
@@ -127,7 +127,7 @@ void Move::applyMove(Board * board)
 		board->removePiece((uint64_t)1 << from);
 
 		//Creates the promoted piece
-		uint64_t bitboard = board->findBitboard(board->nextColour, bishop);
+		uint64_t bitboard = board->getPieceBitboard(board->nextColour, bishop);
 		bitboard |= ((uint64_t)1 << to);
 		board->setBitboard(board->nextColour, bishop, bitboard);
 
@@ -144,7 +144,7 @@ void Move::applyMove(Board * board)
 		board->removePiece((uint64_t)1 << from);
 
 		//Creates the promoted piece
-		uint64_t bitboard = board->findBitboard(board->nextColour, rook);
+		uint64_t bitboard = board->getPieceBitboard(board->nextColour, rook);
 		bitboard |= ((uint64_t)1 << to);
 		board->setBitboard(board->nextColour, rook, bitboard);
 
@@ -161,7 +161,7 @@ void Move::applyMove(Board * board)
 		board->removePiece((uint64_t)1 << from);
 
 		//Creates the promoted piece
-		uint64_t bitboard = board->findBitboard(board->nextColour, queen);
+		uint64_t bitboard = board->getPieceBitboard(board->nextColour, queen);
 		bitboard |= ((uint64_t)1 << to);
 		board->setBitboard(board->nextColour, queen, bitboard);
 
@@ -172,7 +172,7 @@ void Move::applyMove(Board * board)
 	case pawnDoubleMove:
 	{
 		//Moves the piece
-		uint64_t bitboard = board->findBitboard(board->nextColour, piece);
+		uint64_t bitboard = board->getPieceBitboard(board->nextColour, piece);
 		bitboard = (bitboard & ~((uint64_t)1 << from)) | ((uint64_t)1 << to);
 		board->setBitboard(board->nextColour, piece, bitboard);
 
@@ -195,12 +195,12 @@ void Move::applyMove(Board * board)
 	case kingSideCastling:
 	{
 		//Moves the king
-		uint64_t bitboard = board->findBitboard(board->nextColour, piece);
+		uint64_t bitboard = board->getPieceBitboard(board->nextColour, piece);
 		bitboard = (bitboard & ~((uint64_t)1 << from)) | ((uint64_t)1 << to);
 		board->setBitboard(board->nextColour, piece, bitboard);
 		if (board->nextColour == white)
 		{
-			board->whiteRookBitboard = (board->whiteRookBitboard & ~128) | 32; //Moves the rook
+			board->setBitboard(white, rook ,(board->getPieceBitboard(white, rook) & ~128) | 32); //Moves the rook
 
 			//Updates hash for rook
 			board->zorbistKey ^= ZorbistKeys::pieceKeys[7][rook + 6 * board->nextColour];
@@ -208,7 +208,7 @@ void Move::applyMove(Board * board)
 		}
 		else
 		{
-			board->blackRookBitboard = (board->blackRookBitboard & ~9223372036854775808) | 2305843009213693952; //Moves the rook
+			board->setBitboard(black, rook, (board->getPieceBitboard(black, rook) & ~9223372036854775808) | 2305843009213693952); //Moves the rook
 
 			//Updates hash for rook
 			board->zorbistKey ^= ZorbistKeys::pieceKeys[63][rook + 6 * board->nextColour];
@@ -222,12 +222,12 @@ void Move::applyMove(Board * board)
 	case queenSideCastling:
 	{
 		//Moves the king
-		uint64_t bitboard = board->findBitboard(board->nextColour, piece);
+		uint64_t bitboard = board->getPieceBitboard(board->nextColour, piece);
 		bitboard = (bitboard & ~((uint64_t)1 << from)) | ((uint64_t)1 << to);
 		board->setBitboard(board->nextColour, piece, bitboard);
 		if (board->nextColour == white)
 		{
-			board->whiteRookBitboard = (board->whiteRookBitboard & ~1) | 8; //Moves the rook
+			board->setBitboard(white, rook, (board->getPieceBitboard(white, rook) & ~1) | 8); //Moves the rook
 
 			//Updates hash for rook
 			board->zorbistKey ^= ZorbistKeys::pieceKeys[0][rook + 6 * board->nextColour];
@@ -235,7 +235,7 @@ void Move::applyMove(Board * board)
 		}
 		else
 		{
-			board->blackRookBitboard = (board->blackRookBitboard & ~72057594037927936) | 576460752303423488; //Moves the rook
+			board->setBitboard(black, rook, (board->getPieceBitboard(black, rook) & ~72057594037927936) | 576460752303423488); //Moves the rook
 
 			//Updates hash for rook
 			board->zorbistKey ^= ZorbistKeys::pieceKeys[56][rook + 6 * board->nextColour];
@@ -244,10 +244,7 @@ void Move::applyMove(Board * board)
 	}
 	break;
 	}
-	board->nextColour = switchColour(board->nextColour);
-	board->update();
-
-	board->moveHistory.push_back(board->zorbistKey);
+	board->nextMove();
 }
 
 //Updates castling rights and the zorbist hash keys for castling rights.
@@ -314,7 +311,7 @@ void updateCastlingRights(Board * newBoard, Move * move)
 	else if(move->moveType != quietMove)
 	{
 		//Capturing a rook
-		if (((uint64_t)1 << move->to & newBoard->whiteRookBitboard) > 0)
+		if (((uint64_t)1 << move->to & newBoard->getPieceBitboard(white,rook)) > 0)
 		{
 			if (move->to == 0)
 			{
@@ -333,7 +330,7 @@ void updateCastlingRights(Board * newBoard, Move * move)
 				}
 			}
 		}
-		else if (((uint64_t)1 << move->to & newBoard->blackRookBitboard) > 0)
+		else if (((uint64_t)1 << move->to & newBoard->getPieceBitboard(black, rook)) > 0)
 		{
 			if (move->to == 56)
 			{
@@ -361,7 +358,7 @@ void Move::undoMove(Board * board)
 
 	colours opponentColour = board->nextColour;
 	board->nextColour = switchColour(board->nextColour);
-
+	board->kingDangerSquares = 0;
 	board->canBlackCastleQueenSide = canBlackCastleQueenSide;
 	board->canBlackCastleKingSide = canBlackCastleKingSide;
 	board->canWhiteCastleQueenSide = canWhiteCastleQueenSide;
@@ -374,7 +371,7 @@ void Move::undoMove(Board * board)
 	case quietMove:
 	{
 		//Moves the piece
-		uint64_t bitboard = board->findBitboard(board->nextColour, piece);
+		uint64_t bitboard = board->getPieceBitboard(board->nextColour, piece);
 		bitboard = (bitboard & ~((uint64_t)1 << to)) | ((uint64_t)1 << from);
 		board->setBitboard(board->nextColour, piece, bitboard);
 	}
@@ -386,21 +383,21 @@ void Move::undoMove(Board * board)
 			//Adds the captured piece under en passent
 			if (board->nextColour == white)
 			{
-				board->setBitboard(opponentColour, pawn, board->findBitboard(opponentColour, pawn) | ((uint64_t)1 << (to - 8)));
+				board->setBitboard(opponentColour, pawn, board->getPieceBitboard(opponentColour, pawn) | ((uint64_t)1 << (to - 8)));
 			}
 			else
 			{
-				board->setBitboard(opponentColour, pawn, board->findBitboard(opponentColour, pawn) | ((uint64_t)1 << (to + 8)));
+				board->setBitboard(opponentColour, pawn, board->getPieceBitboard(opponentColour, pawn) | ((uint64_t)1 << (to + 8)));
 			}
 		}
 		else
 		{
 			//Adds the captured piece
-			board->setBitboard(opponentColour, capturedPiece, board->findBitboard(opponentColour, capturedPiece) | ((uint64_t)1 << to ));
+			board->setBitboard(opponentColour, capturedPiece, board->getPieceBitboard(opponentColour, capturedPiece) | ((uint64_t)1 << to ));
 		}
 
 		//Moves the piece
-		uint64_t bitboard = board->findBitboard(board->nextColour, piece);
+		uint64_t bitboard = board->getPieceBitboard(board->nextColour, piece);
 		bitboard = (bitboard & ~((uint64_t)1 << to)) | ((uint64_t)1 << from);
 		board->setBitboard(board->nextColour, piece, bitboard);
 	}
@@ -409,13 +406,13 @@ void Move::undoMove(Board * board)
 	{
 		//Adds the captued piece
 		if(capturedPiece != blank)
-			board->setBitboard(opponentColour, capturedPiece, board->findBitboard(opponentColour, capturedPiece) | ((uint64_t)1 << to));
+			board->setBitboard(opponentColour, capturedPiece, board->getPieceBitboard(opponentColour, capturedPiece) | ((uint64_t)1 << to));
 
 		//Adds the moved Piece
-		board->setBitboard(board->nextColour, piece, board->findBitboard(board->nextColour, piece) | ((uint64_t)1 << from));
+		board->setBitboard(board->nextColour, piece, board->getPieceBitboard(board->nextColour, piece) | ((uint64_t)1 << from));
 
 		//Removes the promoted piece
-		uint64_t bitboard = board->findBitboard(board->nextColour, knight);
+		uint64_t bitboard = board->getPieceBitboard(board->nextColour, knight);
 		bitboard &= ~((uint64_t)1 << to);
 		board->setBitboard(board->nextColour, knight, bitboard);
 	}
@@ -424,13 +421,13 @@ void Move::undoMove(Board * board)
 	{
 		//Adds the captued piece
 		if (capturedPiece != blank)
-			board->setBitboard(opponentColour, capturedPiece, board->findBitboard(opponentColour, capturedPiece) | ((uint64_t)1 << to));
+			board->setBitboard(opponentColour, capturedPiece, board->getPieceBitboard(opponentColour, capturedPiece) | ((uint64_t)1 << to));
 
 		//Adds the moved Piece
-		board->setBitboard(board->nextColour, piece, board->findBitboard(board->nextColour, piece) | ((uint64_t)1 << from));
+		board->setBitboard(board->nextColour, piece, board->getPieceBitboard(board->nextColour, piece) | ((uint64_t)1 << from));
 
 		//Removes the promoted piece
-		uint64_t bitboard = board->findBitboard(board->nextColour, bishop);
+		uint64_t bitboard = board->getPieceBitboard(board->nextColour, bishop);
 		bitboard &= ~((uint64_t)1 << to);
 		board->setBitboard(board->nextColour, bishop, bitboard);
 	}
@@ -439,13 +436,13 @@ void Move::undoMove(Board * board)
 	{
 		//Adds the captued piece
 		if (capturedPiece != blank)
-			board->setBitboard(opponentColour, capturedPiece, board->findBitboard(opponentColour, capturedPiece) | ((uint64_t)1 << to));
+			board->setBitboard(opponentColour, capturedPiece, board->getPieceBitboard(opponentColour, capturedPiece) | ((uint64_t)1 << to));
 
 		//Adds the moved Piece
-		board->setBitboard(board->nextColour, piece, board->findBitboard(board->nextColour, piece) | ((uint64_t)1 << from));
+		board->setBitboard(board->nextColour, piece, board->getPieceBitboard(board->nextColour, piece) | ((uint64_t)1 << from));
 
 		//Removes the promoted piece
-		uint64_t bitboard = board->findBitboard(board->nextColour, rook);
+		uint64_t bitboard = board->getPieceBitboard(board->nextColour, rook);
 		bitboard &= ~((uint64_t)1 << to);
 		board->setBitboard(board->nextColour, rook, bitboard);
 	}
@@ -454,13 +451,13 @@ void Move::undoMove(Board * board)
 	{
 		//Adds the captued piece
 		if (capturedPiece != blank)
-			board->setBitboard(opponentColour, capturedPiece, board->findBitboard(opponentColour, capturedPiece) | ((uint64_t)1 << to));
+			board->setBitboard(opponentColour, capturedPiece, board->getPieceBitboard(opponentColour, capturedPiece) | ((uint64_t)1 << to));
 
 		//Adds the moved Piece
-		board->setBitboard(board->nextColour, piece, board->findBitboard(board->nextColour, piece) | ((uint64_t)1 << from));
+		board->setBitboard(board->nextColour, piece, board->getPieceBitboard(board->nextColour, piece) | ((uint64_t)1 << from));
 
 		//Removes the promoted piece
-		uint64_t bitboard = board->findBitboard(board->nextColour, queen);
+		uint64_t bitboard = board->getPieceBitboard(board->nextColour, queen);
 		bitboard &= ~((uint64_t)1 << to);
 		board->setBitboard(board->nextColour, queen, bitboard);
 	}
@@ -468,7 +465,7 @@ void Move::undoMove(Board * board)
 	case pawnDoubleMove:
 	{
 		//Moves the piece
-		uint64_t bitboard = board->findBitboard(board->nextColour, piece);
+		uint64_t bitboard = board->getPieceBitboard(board->nextColour, piece);
 		bitboard = (bitboard & ~((uint64_t)1 << to)) | ((uint64_t)1 << from);
 		board->setBitboard(board->nextColour, piece, bitboard);
 	}
@@ -476,32 +473,32 @@ void Move::undoMove(Board * board)
 	case kingSideCastling:
 	{
 		//Moves the king
-		uint64_t bitboard = board->findBitboard(board->nextColour, piece);
+		uint64_t bitboard = board->getPieceBitboard(board->nextColour, piece);
 		bitboard = (bitboard & ~((uint64_t)1 << to)) | ((uint64_t)1 << from);
 		board->setBitboard(board->nextColour, piece, bitboard);
 		if (board->nextColour == white)
 		{
-			board->whiteRookBitboard = (board->whiteRookBitboard & ~32) | 128; //Moves the rook
+			board->setBitboard(white, rook, (board->getPieceBitboard(white, rook) & ~32) | 128); //Moves the rook
 		}
 		else
 		{
-			board->blackRookBitboard = (board->blackRookBitboard & ~2305843009213693952) | 9223372036854775808; //Moves the rook
+			board->setBitboard(black, rook, (board->getPieceBitboard(black, rook) & ~2305843009213693952) | 9223372036854775808); //Moves the rook
 		}
 	}
 	break;
 	case queenSideCastling:
 	{
 		//Moves the king
-		uint64_t bitboard = board->findBitboard(board->nextColour, piece);
+		uint64_t bitboard = board->getPieceBitboard(board->nextColour, piece);
 		bitboard = (bitboard & ~((uint64_t)1 << to)) | ((uint64_t)1 << from);
 		board->setBitboard(board->nextColour, piece, bitboard);
 		if (board->nextColour == white)
 		{
-			board->whiteRookBitboard = (board->whiteRookBitboard & ~8) | 1; //Moves the rook
+			board->setBitboard(white, rook, (board->getPieceBitboard(white, rook) & ~8) | 1); //Moves the rook
 		}
 		else
 		{
-			board->blackRookBitboard = (board->blackRookBitboard & ~576460752303423488) | 72057594037927936; //Moves the rook
+			board->setBitboard(black, rook, (board->getPieceBitboard(black, rook) & ~576460752303423488) | 72057594037927936); //Moves the rook
 
 		}
 	}

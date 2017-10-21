@@ -21,13 +21,13 @@ int calculatePawnStructureScore(Board* board)
 	//Checks for double and triple pawns.
 	for (int x = 0; x < 8; x++)
 	{
-		int pawnsInRank = bitSum(board->whitePawnBitboard & fileMasks[x]);
+		int pawnsInRank = bitSum(board->getPieceBitboard(white,pawn) & fileMasks[x]);
 		if (pawnsInRank > 1)
 		{
 			whiteScore -= 10 * (pawnsInRank - 1);
 		}
 
-		pawnsInRank = bitSum(board->blackPawnBitboard & fileMasks[x]);
+		pawnsInRank = bitSum(board->getPieceBitboard(black,pawn) & fileMasks[x]);
 		if (pawnsInRank > 1)
 		{
 			blackScore -= 10 * (pawnsInRank - 1);
@@ -47,31 +47,31 @@ int calculatePawnStructureScore(Board* board)
 	const uint64_t blackBackwardsPawnMasks[8] = { 0xffffffffffffffff, 0xffffffffffffff00, 0xffffffffffff0000, 0xffffffffff000000,
 		0xffffffff00000000,  0xffffff0000000000, 0xffff000000000000, 0xff00000000000000 };
 
-	uint64_t whitePawnBitboard = board->whitePawnBitboard;
+	uint64_t whitePawnBitboard = board->getPieceBitboard(white,pawn);
 	while (whitePawnBitboard)
 	{
 		currentPawn = pop(whitePawnBitboard);
 		currentPos = bitScanForward(currentPawn);
 
 		//Passed pawns
-		if ((board->blackPawnBitboard & whitePassedPawnMasks[currentPos / 8] & (neighbouringFileMasks[currentPos % 8] | fileMasks[currentPos % 8])) == 0)
+		if ((board->getPieceBitboard(black,pawn) & whitePassedPawnMasks[currentPos / 8] & (neighbouringFileMasks[currentPos % 8] | fileMasks[currentPos % 8])) == 0)
 		{
 			whiteScore += 20 * (currentPos / 8);
 		}
 
 		//Isolated Pawns
-		if ((board->whitePawnBitboard & neighbouringFileMasks[currentPos % 8]) == 0)
+		if ((board->getPieceBitboard(white,pawn) & neighbouringFileMasks[currentPos % 8]) == 0)
 		{
 			whiteScore -= 20;
 		}
 		//Backwards Pawns
-		else if((board->whitePawnBitboard & neighbouringFileMasks[currentPos % 8] & whiteBackwardsPawnMasks[currentPos / 8]) == 0)
+		else if((board->getPieceBitboard(white,pawn) & neighbouringFileMasks[currentPos % 8] & whiteBackwardsPawnMasks[currentPos / 8]) == 0)
 		{
 			whiteScore -= 8;
 		}
 	}
 
-	uint64_t blackPawnBitboard = board->blackPawnBitboard;
+	uint64_t blackPawnBitboard = board->getPieceBitboard(black,pawn);
 	while (blackPawnBitboard)
 	{
 		currentPawn = pop(blackPawnBitboard);
@@ -79,18 +79,18 @@ int calculatePawnStructureScore(Board* board)
 
 		//Passed pawns
 
-		if ((board->whitePawnBitboard & blackPassedPawnMasks[currentPos / 8] & (neighbouringFileMasks[currentPos % 8] | fileMasks[currentPos % 8])) == 0)
+		if ((board->getPieceBitboard(white,pawn) & blackPassedPawnMasks[currentPos / 8] & (neighbouringFileMasks[currentPos % 8] | fileMasks[currentPos % 8])) == 0)
 		{
 			blackScore += 20 * (7 - (currentPos / 8));
 		}
 
 		//Isolated Pawns
-		if ((board->blackPawnBitboard & neighbouringFileMasks[currentPos % 8]) == 0)
+		if ((board->getPieceBitboard(black,pawn) & neighbouringFileMasks[currentPos % 8]) == 0)
 		{
 			blackScore -= 20;
 		}
 		//Backwards Pawns
-		else if ((board->blackPawnBitboard & neighbouringFileMasks[currentPos % 8] & blackBackwardsPawnMasks[currentPos / 8]) == 0)
+		else if ((board->getPieceBitboard(black,pawn) & neighbouringFileMasks[currentPos % 8] & blackBackwardsPawnMasks[currentPos / 8]) == 0)
 		{
 			blackScore -= 8;
 		}
@@ -115,19 +115,19 @@ int calculateRookPositionScore(Board * board)
 	const uint64_t fileMasks[8] = { fileA, fileB, fileC, fileD, fileE, fileF, fileG, fileH };
 	int currentPos;
 
-	uint64_t whiteRookBitboard = board->whiteRookBitboard;
+	uint64_t whiteRookBitboard = board->getPieceBitboard(white, rook);
 	while (whiteRookBitboard)
 	{
 		currentRook = pop(whiteRookBitboard);
 		currentPos = bitScanForward(currentRook);
 
 		//If the file of the rook contains no pawns.
-		if (((board->whitePawnBitboard | board->blackPawnBitboard) & fileMasks[currentPos % 8]) == 0)
+		if (((board->getPieceBitboard(white,pawn) | board->getPieceBitboard(black,pawn)) & fileMasks[currentPos % 8]) == 0)
 		{
 			whiteScore += 15;
 		}
 		//If the file has black pawns but no white pawns.
-		else if ((board->whitePawnBitboard & fileMasks[currentPos % 8]) == 0)
+		else if ((board->getPieceBitboard(white,pawn) & fileMasks[currentPos % 8]) == 0)
 		{
 			whiteScore += 10;
 		}
@@ -138,19 +138,19 @@ int calculateRookPositionScore(Board * board)
 		}
 	}
 
-	uint64_t blackRookBitboard = board->blackRookBitboard;
+	uint64_t blackRookBitboard = board->getPieceBitboard(black, rook);
 	while (blackRookBitboard)
 	{
 		currentRook = pop(blackRookBitboard);
 		currentPos = bitScanForward(currentRook);
 
 		//If the file of the rook contains no pawns.
-		if (((board->whitePawnBitboard | board->blackPawnBitboard) & fileMasks[currentPos % 8]) == 0)
+		if (((board->getPieceBitboard(white,pawn) | board->getPieceBitboard(black,pawn)) & fileMasks[currentPos % 8]) == 0)
 		{
 			blackScore += 15;
 		}
 		//If the file has white pawns but no black pawns.
-		else if ((board->blackPawnBitboard & fileMasks[currentPos % 8]) == 0)
+		else if ((board->getPieceBitboard(black,pawn) & fileMasks[currentPos % 8]) == 0)
 		{
 			blackScore += 10;
 		}
@@ -174,34 +174,37 @@ int calculateRookPositionScore(Board * board)
 int calculateMaterialScore(Board * board, bool lateGame)
 {
 	int whiteScore = 0;
-	whiteScore += pieceSquareData::pawnSquare.calcScore(board->whitePawnBitboard, white);
-	whiteScore += pieceSquareData::knightSquare.calcScore(board->whiteKnightBitboard, white);
-	whiteScore += pieceSquareData::bishopSquare.calcScore(board->whiteBishopBitboard, white);
+	whiteScore += pieceSquareData::pawnSquare.calcScore(board->getPieceBitboard(white, pawn), white);
+	whiteScore += pieceSquareData::knightSquare.calcScore(board->getPieceBitboard(white, king), white);
+	whiteScore += pieceSquareData::bishopSquare.calcScore(board->getPieceBitboard(white, bishop), white);
 
-	whiteScore += bitSum(board->whiteRookBitboard) * 500;
-	whiteScore += bitSum(board->whiteQueenBitboard) * 900;
+	whiteScore += bitSum(board->getPieceBitboard(white, rook)) * 500;
+	whiteScore += bitSum(board->getPieceBitboard(white, queen)) * 900;
+
 	if (!lateGame)
 	{
-		whiteScore += pieceSquareData::midGameKingSquare.calcScore(board->whiteKingBitboard, white);
+		whiteScore += pieceSquareData::midGameKingSquare.calcScore(board->getPieceBitboard(white, king), white);
 	}
 	else
 	{
-		whiteScore += pieceSquareData::lateGameKingSquare.calcScore(board->whiteKingBitboard, white);
+		whiteScore += pieceSquareData::lateGameKingSquare.calcScore(board->getPieceBitboard(white, king), white);
 	}
 
 	int blackScore = 0;
-	blackScore += pieceSquareData::pawnSquare.calcScore(board->blackPawnBitboard, black);
-	blackScore += pieceSquareData::knightSquare.calcScore(board->blackKnightBitboard, black);
-	blackScore += pieceSquareData::bishopSquare.calcScore(board->blackBishopBitboard, black);
-	blackScore += bitSum(board->blackRookBitboard) * 500;
-	blackScore += bitSum(board->blackQueenBitboard) * 900;
+	blackScore += pieceSquareData::pawnSquare.calcScore(board->getPieceBitboard(black, pawn), black);
+	blackScore += pieceSquareData::knightSquare.calcScore(board->getPieceBitboard(black, knight) , black);
+	blackScore += pieceSquareData::bishopSquare.calcScore(board->getPieceBitboard(black, bishop), black);
+
+
+	blackScore += bitSum(board->getPieceBitboard(black, rook)) * 500;
+	blackScore += bitSum(board->getPieceBitboard(black, queen)) * 900;
 	if (!lateGame)
 	{
-		blackScore += pieceSquareData::midGameKingSquare.calcScore(board->blackKingBitboard, black);
+		blackScore += pieceSquareData::midGameKingSquare.calcScore(board->getPieceBitboard(black, king), black);
 	}
 	else
 	{
-		blackScore += pieceSquareData::lateGameKingSquare.calcScore(board->blackKingBitboard, black);
+		blackScore += pieceSquareData::lateGameKingSquare.calcScore(board->getPieceBitboard(black, king), black);
 	}
 
 	if (board->nextColour == black)
@@ -228,9 +231,9 @@ int calculateKingSafetyScoreForColour(Board * board, colours colour)
 	const uint64_t movedTwiceMask = colour == white ? rank4 : rank5;
 
 	int score = 0;
-	const uint64_t kingBitboard = board->findBitboard(colour, king);
-	const uint64_t pawnBitboard = board->findBitboard(colour, pawn);
-	const uint64_t enemyPawnBitboard = board->findBitboard(switchColour(colour), pawn);
+	const uint64_t kingBitboard = board->getPieceBitboard(colour, king);
+	const uint64_t pawnBitboard = board->getPieceBitboard(colour, pawn);
+	const uint64_t enemyPawnBitboard = board->getPieceBitboard(switchColour(colour), pawn);
 
 	//If the king is in the three left hand files.
 	if (kingBitboard & 506381209866536711)
@@ -360,7 +363,7 @@ int calculateKingSafetyScoreForColour(Board * board, colours colour)
 			uint64_t fileMask = fileMasks[x];
 
 			//If the file is fully open
-			if ((fileMask & (board->whitePawnBitboard | board->blackPawnBitboard)) == 0)
+			if ((fileMask & (board->getPieceBitboard(white,pawn) | board->getPieceBitboard(black,pawn))) == 0)
 			{
 				score -= 10;
 			}
@@ -372,33 +375,33 @@ int calculateKingSafetyScoreForColour(Board * board, colours colour)
 bool isLateGame(Board * board)
 {
 	bool lateGame = false;
-	if (board->whiteQueenBitboard + board->blackQueenBitboard == 0)
+	if (board->getPieceBitboard(white, queen) + board->getPieceBitboard(black, queen) == 0)
 	{
 		lateGame = true;
 	}
-	else if (bitSum(board->whiteQueenBitboard) < 2 && bitSum(board->blackQueenBitboard) < 2) //Can not be late game if either side has two queens.
+	else if (bitSum(board->getPieceBitboard(white, queen)) < 2 && bitSum(board->getPieceBitboard(black, queen)) < 2) //Can not be late game if either side has two queens.
 	{
 		bool blackLateGame = false;
 		bool whiteLateGame = false;
-		if (bitSum(board->blackQueenBitboard) == 1)
+		if (bitSum(board->getPieceBitboard(black, queen)) == 1)
 		{
-			int majorPiece = bitSum(board->blackRookBitboard);
-			int minorPieces = bitSum(board->blackKnightBitboard) + bitSum(board->blackBishopBitboard);
+			int majorPiece = bitSum(board->getPieceBitboard(black, rook));
+			int minorPieces = bitSum(board->getPieceBitboard(black, knight)) + bitSum(board->getPieceBitboard(black, bishop));
 			if (majorPiece == 0 && minorPieces <= 1)
 			{
 				blackLateGame = true;
 			}
 		}
-		else if (bitSum(board->whiteQueenBitboard) == 1)
+		else if (bitSum(board->getPieceBitboard(white, queen)) == 1)
 		{
-			int majorPiece = bitSum(board->whiteRookBitboard);
-			int minorPieces = bitSum(board->whiteKnightBitboard) + bitSum(board->whiteBishopBitboard);
+			int majorPiece = bitSum(board->getPieceBitboard(white, rook));
+			int minorPieces = bitSum(board->getPieceBitboard(white, knight)) + bitSum(board->getPieceBitboard(white, bishop));
 			if (majorPiece == 0 && minorPieces <= 1)
 			{
 				whiteLateGame = true;
 			}
 		}
-		if (whiteLateGame && blackLateGame || blackLateGame && bitSum(board->whiteQueenBitboard) == 0 || whiteLateGame && bitSum(board->blackQueenBitboard) == 0)
+		if (whiteLateGame && blackLateGame || blackLateGame && bitSum(board->getPieceBitboard(white, queen)) == 0 || whiteLateGame && bitSum(board->getPieceBitboard(black, queen)) == 0)
 		{
 			lateGame = true;
 		}
