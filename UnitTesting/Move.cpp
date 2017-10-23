@@ -2,6 +2,7 @@
 #include "gtest/gtest.h"
 #include "board.h"
 #include "move.h"
+#include "utils.h"
 
 TEST(Move, ApplyQuietMoves)
 {
@@ -275,4 +276,28 @@ TEST(Move, UpdateCastlingAvaliability)
 	move.applyMove(&board);
 	EXPECT_EQ(board.canBlackCastleKingSide, false);
 	EXPECT_EQ(board.canBlackCastleQueenSide, false);
+}
+
+TEST(Move, IncrementingScores)
+{
+	Board board = Board("8/8/8/8/4r3/3P4/8/8 w - - 0 1 ");
+	EXPECT_EQ(board.getMaterialScore(white), -400);
+	EXPECT_EQ(board.getMaterialScore(black), 400);
+	EXPECT_EQ(board.getOnlyMaterialScore(black), 500);
+	EXPECT_EQ(board.getOnlyMaterialScore(white), 0);
+
+	Move move = moveFromNotation("d3e4", &board);
+	move.applyMove(&board);
+
+	EXPECT_EQ(board.getMaterialScore(white), 100);
+	EXPECT_EQ(board.getMaterialScore(black), -100);
+	EXPECT_EQ(board.getOnlyMaterialScore(black), 0);
+	EXPECT_EQ(board.getOnlyMaterialScore(white), 0);
+
+	move.undoMove(&board);
+
+	EXPECT_EQ(board.getMaterialScore(white), -400);
+	EXPECT_EQ(board.getMaterialScore(black), 400);
+	EXPECT_EQ(board.getOnlyMaterialScore(black), 500);
+	EXPECT_EQ(board.getOnlyMaterialScore(white), 0);
 }

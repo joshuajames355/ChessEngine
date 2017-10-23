@@ -22,6 +22,7 @@ TEST(Scoring, pawnStructureScore)
 	EXPECT_EQ(calculatePawnStructureScore(&board), 52 - 212);
 }
 
+//Need to be updated for midgame/lategame transition
 TEST(Scoring, kingStructureScore)
 {
 	Board board;

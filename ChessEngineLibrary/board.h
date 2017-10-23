@@ -14,6 +14,8 @@ class Board
 {
 public:
 	Board();
+	Board(std::string fenString);
+
 	void clearBoard();
 	void defaults();
 	void printBoard();
@@ -25,6 +27,7 @@ public:
 
 	uint64_t getPieceBitboard(colours colour , pieceType piece);
 	void setBitboard(colours colour, pieceType piece, uint64_t bitboard);
+	//returns the value of the piece lost.
 	void removePiece(uint64_t bitboard);
 	pieceType getPieceTypeInSquare(uint64_t bitboard);
 	bool isPieceAttacked(int piecePos, colours colour);
@@ -44,22 +47,6 @@ public:
 
 	uint64_t zorbistKey;
 
-	/*
-	uint64_t whitePawnBitboard;
-	uint64_t whiteKnightBitboard;
-	uint64_t whiteBishopBitboard;
-	uint64_t whiteRookBitboard;
-	uint64_t whiteQueenBitboard;
-	uint64_t whiteKingBitboard;
-	
-	uint64_t pieceBitboards[black][pawn];
-	uint64_t pieceBitboards[black][knight];
-	uint64_t blackBishopBitboard;
-	uint64_t pieceBitboards[black][rook];
-	uint64_t blackQueenBitboard;
-	uint64_t blackKingBitboard;
-	*/
-
 	uint64_t whitePieces;
 	uint64_t blackPieces;
 	uint64_t allPieces;
@@ -71,6 +58,23 @@ public:
 	uint64_t getKingDangerSquares();
 	void generateKingDangerSquares();
 
+	//returns the total material score.
+	int getMaterialScore(colours colour);
+	//returns the material score (no pawns) , for only one colour.
+	int getOnlyMaterialScore(colours colour);
+	void updateMaterialScore();
+	//Adds the value of a piece
+	void addMaterialScore(colours colour, pieceType piece);
+	//Removes the value of a piece.
+	void removeMaterialScore(colours colour, pieceType piece);
+
 private:
 	uint64_t pieceBitboards[2][6];
+
+	//Score not including pawns. (used for phase changed in scoring.cpp)
+	int whiteMaterialScore;
+	int blackMaterialScore;
+
+	int whitePawnScore;
+	int blackPawnScore;
 };

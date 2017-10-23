@@ -14,9 +14,6 @@ pieceSquare::pieceSquare(std::string filename, pieceType typeNew, colours defaul
 
 void pieceSquare::loadFromFile(std::string filename)
 {
-	//Used to add the material scores of each piece into the table.
-	int materialValues[6] = { 100,300,300,500,900,20000 };
-
 	std::ifstream tableFile;
 	tableFile.open(filename);
 	std::string line;
@@ -36,7 +33,7 @@ void pieceSquare::loadFromFile(std::string filename)
 				}
 				else
 				{
-					square[colNum][lineNum] = std::stoi(temp) + materialValues[type];
+					square[colNum][lineNum] = std::stoi(temp);
 					temp = "";
 					colNum++;
 				}
@@ -56,7 +53,7 @@ int pieceSquare::calcScore(uint64_t bitboard,colours targetColour)
 {
 
 	int score = 0;
-	int bitPos, x, y;
+	int bitPos;
 	while (bitboard)
 	{
 		bitPos = bitScanForward(pop(bitboard));

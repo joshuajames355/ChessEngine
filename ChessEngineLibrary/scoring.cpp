@@ -2,12 +2,10 @@
 
 int calculateScoreDiff(Board* board)
 {
-	bool lateGame = isLateGame(board);
-
 	int score = calculatePawnStructureScore(board);
-	score += calculateMaterialScore(board, lateGame);
+	score += calculateMaterialScore(board);
 	score += calculateRookPositionScore(board);
-	if(!isLateGame) score += calculateKingSafetyScore(board);
+	score += calculateKingSafetyScore(board);
 
 	return score;
 }
@@ -171,21 +169,14 @@ int calculateRookPositionScore(Board * board)
 	}
 }
 
-int calculateMaterialScore(Board * board, bool lateGame)
+int calculateMaterialScore(Board * board)
 {
 	int whiteScore = 0;
 	whiteScore += pieceSquareData::pawnSquare.calcScore(board->getPieceBitboard(white, pawn), white);
-	whiteScore += pieceSquareData::knightSquare.calcScore(board->getPieceBitboard(white, king), white);
+	whiteScore += pieceSquareData::knightSquare.calcScore(board->getPieceBitboard(white, knight), white);
 	whiteScore += pieceSquareData::bishopSquare.calcScore(board->getPieceBitboard(white, bishop), white);
-
-	whiteScore += bitSum(board->getPieceBitboard(white, rook)) * 500;
-	whiteScore += bitSum(board->getPieceBitboard(white, queen)) * 900;
-
-	if (!lateGame)
-	{
-		whiteScore += pieceSquareData::midGameKingSquare.calcScore(board->getPieceBitboard(white, king), white);
-	}
-	else
+	//If late game
+	if (board->getOnlyMaterialScore(black) <= 1200)
 	{
 		whiteScore += pieceSquareData::lateGameKingSquare.calcScore(board->getPieceBitboard(white, king), white);
 	}
@@ -194,33 +185,40 @@ int calculateMaterialScore(Board * board, bool lateGame)
 	blackScore += pieceSquareData::pawnSquare.calcScore(board->getPieceBitboard(black, pawn), black);
 	blackScore += pieceSquareData::knightSquare.calcScore(board->getPieceBitboard(black, knight) , black);
 	blackScore += pieceSquareData::bishopSquare.calcScore(board->getPieceBitboard(black, bishop), black);
-
-
-	blackScore += bitSum(board->getPieceBitboard(black, rook)) * 500;
-	blackScore += bitSum(board->getPieceBitboard(black, queen)) * 900;
-	if (!lateGame)
-	{
-		blackScore += pieceSquareData::midGameKingSquare.calcScore(board->getPieceBitboard(black, king), black);
-	}
-	else
+	//If late game
+	if (board->getOnlyMaterialScore(white) <= 1200)
 	{
 		blackScore += pieceSquareData::lateGameKingSquare.calcScore(board->getPieceBitboard(black, king), black);
 	}
 
 	if (board->nextColour == black)
 	{
-		return blackScore - whiteScore;
+		return blackScore - whiteScore + board->getMaterialScore(black);
 	}
 	else
 	{
-		return whiteScore - blackScore;
+		return whiteScore - blackScore + board->getMaterialScore(white);
 	}
 }
 
 int calculateKingSafetyScore(Board * board)
 {
-	if (board->nextColour == white) return calculateKingSafetyScoreForColour(board, white) - calculateKingSafetyScoreForColour(board, black);
-	else return calculateKingSafetyScoreForColour(board, black) - calculateKingSafetyScoreForColour(board, white);
+	int score = 0;
+	//If midgame for white
+	if (board->getOnlyMaterialScore(black) > 1200)
+	{
+		const float whiteMultiplier = ((float)board->getOnlyMaterialScore(black) / 3100.0);
+		score += whiteMultiplier * (float)(calculateKingSafetyScoreForColour(board, white) + pieceSquareData::midGameKingSquare.calcScore(board->getPieceBitboard(white, king), white));
+	}
+	//If midgame for black
+	if (board->getOnlyMaterialScore(white) > 1200)
+	{
+		const float blackMultiplier = ((float)board->getOnlyMaterialScore(white) / 3100.0);
+		score -= blackMultiplier * (float)(calculateKingSafetyScoreForColour(board, black) + pieceSquareData::midGameKingSquare.calcScore(board->getPieceBitboard(black, king), black));
+	}
+
+	if (board->nextColour == white) return score;
+	else return -score;
 }
 
 int calculateKingSafetyScoreForColour(Board * board, colours colour)
@@ -370,41 +368,4 @@ int calculateKingSafetyScoreForColour(Board * board, colours colour)
 		}
 	}
 	return score;
-}
-
-bool isLateGame(Board * board)
-{
-	bool lateGame = false;
-	if (board->getPieceBitboard(white, queen) + board->getPieceBitboard(black, queen) == 0)
-	{
-		lateGame = true;
-	}
-	else if (bitSum(board->getPieceBitboard(white, queen)) < 2 && bitSum(board->getPieceBitboard(black, queen)) < 2) //Can not be late game if either side has two queens.
-	{
-		bool blackLateGame = false;
-		bool whiteLateGame = false;
-		if (bitSum(board->getPieceBitboard(black, queen)) == 1)
-		{
-			int majorPiece = bitSum(board->getPieceBitboard(black, rook));
-			int minorPieces = bitSum(board->getPieceBitboard(black, knight)) + bitSum(board->getPieceBitboard(black, bishop));
-			if (majorPiece == 0 && minorPieces <= 1)
-			{
-				blackLateGame = true;
-			}
-		}
-		else if (bitSum(board->getPieceBitboard(white, queen)) == 1)
-		{
-			int majorPiece = bitSum(board->getPieceBitboard(white, rook));
-			int minorPieces = bitSum(board->getPieceBitboard(white, knight)) + bitSum(board->getPieceBitboard(white, bishop));
-			if (majorPiece == 0 && minorPieces <= 1)
-			{
-				whiteLateGame = true;
-			}
-		}
-		if (whiteLateGame && blackLateGame || blackLateGame && bitSum(board->getPieceBitboard(white, queen)) == 0 || whiteLateGame && bitSum(board->getPieceBitboard(black, queen)) == 0)
-		{
-			lateGame = true;
-		}
-	}
-	return lateGame;
 }

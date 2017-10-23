@@ -6,6 +6,11 @@ Board::Board()
 	clearBoard();
 }
 
+Board::Board(std::string fenString)
+{
+	loadFromFen(fenString);
+}
+
 void Board::clearBoard()
 {
 	pieceBitboards[white][pawn] = emptyBitboard;
@@ -31,6 +36,8 @@ void Board::clearBoard()
 	canWhiteCastleKingSide = false;
 
 	kingDangerSquares = 0;
+	whiteMaterialScore = 0;
+	blackMaterialScore = 0;
 
 	generateZorbistKey();
 	update();
@@ -61,6 +68,7 @@ void Board::defaults()
 	canWhiteCastleKingSide = true;
 
 	generateZorbistKey();
+	updateMaterialScore();
 
 	update();
 }
@@ -294,6 +302,7 @@ void Board::loadFromFen(std::string fen)
 	//Halfmove clock
 	//Fullmove clock	
 
+	updateMaterialScore();
 	generateZorbistKey();
 	update();
 
@@ -436,38 +445,6 @@ void Board::removePiece(uint64_t bitboard)
 			pieceBitboards[colour][piece] = pieceBitboards[colour][piece] & ~bitboard;
 			return;
 		}
-	}
-
-
-	if ((pieceBitboards[white][pawn] & bitboard) != 0)
-	{
-		pieceBitboards[white][pawn] = pieceBitboards[white][pawn] & ~bitboard;
-		return;
-	}
-	if ((pieceBitboards[white][knight] & bitboard) != 0)
-	{
-		pieceBitboards[white][knight] = pieceBitboards[white][knight] & ~bitboard;
-		return;
-	}
-	if ((pieceBitboards[white][bishop] & bitboard) != 0)
-	{
-		pieceBitboards[white][bishop] = pieceBitboards[white][bishop] & ~bitboard;
-		return;
-	}
-	if ((pieceBitboards[white][rook] & bitboard) != 0)
-	{
-		pieceBitboards[white][rook] = pieceBitboards[white][rook] & ~bitboard;
-		return;
-	}
-	if ((pieceBitboards[white][queen] & bitboard) != 0)
-	{
-		pieceBitboards[white][queen] = pieceBitboards[white][queen] & ~bitboard;
-		return;
-	}
-	if ((pieceBitboards[white][king] & bitboard) != 0)
-	{
-		pieceBitboards[white][king] = pieceBitboards[white][king] & ~bitboard;
-		return;
 	}
 }
 
@@ -692,3 +669,90 @@ void Board::generateKingDangerSquares()
 
 	kingDangerSquares = attackSet;
 }
+
+int Board::getMaterialScore(colours colour)
+{
+	if (colour == white) return whitePawnScore + whiteMaterialScore - blackPawnScore - blackMaterialScore;
+	else return blackPawnScore + blackMaterialScore - whitePawnScore - whiteMaterialScore;
+}
+
+int Board::getOnlyMaterialScore(colours colour)
+{
+	if (colour == white) return whiteMaterialScore;
+	else return blackMaterialScore;
+}
+
+void Board::updateMaterialScore()
+{
+	whitePawnScore = bitSum(getPieceBitboard(white, pawn)) * 100;
+
+	whiteMaterialScore = 0;
+	whiteMaterialScore += bitSum(getPieceBitboard(white, knight)) * 300;
+	whiteMaterialScore += bitSum(getPieceBitboard(white, bishop)) * 300;
+	whiteMaterialScore += bitSum(getPieceBitboard(white, rook)) * 500;
+	whiteMaterialScore += bitSum(getPieceBitboard(white, queen)) * 900;
+
+	blackPawnScore = bitSum(getPieceBitboard(black, pawn)) * 100;
+
+	blackMaterialScore = 0;
+	blackMaterialScore += bitSum(getPieceBitboard(black, knight)) * 300;
+	blackMaterialScore += bitSum(getPieceBitboard(black, bishop)) * 300;
+	blackMaterialScore += bitSum(getPieceBitboard(black, rook)) * 500;
+	blackMaterialScore += bitSum(getPieceBitboard(black, queen)) * 900;
+}
+
+void Board::addMaterialScore(colours colour, pieceType piece)
+{
+	const int materialValues[6] = { 100,300,300,500,900,0 };
+	if (colour == white)
+	{
+		if (piece == pawn)
+		{
+			whitePawnScore += materialValues[pawn];
+		}
+		else
+		{
+			whiteMaterialScore += materialValues[piece];
+		}
+	}
+	else
+	{
+		if (piece == pawn)
+		{
+			blackPawnScore += materialValues[pawn];
+		}
+		else
+		{
+			blackMaterialScore += materialValues[piece];
+		}
+	}
+}
+
+void Board::removeMaterialScore(colours colour, pieceType piece)
+{
+	const int materialValues[6] = { 100,300,300,500,900,0 };
+	if (colour == white)
+	{
+		if (piece == pawn)
+		{
+			whitePawnScore -= materialValues[pawn];
+		}
+		else
+		{
+			whiteMaterialScore -= materialValues[piece];
+		}
+	}
+	else
+	{
+		if (piece == pawn)
+		{
+			blackPawnScore -= materialValues[pawn];
+		}
+		else
+		{
+			blackMaterialScore -= materialValues[piece];
+		}
+	}
+}
+
+

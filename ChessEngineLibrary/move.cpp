@@ -50,9 +50,12 @@ void Move::applyMove(Board * board)
 	board->zorbistKey ^= ZorbistKeys::pieceKeys[from][piece + 6 * board->nextColour];
 
 	//Removed captured piece from hash
-	if (board->allPieces & (uint64_t)1 << to)
+	if (capturedPiece != blank)
 	{
 		board -> zorbistKey ^= ZorbistKeys::pieceKeys[to][capturedPiece + 6 * opponentColour];
+
+		//Updates materialScore
+		board->removeMaterialScore(opponentColour, capturedPiece);
 	}
 
 	switch (moveType)
@@ -365,6 +368,12 @@ void Move::undoMove(Board * board)
 	board->canWhiteCastleKingSide = canWhiteCastleKingSide;
 	board->zorbistKey = hash;
 	board->enPassantSquare = enPassantSquare;
+
+	//Updates materialScore
+	if (capturedPiece != blank)
+	{
+		board->addMaterialScore(opponentColour, capturedPiece);
+	}
 
 	switch (moveType)
 	{
