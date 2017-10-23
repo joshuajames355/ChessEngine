@@ -29,11 +29,11 @@ Move startSearch(Board* board, TranspositionEntry* transpositionTable, timeManag
 	{
 		data.depth = x;
 
-		//bestMove = rootSearch(x, board, &data, transpositionTable);
 		std::vector<killerEntry>* killerMoveTable = new std::vector<killerEntry>();
 		killerMoveTable->resize(x + 1);
 
-		negascout(-30000, 3000, x, board, &data, transpositionTable, killerMoveTable);
+		negascout(-30000, 30000, x, board, &data, transpositionTable, killerMoveTable);
+
 		delete killerMoveTable;
 
 		bestMove = extractPVLine(board, transpositionTable);
@@ -101,8 +101,11 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 	}
 
 	//Threefold repetition 
-	if (std::count(board->moveHistory.begin(), board->moveHistory.end(), board->moveHistory.back()) >= 3)
-		return 0;
+	if (board->moveHistory.size() > 0)
+	{
+		if (std::count(board->moveHistory.begin(), board->moveHistory.end(), board->moveHistory.back()) >= 3)
+			return 0;
+	}
 
 	orderSearch(&moveList, board, arraySize, &bestMove, isBestMove,(*killerMoveTable)[depthLeft]);
 
@@ -149,16 +152,16 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 		}
 		moveList[x].undoMove(board);
 
-		if (score >= beta)
-		{
-			if(moveList[x].capturedPiece == blank)
-				(*killerMoveTable)[depthLeft].addKillerMove(moveList[x]);
-			return beta;   //  fail hard beta-cutoff
-		}
 		if (score > alpha)
 		{
 			alpha = score; // alpha acts like max in MiniMax
 			bestMove = moveList[x];
+		}
+		if (score >= beta)
+		{
+			if(moveList[x].capturedPiece == blank)
+				(*killerMoveTable)[depthLeft].addKillerMove(moveList[x]);
+			break;   //  fail hard beta-cutoff
 		}
 		
 	}
@@ -197,7 +200,7 @@ int quiescence(int alpha, int beta, int depthLeft, Board* board, searchData * da
 	int score = calculateScoreDiff(board);
 	if (score >= beta) return beta;
 	if (alpha < score) alpha = score;
-	//if (depthLeft == 0) return alpha;
+	if (depthLeft == 0) return alpha;
 
 	std::array<Move, 150> moveList;
 	int arraySize = searchForMoves(board, &moveList);
