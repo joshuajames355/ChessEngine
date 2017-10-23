@@ -28,9 +28,13 @@ struct Move
 	bool canWhiteCastleKingSide;
 	int enPassantSquare;
 	uint64_t hash;
+	uint64_t pawnHash;
 
 	void applyMove(Board* board);
 	void undoMove(Board* board);
+
+	//Updates all keys used for hash tables.
+	void updateZorbistKeys(Board* board, colours opponentColour);
 
 	bool operator==(const Move& b)
 	{
@@ -39,5 +43,6 @@ struct Move
 };
 
 void updateCastlingRights(Board* newBoard, Move* move);
+
 
 

@@ -45,7 +45,11 @@ public:
 	bool canWhiteCastleQueenSide;
 	bool canWhiteCastleKingSide;
 
+	//Used for for indexing the main transposition table.
 	uint64_t zorbistKey;
+
+	//Used for indexing pawn structure scores hash table.
+	uint64_t pawnScoreZorbistKey;
 
 	uint64_t whitePieces;
 	uint64_t blackPieces;

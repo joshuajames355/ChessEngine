@@ -556,7 +556,10 @@ bool Board::isPieceAttacked(int piecePos, colours colour)
 void Board::generateZorbistKey()
 {
 	update();
+
 	uint64_t hash = 0;
+	uint64_t pawnHash = 0;
+
 	for (int x = 0; x < 64; x++)
 	{
 		uint64_t currentPosBitboard = (uint64_t)1 << x;
@@ -567,9 +570,14 @@ void Board::generateZorbistKey()
 			{
 				for (int piece = 0; piece <= 6; piece++)
 				{
-					if (pieceBitboards[colour][piece] & ((uint64_t)1 << x) > 0)
+					if ((pieceBitboards[colour][piece] & currentPosBitboard) > 0)
 					{
 						hash ^= ZorbistKeys::pieceKeys[x][colour * 6 + piece];
+
+						if (piece == pawn)
+						{
+							pawnHash ^= ZorbistKeys::pieceKeys[x][colour * 6 + piece];
+						}
 					}
 				}
 			}
@@ -589,6 +597,7 @@ void Board::generateZorbistKey()
 		hash ^= ZorbistKeys::enPassantKeys[enPassantSquare % 8]; //Adds the hash for the column the of en passant square
 
 	zorbistKey = hash;
+	pawnScoreZorbistKey = pawnHash;
 }
 
 bool Board::isInCheck()

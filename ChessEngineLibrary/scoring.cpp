@@ -1,5 +1,8 @@
 #include "scoring.h"
 
+//Pawn structure hash table
+PawnStructureTableEntry pawnHashTable[2048];
+
 int calculateScoreDiff(Board* board)
 {
 	int score = calculatePawnStructureScore(board);
@@ -12,6 +15,19 @@ int calculateScoreDiff(Board* board)
 
 int calculatePawnStructureScore(Board* board)
 {
+	//If this pawn structure has already been calculated.
+	if (pawnHashTable[board->pawnScoreZorbistKey % 2048].zorbistKey == board->pawnScoreZorbistKey && board->pawnScoreZorbistKey != 0)
+	{
+		//std::cout << "\n\nmatch found\n\n";
+		//board->printBoard();
+		//std::cout << "\n\n";
+		//pawnHashTable[board->pawnScoreZorbistKey % 2048].prevBoard.printBoard();
+		//std::cout << "\n\n" << pawnHashTable[board->pawnScoreZorbistKey % 2048].score << "\n\n";
+
+		if (board->nextColour == white) return pawnHashTable[board->pawnScoreZorbistKey % 2048].score;
+		else return -pawnHashTable[board->pawnScoreZorbistKey % 2048].score;
+	}
+
 	int blackScore = 0;
 	int whiteScore = 0;
 	const uint64_t fileMasks[8] = { fileA, fileB, fileC, fileD, fileE, fileF, fileG, fileH };
@@ -93,6 +109,11 @@ int calculatePawnStructureScore(Board* board)
 			blackScore -= 8;
 		}
 	}
+
+	//Caches results into hash table.
+	pawnHashTable[board->pawnScoreZorbistKey % 2048].zorbistKey = board->pawnScoreZorbistKey;
+	pawnHashTable[board->pawnScoreZorbistKey % 2048].score = whiteScore - blackScore;
+	//pawnHashTable[board->pawnScoreZorbistKey % 2048].prevBoard = *board;
 
 	if (board->nextColour == black)
 	{
