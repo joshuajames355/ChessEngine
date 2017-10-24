@@ -48,3 +48,12 @@ TEST(Scoring, rookPositionalScore)
 	board.loadFromFen("k3r3/5pR1/8/8/8/8/8/5R1K w - - 0 1");
 	EXPECT_EQ(calculateRookPositionScore(&board), 45 - 15);
 }
+
+TEST(Scoring, calculateScoreDiff)
+{
+	Board board = Board("5rk1/pp2npp1/2p1r2p/2qpP2P/P3P3/2B2PQ1/2P2P2/3RR1K1 w - - 1 28");
+
+	EXPECT_EQ(calculatePawnStructureScore(&board), -96);
+	EXPECT_EQ(calculateKingSafetyScore(&board), -24);
+
+}
