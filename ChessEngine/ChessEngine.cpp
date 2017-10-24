@@ -86,6 +86,7 @@ void engineLoop()
 			//Default value of 15 mins
 			long int btime = 900000;
 			long int wtime = 900000;
+			int depth = -1;
 
 			//Retreives the clock values from the message
 			if (std::find(words.begin(), words.end(), "btime") != words.end())
@@ -97,12 +98,25 @@ void engineLoop()
 				wtime = std::stoi(*(std::find(words.begin(), words.end(), "wtime") + 1));
 			}
 
+			//Retreives depth from message , if set
+			if (std::find(words.begin(), words.end(), "depth") != words.end())
+			{
+				depth = std::stoi(*(std::find(words.begin(), words.end(), "depth") + 1));
+			}
+
 			std::cout << btime << " " << wtime << "\n";
 
-			timeManagement timer = timeManagement(btime, wtime, board.nextColour);
+			timeManagement timer;
+			if (depth == -1)
+				timer = timeManagement(btime, wtime, board.nextColour);
+			else
+				timer = timeManagement(depth);
 
 			board.printBoard();
-			std::cout << "bestmove " << notationFromMove(startSearch(&board, transpositionTable, &timer)) << "\n";
+
+			Move pv = startSearch(&board, transpositionTable, &timer);
+
+			std::cout << "bestmove " << notationFromMove(pv) << "\n";
 		}
 	}
 

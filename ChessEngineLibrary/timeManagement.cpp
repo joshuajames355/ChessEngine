@@ -2,6 +2,10 @@
 
 
 
+timeManagement::timeManagement()
+{
+}
+
 timeManagement::timeManagement(long int wtime,long int btime, colours colour)
 {
 	//Assume their is always 30 moves left.
@@ -18,17 +22,31 @@ timeManagement::timeManagement(long int wtime,long int btime, colours colour)
 	}
 
 	startTime = std::chrono::high_resolution_clock::now();
+	searchMode = timed;
+}
+
+timeManagement::timeManagement(int depth)
+{
+	targetDepth = depth;
+	searchMode = fixedDepth;
 }
 
 timeManagement::~timeManagement()
 {
 }
 
-bool timeManagement::isMoreTime()
+bool timeManagement::isMoreTime(int searchDepth)
 {
-	//Their is enough time for another iteration if we have used less than half of the target time;
-	std::chrono::duration<double, std::milli> time_span = std::chrono::high_resolution_clock::now() - startTime;
+	if (searchMode == timed)
+	{
+		//Their is enough time for another iteration if we have used less than half of the target time;
+		std::chrono::duration<double, std::milli> time_span = std::chrono::high_resolution_clock::now() - startTime;
 
-	//Divides by 10 as it is assuming each depth is 5 times harder than the previous.
-	return time_span.count() < targetTime / 5;
+		//Divides by 10 as it is assuming each depth is 5 times harder than the previous.
+		return time_span.count() < targetTime / 5;
+	}
+	else if (searchMode == fixedDepth)
+	{
+		return searchDepth < targetDepth;
+	}
 }

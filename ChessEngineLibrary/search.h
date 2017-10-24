@@ -22,8 +22,18 @@ struct searchData
 	time_t startTime;
 };
 
+struct PVData
+{
+	Move bestMove;
+	std::string line;
+};
+
+void updateUI(searchData * data, Move currentMove, int currentMoveNumber, std::string pvLine);
+void finalUIUpdate(searchData * data, std::string pvLine);
+
 Move startSearch(Board* board, TranspositionEntry* transpositionTable, timeManagement* timer);
-Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntry* transpositionTable);
-int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data, bool isQuiet, TranspositionEntry* transpositionTable, std::vector<killerEntry>* killerMoveTable);
+int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data, TranspositionEntry* transpositionTable, std::vector<killerEntry>* killerMoveTable);
 int quiescence(int alpha, int beta, int depthLeft, Board* board, searchData* data, bool isQuiet);
 bool continueQuiescence(Board* board, Move* nextMove);
+
+PVData extractPVLine(Board* board, TranspositionEntry* transpositionTable);
