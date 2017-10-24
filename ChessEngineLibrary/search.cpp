@@ -38,7 +38,7 @@ Move startSearch(Board* board, TranspositionEntry* transpositionTable, timeManag
 
 		bestMove = extractPVLine(board, transpositionTable);
 
-		if (!timer->isMoreTime())
+		if (!timer->isMoreTime(x))
 			break;
 	}
 	finalUIUpdate(&data, bestMove.line);
