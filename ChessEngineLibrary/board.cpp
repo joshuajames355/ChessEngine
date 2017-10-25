@@ -8,19 +8,19 @@ Board::Board()
 
 void Board::clearBoard()
 {
-	whitePawnBitboard = emptyBitboard;
-	whiteRookBitboard = emptyBitboard;
-	whiteKnightBitboard = emptyBitboard;
-	whiteBishopBitboard = emptyBitboard;
-	whiteQueenBitboard = emptyBitboard;
-	whiteKingBitboard = emptyBitboard;
+	pieceBitboards[white][pawn] = emptyBitboard;
+	pieceBitboards[white][rook] = emptyBitboard;
+	pieceBitboards[white][knight] = emptyBitboard;
+	pieceBitboards[white][bishop] = emptyBitboard;
+	pieceBitboards[white][queen] = emptyBitboard;
+	pieceBitboards[white][king] = emptyBitboard;
 
-	blackPawnBitboard = emptyBitboard;
-	blackRookBitboard = emptyBitboard;
-	blackKnightBitboard = emptyBitboard;
-	blackBishopBitboard = emptyBitboard;
-	blackQueenBitboard = emptyBitboard;
-	blackKingBitboard = emptyBitboard;
+	pieceBitboards[black][pawn] = emptyBitboard;
+	pieceBitboards[black][rook] = emptyBitboard;
+	pieceBitboards[black][knight] = emptyBitboard;
+	pieceBitboards[black][bishop] = emptyBitboard;
+	pieceBitboards[black][queen] = emptyBitboard;
+	pieceBitboards[black][king] = emptyBitboard;
 
 	nextColour = white;
 	enPassantSquare = -1;
@@ -38,19 +38,19 @@ void Board::clearBoard()
 
 void Board::defaults()
 {
-	whitePawnBitboard = rank2;
-	whiteRookBitboard = 129; //2^0 + 2^7
-	whiteKnightBitboard = 66; //2^1 + 2^6
-	whiteBishopBitboard = 36; //2^2 + 2^5
-	whiteQueenBitboard = 8; //2^3
-	whiteKingBitboard = 16; //2^4
+	pieceBitboards[white][pawn] = rank2;
+	pieceBitboards[white][rook] = 129; //2^0 + 2^7
+	pieceBitboards[white][knight] = 66; //2^1 + 2^6
+	pieceBitboards[white][bishop] = 36; //2^2 + 2^5
+	pieceBitboards[white][queen] = 8; //2^3
+	pieceBitboards[white][king] = 16; //2^4
 
-	blackPawnBitboard = rank7;
-	blackRookBitboard = 9295429630892703744; //2^56 + 2^63
-	blackKnightBitboard = 4755801206503243776; //2^57 + 2^62
-	blackBishopBitboard = 2594073385365405696; //2^58 + 2^61
-	blackQueenBitboard = 576460752303423488; //2^59
-	blackKingBitboard = 1152921504606846976; //2^60
+	pieceBitboards[black][pawn] = rank7;
+	pieceBitboards[black][rook] = 9295429630892703744; //2^56 + 2^63
+	pieceBitboards[black][knight] = 4755801206503243776; //2^57 + 2^62
+	pieceBitboards[black][bishop] = 2594073385365405696; //2^58 + 2^61
+	pieceBitboards[black][queen] = 576460752303423488; //2^59
+	pieceBitboards[black][king] = 1152921504606846976; //2^60
 
 	nextColour = white;
 	enPassantSquare = -1;
@@ -78,53 +78,53 @@ void Board::printBoard()
 			std::cout << "|";
 
 			//Checking for white pieces
-			if ((whitePawnBitboard & currentPosBitboard) != 0) //If the piece is a white pawn;
+			if ((pieceBitboards[white][pawn] & currentPosBitboard) != 0) //If the piece is a white pawn;
 			{
 				std::cout << "WP";
 			}
-			if ((whiteRookBitboard & currentPosBitboard) != 0) //If the piece is a white rook;
+			if ((pieceBitboards[white][rook] & currentPosBitboard) != 0) //If the piece is a white rook;
 			{
 				std::cout <<  "WR";
 			}
-			if ((whiteKnightBitboard & currentPosBitboard) != 0) //If the piece is a white knight;
+			if ((pieceBitboards[white][knight] & currentPosBitboard) != 0) //If the piece is a white knight;
 			{
 				std::cout << "WN";
 			}
-			if ((whiteBishopBitboard & currentPosBitboard) != 0) //If the piece is a white bishop;
+			if ((pieceBitboards[white][bishop] & currentPosBitboard) != 0) //If the piece is a white bishop;
 			{
 				std::cout << "WB";
 			}
-			if ((whiteQueenBitboard & currentPosBitboard) != 0) //If the piece is a white queen;
+			if ((pieceBitboards[white][queen] & currentPosBitboard) != 0) //If the piece is a white queen;
 			{
 				std::cout << "WQ";
 			}
-			if ((whiteKingBitboard & currentPosBitboard) != 0) //If the piece is a white king;
+			if ((pieceBitboards[white][king] & currentPosBitboard) != 0) //If the piece is a white king;
 			{
 				std::cout << "WK";
 			}
 
 			//Checking for black pieces
-			if ((blackPawnBitboard & currentPosBitboard) != 0) //If the piece is a black pawn;
+			if ((pieceBitboards[black][pawn] & currentPosBitboard) != 0) //If the piece is a black pawn;
 			{
 				std::cout << "BP";
 			}
-			if ((blackRookBitboard & currentPosBitboard) != 0) //If the piece is a black rook;
+			if ((pieceBitboards[black][rook] & currentPosBitboard) != 0) //If the piece is a black rook;
 			{
 				std::cout << "BR";
 			}
-			if ((blackKnightBitboard & currentPosBitboard) != 0) //If the piece is a black knight;
+			if ((pieceBitboards[black][knight] & currentPosBitboard) != 0) //If the piece is a black knight;
 			{
 				std::cout << "BN";
 			}
-			if ((blackBishopBitboard & currentPosBitboard) != 0) //If the piece is a black bishop;
+			if ((pieceBitboards[black][bishop] & currentPosBitboard) != 0) //If the piece is a black bishop;
 			{
 				std::cout << "BB";
 			}
-			if ((blackQueenBitboard & currentPosBitboard) != 0) //If the piece is a black queen;
+			if ((pieceBitboards[black][queen] & currentPosBitboard) != 0) //If the piece is a black queen;
 			{
 				std::cout << "BQ";
 			}
-			if ((blackKingBitboard & currentPosBitboard) != 0) //If the piece is a black king;
+			if ((pieceBitboards[black][king] & currentPosBitboard) != 0) //If the piece is a black king;
 			{
 				std::cout << "BK";
 			}
@@ -141,8 +141,8 @@ void Board::printBoard()
 
 void Board::update()
 {
-	blackPieces = blackPawnBitboard | blackRookBitboard | blackKnightBitboard | blackBishopBitboard | blackKingBitboard | blackQueenBitboard;
-	whitePieces = whitePawnBitboard | whiteRookBitboard | whiteKnightBitboard | whiteBishopBitboard | whiteKingBitboard | whiteQueenBitboard;
+	blackPieces = pieceBitboards[black][pawn] | pieceBitboards[black][rook] | pieceBitboards[black][knight] | pieceBitboards[black][bishop] | pieceBitboards[black][king] | pieceBitboards[black][queen];
+	whitePieces = pieceBitboards[white][pawn] | pieceBitboards[white][rook] | pieceBitboards[white][knight] | pieceBitboards[white][bishop] | pieceBitboards[white][king] | pieceBitboards[white][queen];
 
 	allPieces = whitePieces | blackPieces;
 }
@@ -169,62 +169,62 @@ void Board::loadFromFen(std::string fen)
 
 		if (currentChar == 'p')
 		{
-			blackPawnBitboard |= (uint64_t)1 << currentPosInBoard;
+			pieceBitboards[black][pawn] |= (uint64_t)1 << currentPosInBoard;
 			currentPosInBoard++;
 		}
 		else if (currentChar == 'r')
 		{
-			blackRookBitboard |= (uint64_t)1 << currentPosInBoard;
+			pieceBitboards[black][rook] |= (uint64_t)1 << currentPosInBoard;
 			currentPosInBoard++;
 		}
 		else if (currentChar == 'n')
 		{
-			blackKnightBitboard |= (uint64_t)1 << currentPosInBoard;
+			pieceBitboards[black][knight] |= (uint64_t)1 << currentPosInBoard;
 			currentPosInBoard++;
 		}
 		else if (currentChar == 'b')
 		{
-			blackBishopBitboard |= (uint64_t)1 << currentPosInBoard;
+			pieceBitboards[black][bishop] |= (uint64_t)1 << currentPosInBoard;
 			currentPosInBoard++;
 		}
 		else if (currentChar == 'k')
 		{
-			blackKingBitboard |= (uint64_t)1 << currentPosInBoard;
+			pieceBitboards[black][king] |= (uint64_t)1 << currentPosInBoard;
 			currentPosInBoard++;
 		}
 		else if (currentChar == 'q')
 		{
-			blackQueenBitboard |= (uint64_t)1 << currentPosInBoard;
+			pieceBitboards[black][queen] |= (uint64_t)1 << currentPosInBoard;
 			currentPosInBoard++;
 		}
 		else if (currentChar == 'P')
 		{
-			whitePawnBitboard |= (uint64_t)1 << currentPosInBoard;
+			pieceBitboards[white][pawn] |= (uint64_t)1 << currentPosInBoard;
 			currentPosInBoard++;
 		}
 		else if (currentChar == 'R')
 		{
-			whiteRookBitboard |= (uint64_t)1 << currentPosInBoard;
+			pieceBitboards[white][rook] |= (uint64_t)1 << currentPosInBoard;
 			currentPosInBoard++;
 		}
 		else if (currentChar == 'N')
 		{
-			whiteKnightBitboard |= (uint64_t)1 << currentPosInBoard;
+			pieceBitboards[white][knight] |= (uint64_t)1 << currentPosInBoard;
 			currentPosInBoard++;
 		}
 		else if (currentChar == 'B')
 		{
-			whiteBishopBitboard |= (uint64_t)1 << currentPosInBoard;
+			pieceBitboards[white][bishop] |= (uint64_t)1 << currentPosInBoard;
 			currentPosInBoard++;
 		}
 		else if (currentChar == 'K')
 		{
-			whiteKingBitboard |= (uint64_t)1 << currentPosInBoard;
+			pieceBitboards[white][king] |= (uint64_t)1 << currentPosInBoard;
 			currentPosInBoard++;
 		}
 		else if (currentChar == 'Q')
 		{
-			whiteQueenBitboard |= (uint64_t)1 << currentPosInBoard;
+			pieceBitboards[white][queen] |= (uint64_t)1 << currentPosInBoard;
 			currentPosInBoard++;
 		}
 		else if (currentChar == '/')
@@ -411,174 +411,39 @@ std::string Board::exportAsFen()
 	return fenString;
 }
 
-uint64_t Board::findBitboard(colours colour, pieceType piece)
+uint64_t Board::getPieceBitboard(colours colour, pieceType piece)
 {
-	if (colour == white)
-	{
-		switch (piece)
-		{
-		case pawn:
-			return whitePawnBitboard;
-		case knight:
-			return whiteKnightBitboard;
-		case bishop:
-			return whiteBishopBitboard;
-		case rook:
-			return whiteRookBitboard;
-		case queen:
-			return whiteQueenBitboard;
-		case king:
-			return whiteKingBitboard;
-		}
-	}
-	else
-	{
-		switch (piece)
-		{
-		case pawn:
-			return blackPawnBitboard;
-		case knight:
-			return blackKnightBitboard;
-		case bishop:
-			return blackBishopBitboard;
-		case rook:
-			return blackRookBitboard;
-		case queen:
-			return blackQueenBitboard;
-		case king:
-			return blackKingBitboard;
-		}
-	}
+	return pieceBitboards[colour][piece];
 }
 
 void Board::setBitboard(colours colour, pieceType piece, uint64_t bitboard)
 {
-	if (colour == white)
-	{
-		switch (piece)
-		{
-		case pawn:
-			whitePawnBitboard = bitboard;
-			break;
-		case knight:
-			whiteKnightBitboard = bitboard;
-			break;
-		case bishop:
-			whiteBishopBitboard = bitboard;
-			break;
-		case rook:
-			whiteRookBitboard = bitboard;
-			break;
-		case queen:
-			whiteQueenBitboard = bitboard;
-			break;
-		case king:
-			whiteKingBitboard = bitboard;
-			break;
-		}
-	}
-	else
-	{
-		switch (piece)
-		{
-		case pawn:
-			blackPawnBitboard = bitboard;
-			break;
-		case knight:
-			blackKnightBitboard = bitboard;
-			break;
-		case bishop:
-			blackBishopBitboard = bitboard;
-			break;
-		case rook:
-			blackRookBitboard = bitboard;
-			break;
-		case queen:
-			blackQueenBitboard = bitboard;
-			break;
-		case king:
-			blackKingBitboard = bitboard;
-			break;
-		}
-	}
+	pieceBitboards[colour][piece] = bitboard;
 }
 
 void Board::removePiece(uint64_t bitboard)
 {
-	if ((whitePawnBitboard & bitboard) != 0)
-	{
-		whitePawnBitboard = whitePawnBitboard & ~bitboard;
-		return;
-	}
-	if ((whiteKnightBitboard & bitboard) != 0)
-	{
-		whiteKnightBitboard = whiteKnightBitboard & ~bitboard;
-		return;
-	}
-	if ((whiteBishopBitboard & bitboard) != 0)
-	{
-		whiteBishopBitboard = whiteBishopBitboard & ~bitboard;
-		return;
-	}
-	if ((whiteRookBitboard & bitboard) != 0)
-	{
-		whiteRookBitboard = whiteRookBitboard & ~bitboard;
-		return;
-	}
-	if ((whiteQueenBitboard & bitboard) != 0)
-	{
-		whiteQueenBitboard = whiteQueenBitboard & ~bitboard;
-		return;
-	}
-	if ((whiteKingBitboard & bitboard) != 0)
-	{
-		whiteKingBitboard = whiteKingBitboard & ~bitboard;
-		return;
-	}
+	colours colour;
+	if (bitboard & whitePieces)
+		colour = white;
+	else
+		colour = black;
 
-
-
-	if ((blackPawnBitboard & bitboard) != 0)
+	for (int piece = 0; piece <= 6; piece++)
 	{
-		blackPawnBitboard = blackPawnBitboard & ~bitboard;
-		return;
-	}
-	if ((blackKnightBitboard & bitboard) != 0)
-	{
-		blackKnightBitboard = blackKnightBitboard & ~bitboard;
-		return;
-	}
-	if ((blackBishopBitboard & bitboard) != 0)
-	{
-		blackBishopBitboard = blackBishopBitboard & ~bitboard;
-		return;
-	}
-	if ((blackRookBitboard & bitboard) != 0)
-	{
-		blackRookBitboard = blackRookBitboard & ~bitboard;
-		return;
-	}
-	if ((blackQueenBitboard & bitboard) != 0)
-	{
-		blackQueenBitboard = blackQueenBitboard & ~bitboard;
-		return;
-	}
-	if ((blackKingBitboard & bitboard) != 0)
-	{
-		blackKingBitboard = blackKingBitboard & ~bitboard;
-		return;
+		if ((pieceBitboards[colour][piece] & bitboard) != 0)
+		{
+			pieceBitboards[colour][piece] = pieceBitboards[colour][piece] & ~bitboard;
+			return;
+		}
 	}
 }
 
 pieceType Board::getPieceTypeInSquare(uint64_t bitboard)
 {
-	if (bitboard & (blackPawnBitboard | whitePawnBitboard)) return pawn;
-	else if (bitboard & (blackRookBitboard | whiteRookBitboard)) return rook;
-	else if (bitboard & (blackKnightBitboard | whiteKnightBitboard)) return knight;
-	else if (bitboard & (blackBishopBitboard | whiteBishopBitboard)) return bishop;
-	else if (bitboard & (blackQueenBitboard | whiteQueenBitboard)) return queen;
-	else if (bitboard & (blackKingBitboard | whiteKingBitboard)) return king;
-	else return blank;
+	for (int piece = 0; piece <= 6; piece++)
+		if (bitboard & (pieceBitboards[black][piece] | pieceBitboards[white][piece])) return (pieceType)piece;
+	return blank;
 }
 
 bool Board::isPieceAttacked(int piecePos, colours colour)
@@ -587,14 +452,14 @@ bool Board::isPieceAttacked(int piecePos, colours colour)
 
 	if (colour == white)
 	{
-		if (pawnWhiteAttacksArray[piecePos] & whitePawnBitboard)
+		if (pawnWhiteAttacksArray[piecePos] & pieceBitboards[black][pawn])
 		{
 			return true;
 		}
 	}
 	else
 	{
-		if (pawnBlackAttacksArray[piecePos] & blackPawnBitboard)
+		if (pawnBlackAttacksArray[piecePos] & pieceBitboards[white][pawn])
 		{
 			return true;
 		}
@@ -605,14 +470,14 @@ bool Board::isPieceAttacked(int piecePos, colours colour)
 
 	if (colour == white)
 	{
-		if (knightMoves & blackKnightBitboard)
+		if (knightMoves & pieceBitboards[black][knight])
 		{
 			return true;
 		}
 	}
 	else
 	{
-		if (knightMoves & whiteKnightBitboard)
+		if (knightMoves & pieceBitboards[white][knight])
 		{
 			return true;
 		}
@@ -622,14 +487,14 @@ bool Board::isPieceAttacked(int piecePos, colours colour)
 
 	if (colour == white)
 	{
-		if (kingMoves & blackKingBitboard)
+		if (kingMoves & pieceBitboards[black][king])
 		{
 			return true;
 		}
 	}
 	else
 	{
-		if (kingMoves & whiteKingBitboard)
+		if (kingMoves & pieceBitboards[white][king])
 		{
 			return true;
 		}
@@ -643,14 +508,14 @@ bool Board::isPieceAttacked(int piecePos, colours colour)
 
 	if (colour == white)
 	{
-		if (magicMoves & (blackRookBitboard | blackQueenBitboard))
+		if (magicMoves & (pieceBitboards[black][rook] | pieceBitboards[black][queen]))
 		{
 			return true;
 		}
 	}
 	else
 	{
-		if (magicMoves & (whiteRookBitboard | whiteQueenBitboard))
+		if (magicMoves & (pieceBitboards[white][rook] | pieceBitboards[white][queen]))
 		{
 			return true;
 		}
@@ -664,14 +529,14 @@ bool Board::isPieceAttacked(int piecePos, colours colour)
 
 	if (colour == white)
 	{
-		if (magicMoves & (blackBishopBitboard | blackQueenBitboard))
+		if (magicMoves & (pieceBitboards[black][bishop] | pieceBitboards[black][queen]))
 		{
 			return true;
 		}
 	}
 	else
 	{
-		if (magicMoves & (whiteBishopBitboard | whiteQueenBitboard))
+		if (magicMoves & (pieceBitboards[white][bishop] | pieceBitboards[white][queen]))
 		{
 			return true;
 		}
@@ -685,57 +550,19 @@ void Board::generateZorbistKey()
 	uint64_t hash = 0;
 	for (int x = 0; x < 64; x++)
 	{
-		//std::cout << "current hash " << (((uint64_t)1 << x) & allPieces) << "\n";
-		if ((((uint64_t)1 << x) & allPieces) > 0) //If their is a piece at the square.
+		uint64_t currentPosBitboard = (uint64_t)1 << x;
+		if (currentPosBitboard & allPieces) //If their is a piece at the square.
 		{
 			//std::cout << "current hash " << ((uint64_t)1 << x) << "\n";
-			if (blackPawnBitboard & ((uint64_t)1 << x) > 0) //If the piece is a black pawn
+			for (int colour = 0; colour < 2; colour++)
 			{
-				hash ^= ZorbistKeys::pieceKeys[x][0];
-			}
-			else if (blackKnightBitboard & ((uint64_t)1 << x) > 0) //If the piece is a black knight
-			{
-				hash ^= ZorbistKeys::pieceKeys[x][1];
-			}
-			else if (blackBishopBitboard & ((uint64_t)1 << x) > 0) //If the piece is a black bishop
-			{
-				hash ^= ZorbistKeys::pieceKeys[x][2];
-			}
-			else if (blackRookBitboard & ((uint64_t)1 << x) > 0) //If the piece is a black rook
-			{
-				hash ^= ZorbistKeys::pieceKeys[x][3];
-			}
-			else if (blackQueenBitboard & ((uint64_t)1 << x) > 0) //If the piece is a black queen
-			{
-				hash ^= ZorbistKeys::pieceKeys[x][4];
-			}
-			else if (blackKingBitboard & ((uint64_t)1 << x) > 0) //If the piece is a black king
-			{
-				hash ^= ZorbistKeys::pieceKeys[x][5];
-			}
-			else if (whitePawnBitboard & ((uint64_t)1 << x) > 0) //If the piece is a white pawn
-			{
-				hash ^= ZorbistKeys::pieceKeys[x][6];
-			}
-			else if (whiteKnightBitboard & ((uint64_t)1 << x) > 0) //If the piece is a white knight
-			{
-				hash ^= ZorbistKeys::pieceKeys[x][7];
-			}
-			else if (whiteBishopBitboard & ((uint64_t)1 << x) > 0) //If the piece is a white bishop
-			{
-				hash ^= ZorbistKeys::pieceKeys[x][8];
-			}
-			else if (whiteRookBitboard & ((uint64_t)1 << x) > 0) //If the piece is a white rook
-			{
-				hash ^= ZorbistKeys::pieceKeys[x][9];
-			}
-			else if (whiteQueenBitboard & ((uint64_t)1 << x) > 0) //If the piece is a white queen
-			{
-				hash ^= ZorbistKeys::pieceKeys[x][10];
-			}
-			else if (whiteKingBitboard & ((uint64_t)1 << x) > 0) //If the piece is a white king
-			{
-				hash ^= ZorbistKeys::pieceKeys[x][11];
+				for (int piece = 0; piece <= 6; piece++)
+				{
+					if (pieceBitboards[colour][piece] & ((uint64_t)1 << x) > 0)
+					{
+						hash ^= ZorbistKeys::pieceKeys[x][colour * 6 + piece];
+					}
+				}
 			}
 		}
 	}
@@ -758,7 +585,7 @@ void Board::generateZorbistKey()
 bool Board::isInCheck()
 {
 	if (kingDangerSquares == 0)	generateKingDangerSquares();
-	return kingDangerSquares & findBitboard(nextColour, king);
+	return kingDangerSquares & getPieceBitboard(nextColour, king);
 }
 
 uint64_t Board::getKingDangerSquares()
@@ -769,13 +596,13 @@ uint64_t Board::getKingDangerSquares()
 
 void Board::generateKingDangerSquares()
 {
-	const uint64_t allPiecesExceptKing = allPieces & ~findBitboard(nextColour, king);
+	const uint64_t allPiecesExceptKing = allPieces & ~getPieceBitboard(nextColour, king);
 	const colours oppositeColour = switchColour(nextColour);
 
 	uint64_t attackSet = 0;
 	uint64_t currentPos;
 
-	uint64_t pawnBitboard = findBitboard(oppositeColour, pawn);
+	uint64_t pawnBitboard = getPieceBitboard(oppositeColour, pawn);
 	if (oppositeColour == white)
 	{
 		while (pawnBitboard)
@@ -793,21 +620,21 @@ void Board::generateKingDangerSquares()
 		}
 	}
 
-	uint64_t knightBitboard = findBitboard(oppositeColour, knight);
+	uint64_t knightBitboard = getPieceBitboard(oppositeColour, knight);
 	while (knightBitboard)
 	{
 		currentPos = pop(knightBitboard);
 		attackSet |= knightMovesArray[bitScanForward(currentPos)];
 	}
 
-	uint64_t kingBitboard = findBitboard(oppositeColour, king);
+	uint64_t kingBitboard = getPieceBitboard(oppositeColour, king);
 	while (kingBitboard)
 	{
 		currentPos = pop(kingBitboard);
 		attackSet |= kingMovesArray[bitScanForward(currentPos)];
 	}
 
-	uint64_t rookBitboard = findBitboard(oppositeColour, rook) | findBitboard(oppositeColour, queen);
+	uint64_t rookBitboard = getPieceBitboard(oppositeColour, rook) | getPieceBitboard(oppositeColour, queen);
 	while (rookBitboard)
 	{
 		currentPos = pop(rookBitboard);
@@ -819,7 +646,7 @@ void Board::generateKingDangerSquares()
 		attackSet |= magicBitboards::magicMovesRook[piecePos][arrayIndex];
 	}
 
-	uint64_t bishopBitboard = findBitboard(oppositeColour, bishop) | findBitboard(oppositeColour, queen);
+	uint64_t bishopBitboard = getPieceBitboard(oppositeColour, bishop) | getPieceBitboard(oppositeColour, queen);
 	while (bishopBitboard)
 	{
 		currentPos = pop(bishopBitboard);

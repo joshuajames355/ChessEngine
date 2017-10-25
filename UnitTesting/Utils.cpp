@@ -38,8 +38,8 @@ TEST(Utils, moveFromNotation)
 	EXPECT_EQ(move.piece, pawn);
 
 	board = Board();
-	board.whiteBishopBitboard = 2;
-	board.blackPawnBitboard = 256;
+	board.setBitboard(white, bishop, 2);
+	board.setBitboard(black, pawn, 256);
 	board.update();
 	move = moveFromNotation("b1a2", &board);
 	EXPECT_EQ(move.from, 1);
@@ -48,8 +48,8 @@ TEST(Utils, moveFromNotation)
 	EXPECT_EQ(move.piece, bishop);
 
 	board = Board();
-	board.blackKingBitboard = 34359738368;
-	board.whitePawnBitboard = 134217728;
+	board.setBitboard(black, king, 34359738368);
+	board.setBitboard(white, pawn, 134217728);
 	board.update();
 	move = moveFromNotation("d5d4", &board);
 	EXPECT_EQ(move.from, 35);
@@ -58,8 +58,8 @@ TEST(Utils, moveFromNotation)
 	EXPECT_EQ(move.piece, king);
 
 	board = Board();
-	board.whitePawnBitboard = 1;
-	board.blackPawnBitboard = 512;
+	board.setBitboard(white, pawn, 1);
+	board.setBitboard(black, pawn, 512);
 	board.update();
 	move = moveFromNotation("a1b2", &board);
 	EXPECT_EQ(move.from, 0);
@@ -68,7 +68,7 @@ TEST(Utils, moveFromNotation)
 	EXPECT_EQ(move.piece, pawn);
 
 	board = Board();
-	board.whitePawnBitboard = 281474976710656;
+	board.setBitboard(white, pawn, 281474976710656);
 	board.update();
 	move = moveFromNotation("a7a8q", &board);
 	EXPECT_EQ(move.from, 48);
@@ -77,7 +77,7 @@ TEST(Utils, moveFromNotation)
 	EXPECT_EQ(move.piece, pawn);
 
 	board = Board();
-	board.blackPawnBitboard = 256;
+	board.setBitboard(black, pawn, 256);
 	board.update();
 	move = moveFromNotation("a2a1n", &board);
 	EXPECT_EQ(move.from, 8);
@@ -86,8 +86,8 @@ TEST(Utils, moveFromNotation)
 	EXPECT_EQ(move.piece, pawn);
 
 	board = Board();
-	board.whiteKingBitboard = 16;
-	board.whiteRookBitboard = 128;
+	board.setBitboard(white, king, 16);
+	board.setBitboard(white, rook, 128);
 	board.update();
 	move = moveFromNotation("e1g1", &board);
 	EXPECT_EQ(move.from,4);
@@ -96,8 +96,8 @@ TEST(Utils, moveFromNotation)
 	EXPECT_EQ(move.piece, king);
 
 	board = Board();
-	board.whiteKingBitboard = 16;
-	board.whiteRookBitboard = 1;
+	board.setBitboard(white, king, 16);
+	board.setBitboard(white, rook, 1);
 	board.update();
 	move = moveFromNotation("e1c1", &board);
 	EXPECT_EQ(move.from, 4);
@@ -106,8 +106,8 @@ TEST(Utils, moveFromNotation)
 	EXPECT_EQ(move.piece, king);
 
 	board = Board();
-	board.blackKingBitboard = 1152921504606846976;
-	board.blackRookBitboard = 9223372036854775808;
+	board.setBitboard(black, king, 1152921504606846976);
+	board.setBitboard(black, rook, 9223372036854775808);
 	board.update();
 	move = moveFromNotation("e8g8", &board);
 	EXPECT_EQ(move.from, 60);
@@ -116,8 +116,8 @@ TEST(Utils, moveFromNotation)
 	EXPECT_EQ(move.piece, king);
 
 	board = Board();
-	board.blackKingBitboard = 1152921504606846976;
-	board.blackRookBitboard = 72057594037927936;
+	board.setBitboard(black, king, 1152921504606846976);
+	board.setBitboard(black, rook, 72057594037927936);
 	board.update();
 	move = moveFromNotation("e8c8", &board);
 	EXPECT_EQ(move.from, 60);

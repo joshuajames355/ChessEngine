@@ -8,7 +8,7 @@
 TEST(MoveGeneration, PawnMoves)
 {
 	Board board = Board();
-	board.whitePawnBitboard = 2;
+	board.setBitboard(white, pawn, 2);
 	board.update();
 	board.nextColour = white;
 	std::array<Move, 150> Movelist;
@@ -20,7 +20,7 @@ TEST(MoveGeneration, PawnMoves)
 	EXPECT_EQ(Movelist[0].moveType, quietMove);
 
 	board = Board();
-	board.whitePawnBitboard = 256;
+	board.setBitboard(white, pawn, 256);
 	board.update();
 	board.nextColour = white;
 	arraySize = generatePawnMoves(&board, &Movelist, 0, ~0, ~0, 0);
@@ -47,9 +47,9 @@ TEST(MoveGeneration, PawnMoves)
 	}
 
 	board = Board();
-	board.whitePawnBitboard = 1;
-	board.blackKingBitboard = 256;
-	board.blackPawnBitboard = 512;
+	board.setBitboard(white, pawn, 1);
+	board.setBitboard(white, king, 256);
+	board.setBitboard(black, pawn, 512);
 	board.update();
 	board.nextColour = white;
 	arraySize = generatePawnMoves(&board, &Movelist, 0, ~0, ~0, 0);
@@ -60,9 +60,9 @@ TEST(MoveGeneration, PawnMoves)
 	EXPECT_EQ(Movelist[0].moveType, capture);
 
 	board = Board();
-	board.whitePawnBitboard = 32768;
-	board.blackKingBitboard = 4194304;
-	board.blackPawnBitboard = 8388608;
+	board.setBitboard(white, pawn, 32768);
+	board.setBitboard(black, king, 4194304);
+	board.setBitboard(black, pawn, 8388608);
 	board.update();
 	board.nextColour = white;
 	arraySize = generatePawnMoves(&board, &Movelist, 0, ~0, ~0, 0);
@@ -73,7 +73,7 @@ TEST(MoveGeneration, PawnMoves)
 	EXPECT_EQ(Movelist[0].moveType, capture);
 
 	board = Board();
-	board.whitePawnBitboard = 281474976710656;
+	board.setBitboard(white, pawn, 281474976710656);
 	board.update();
 	board.nextColour = white;
 	arraySize = generatePawnMoves(&board, &Movelist, 0, ~0, ~0, 0);
@@ -83,7 +83,7 @@ TEST(MoveGeneration, PawnMoves)
 	EXPECT_EQ(Movelist[0].piece, pawn);
 
 	board = Board();
-	board.blackPawnBitboard = 256;
+	board.setBitboard(black, pawn, 256);
 	board.update();
 	board.nextColour = black;
 	arraySize = generatePawnMoves(&board, &Movelist, 0, ~0, ~0, 0);
@@ -98,9 +98,9 @@ TEST(MoveGeneration, KingMoves)
 {
 	std::array<Move,150> movelist;
 	Board board = Board();
-	board.whiteKingBitboard = 1;
-	board.whitePawnBitboard = 768;
-	board.blackPawnBitboard = 2;
+	board.setBitboard(white, king, 1);
+	board.setBitboard(white, pawn, 768);
+	board.setBitboard(black, pawn, 2);
 	board.update();
 	board.nextColour = white;
 	int arraySize = generateKingMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0,0);
@@ -111,9 +111,9 @@ TEST(MoveGeneration, KingMoves)
 	EXPECT_EQ(movelist[0].moveType, capture);
 
 	board = Board();
-	board.whiteKingBitboard = 1;
-	board.whitePawnBitboard = 512;
-	board.whiteRookBitboard = 2;
+	board.setBitboard(white, king, 1);
+	board.setBitboard(white, pawn, 512);
+	board.setBitboard(white, rook, 2);
 	board.update();
 	board.nextColour = white;
 	arraySize = generateKingMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, 0);
@@ -124,9 +124,9 @@ TEST(MoveGeneration, KingMoves)
 	EXPECT_EQ(movelist[0].moveType, quietMove);
 
 	board = Board();
-	board.blackKingBitboard = 9223372036854775808;
-	board.blackPawnBitboard = 4647714815446351872;
-	board.whiteRookBitboard = 18014398509481984;
+	board.setBitboard(black, king, 9223372036854775808);
+	board.setBitboard(black, pawn, 4647714815446351872);
+	board.setBitboard(white, rook, 18014398509481984);
 	board.update();
 	board.nextColour = black;
 	arraySize = generateKingMoves(&board, &movelist, board.blackPieces, board.whitePieces, 0, 0);
@@ -141,8 +141,8 @@ TEST(MoveGeneration, KnightMoves)
 {
 	std::array<Move, 150> movelist;
 	Board board = Board();
-	board.whiteKnightBitboard = 1;
-	board.whitePawnBitboard = 1024;
+	board.setBitboard(white, knight, 1);
+	board.setBitboard(white, pawn, 1024);
 	board.update();
 	board.nextColour = white;
 	int arraySize = generateKnightMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0,0);
@@ -153,9 +153,9 @@ TEST(MoveGeneration, KnightMoves)
 	EXPECT_EQ(movelist[0].moveType, quietMove);
 
 	board = Board();
-	board.whiteKnightBitboard = 9223372036854775808;
-	board.whitePawnBitboard = 70368744177664;
-	board.blackRookBitboard = 9007199254740992;
+	board.setBitboard(white, knight, 9223372036854775808);
+	board.setBitboard(white, pawn, 70368744177664);
+	board.setBitboard(black, rook, 9007199254740992);
 	board.update();
 	board.nextColour = white;
 	arraySize = generateKnightMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
@@ -170,8 +170,8 @@ TEST(MoveGeneration, RookMoves)
 {
 	std::array<Move, 150> movelist;
 	Board board = Board();
-	board.whiteRookBitboard = 1;
-	board.whitePawnBitboard = 260;
+	board.setBitboard(white, rook, 1);
+	board.setBitboard(white, pawn, 260);
 	board.update();
 	board.nextColour = white;
 	int arraySize = generateRookMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
@@ -182,9 +182,9 @@ TEST(MoveGeneration, RookMoves)
 	EXPECT_EQ(movelist[0].moveType, quietMove);
 
 	board = Board();
-	board.whiteRookBitboard = 1;
-	board.whitePawnBitboard = 2;
-	board.blackPawnBitboard = 256;
+	board.setBitboard(white, rook, 1);
+	board.setBitboard(white, pawn, 2);
+	board.setBitboard(black, pawn, 256);
 	board.update();
 	board.nextColour = white;
 	arraySize = generateRookMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
@@ -199,8 +199,8 @@ TEST(MoveGeneration, BishopMoves)
 {
 	std::array<Move, 150> movelist;
 	Board board = Board();
-	board.whiteBishopBitboard = 1;
-	board.whitePawnBitboard = 262144;
+	board.setBitboard(white, bishop, 1);
+	board.setBitboard(white, pawn, 262144);
 	board.update();
 	board.nextColour = white;
 	int arraySize = generateBishopMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
@@ -211,8 +211,8 @@ TEST(MoveGeneration, BishopMoves)
 	EXPECT_EQ(movelist[0].moveType, quietMove);
 
 	board = Board();
-	board.whiteBishopBitboard = 128;
-	board.whitePawnBitboard = 2097216;
+	board.setBitboard(white,bishop, 128);
+	board.setBitboard(white, pawn, 2097216);
 	board.update();
 	board.nextColour = white;
 	arraySize = generateBishopMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
@@ -223,9 +223,9 @@ TEST(MoveGeneration, BishopMoves)
 	EXPECT_EQ(movelist[0].moveType, quietMove);
 
 	board = Board();
-	board.whiteBishopBitboard = 134217728;
-	board.whitePawnBitboard = 68720787456;
-	board.blackPawnBitboard = 17179869184;
+	board.setBitboard(white, bishop, 134217728);
+	board.setBitboard(white, pawn, 68720787456);
+	board.setBitboard(black, pawn, 17179869184);
 	board.update();
 	board.nextColour = white;
 	arraySize = generateBishopMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
@@ -236,9 +236,9 @@ TEST(MoveGeneration, BishopMoves)
 	EXPECT_EQ(movelist[0].moveType, capture);
 
 	board = Board();
-	board.whiteBishopBitboard = 4;
-	board.whitePawnBitboard = 1536;
-	board.blackKnightBitboard = 1048576;
+	board.setBitboard(white, bishop, 4);
+	board.setBitboard(white, pawn, 1536);
+	board.setBitboard(black, knight, 1048576);
 	board.update();
 	board.nextColour = white;
 	arraySize = generateBishopMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
@@ -263,8 +263,8 @@ TEST(MoveGeneration, QueenMoves)
 {
 	std::array<Move, 150> movelist;
 	Board board = Board();
-	board.whiteQueenBitboard = 1;
-	board.whitePawnBitboard = 262402;
+	board.setBitboard(white, queen, 1);
+	board.setBitboard(white, pawn, 262402);
 	board.update();
 	board.nextColour = white;
 	int arraySize = generateQueenMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
@@ -275,8 +275,8 @@ TEST(MoveGeneration, QueenMoves)
 	EXPECT_EQ(movelist[0].moveType, quietMove);
 
 	board = Board();
-	board.whiteQueenBitboard = 128;
-	board.whitePawnBitboard = 2129984;
+	board.setBitboard(white, queen, 128);
+	board.setBitboard(white, pawn, 2129984);
 	board.update();
 	board.nextColour = white;
 	arraySize = generateQueenMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
@@ -287,8 +287,8 @@ TEST(MoveGeneration, QueenMoves)
 	EXPECT_EQ(movelist[0].moveType, quietMove);
 
 	board = Board();
-	board.whiteQueenBitboard = 1;
-	board.whitePawnBitboard = 772;
+	board.setBitboard(white, queen, 1);
+	board.setBitboard(white, pawn, 772);
 	board.update();
 	board.nextColour = white;
 	arraySize = generateQueenMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
@@ -299,9 +299,9 @@ TEST(MoveGeneration, QueenMoves)
 	EXPECT_EQ(movelist[0].moveType, quietMove);
 
 	board = Board();
-	board.whiteQueenBitboard = 2097152;
-	board.whitePawnBitboard = 1615884288;
-	board.blackKnightBitboard = 268435456;
+	board.setBitboard(white, queen, 2097152);
+	board.setBitboard(white, pawn, 1615884288);
+	board.setBitboard(black, knight, 268435456);
 	board.update();
 	board.nextColour = white;
 	arraySize = generateQueenMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
@@ -312,9 +312,9 @@ TEST(MoveGeneration, QueenMoves)
 	EXPECT_EQ(movelist[0].moveType, capture);
 
 	board = Board();
-	board.whiteQueenBitboard = 67108864;
-	board.whitePawnBitboard = 60264677376;
-	board.blackKnightBitboard = 16777216;
+	board.setBitboard(white, queen, 67108864);
+	board.setBitboard(white, pawn, 60264677376);
+	board.setBitboard(black, knight, 16777216);
 	board.update();
 	board.nextColour = white;
 	arraySize = generateQueenMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
@@ -336,9 +336,9 @@ TEST(MoveGeneration, QueenMoves)
 
 
 	board = Board();
-	board.whiteQueenBitboard = 4194304;
-	board.whitePawnBitboard = 3768623104;
-	board.blackKingBitboard = 64;
+	board.setBitboard(white, queen, 4194304);
+	board.setBitboard(white, pawn, 3768623104);
+	board.setBitboard(black, queen, 64);
 	board.update();
 	board.nextColour = white;
 	arraySize = generateQueenMoves(&board, &movelist, board.whitePieces, board.blackPieces, 0, ~0, ~0, 0);
@@ -363,8 +363,8 @@ TEST(MoveGeneration, CastlingMoves)
 {
 	std::array<Move, 150> movelist;
 	Board board = Board();
-	board.whiteKingBitboard = 16;
-	board.whiteRookBitboard = 128;
+	board.setBitboard(white, king, 16);
+	board.setBitboard(white, rook, 128);
 	board.canWhiteCastleKingSide = true;
 	board.update();
 	board.nextColour = white;
@@ -376,8 +376,8 @@ TEST(MoveGeneration, CastlingMoves)
 	EXPECT_EQ(movelist[0].moveType, kingSideCastling);
 
 	board = Board();
-	board.whiteKingBitboard = 16;
-	board.whiteRookBitboard = 1;
+	board.setBitboard(white, king, 16);
+	board.setBitboard(white, rook, 1);
 	board.canWhiteCastleQueenSide = true;
 	board.update();
 	board.nextColour = white;
@@ -389,8 +389,8 @@ TEST(MoveGeneration, CastlingMoves)
 	EXPECT_EQ(movelist[0].moveType, queenSideCastling);
 
 	board = Board();
-	board.blackKingBitboard = 1152921504606846976;
-	board.blackRookBitboard = 9223372036854775808;
+	board.setBitboard(black, king, 1152921504606846976);
+	board.setBitboard(black, rook, 9223372036854775808);
 	board.canBlackCastleKingSide = true;
 	board.update();
 	board.nextColour = black;
@@ -402,8 +402,8 @@ TEST(MoveGeneration, CastlingMoves)
 	EXPECT_EQ(movelist[0].moveType, kingSideCastling);
 
 	board = Board();
-	board.blackKingBitboard = 1152921504606846976;
-	board.blackRookBitboard = 72057594037927936;
+	board.setBitboard(black, king, 1152921504606846976);
+	board.setBitboard(black, rook, 72057594037927936);
 	board.canBlackCastleQueenSide = true;
 	board.update();
 	board.nextColour = black;

@@ -1,13 +1,21 @@
 #include "search.h"
 
-void updateEngine(searchData * data, Move* bestMove, int alpha)
+void updateUI(searchData * data, Move currentMove, int currentMoveNumber, std::string pvLine)
 {
 	std::cout << "info depth " << data->depth;
 	std::cout << " nodes " << data->nodes;
 	std::cout << " nps " << (uint64_t)((data->nodes) / difftime(time(NULL), data->startTime));
-	std::cout << " pv " << notationFromMove(*bestMove);
-	std::cout << " score upperbound " << alpha << "\n";
-	
+	std::cout << " pv " << pvLine;
+	std::cout << " currmove " << notationFromMove(currentMove);
+	std::cout << " currmovenumber " << currentMoveNumber << "\n";
+}
+
+void finalUIUpdate(searchData * data, std::string pvLine)
+{
+	std::cout << "info depth " << data->depth;
+	std::cout << " nodes " << data->nodes;
+	std::cout << " nps " << (uint64_t)((data->nodes) / difftime(time(NULL), data->startTime));
+	std::cout << " pv " << pvLine << "\n";
 }
 
 Move startSearch(Board* board, TranspositionEntry* transpositionTable, timeManagement* timer)
@@ -16,145 +24,30 @@ Move startSearch(Board* board, TranspositionEntry* transpositionTable, timeManag
 	data.startTime = time(0);
 	data.nodes = 0;
 	
-	Move bestMove;
+	PVData bestMove;
 	for (int x = 1; x <= 50; x++)
 	{
 		data.depth = x;
-		bestMove = rootSearch(x, board, &data, transpositionTable);
 
-		if (!timer->isMoreTime())
+		std::vector<killerEntry>* killerMoveTable = new std::vector<killerEntry>();
+		killerMoveTable->resize(x + 1);
+
+		negascout(-30000, 30000, x, board, &data, transpositionTable, killerMoveTable, false);
+
+		delete killerMoveTable;
+
+		bestMove = extractPVLine(board, transpositionTable, x);
+
+		if (!timer->isMoreTime(x))
 			break;
 	}
-	return bestMove;
+	finalUIUpdate(&data, bestMove.line);
+	return bestMove.bestMove;
 }
 
-
-Move rootSearch(int depthLeft, Board* board, searchData* data, TranspositionEntry* transpositionTable)
+int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data, TranspositionEntry* transpositionTable, std::vector<killerEntry>* killerMoveTable, bool isPrevMoveNull)
 {
-	data->nodes++;
-
-	int alpha = -30000;
-	int beta = 30000;
-
-	std::vector<killerEntry>* killerMoveTable = new std::vector<killerEntry>();
-	killerMoveTable->resize(depthLeft);
-
-	int alphaOriginal = alpha;
-	Move bestMove;
-	bool isBestMove = false;
-
-	TranspositionEntry entry = transpositionTable[board->zorbistKey % TTSize];
-
-	std::array<Move, 150> moveList = std::array<Move, 150>();
-	board->printBoard();
-	int arraySize = searchForMoves(board,&moveList);
-	if (entry.zorbistKey == board->zorbistKey && std::find(moveList.begin(), moveList.end(), entry.bestMove) != moveList.end())
-	{
-		if (entry.depth >= depthLeft)
-		{
-			if (entry.flag == Exact)
-			{
-				delete killerMoveTable;
-				return entry.bestMove;
-			}
-			else if (entry.flag == lowerBound)
-			{
-				alpha = std::max(alpha, entry.score);
-			}
-			else if (entry.flag == upperBound)
-			{
-				beta = std::max(beta, entry.score);
-			}
-			if (alpha >= beta)
-			{
-				delete killerMoveTable;
-				return entry.bestMove;
-			}
-		}
-
-		isBestMove = true;
-		bestMove = entry.bestMove;
-	}
-
-	orderSearch(&moveList, board, arraySize, &bestMove, isBestMove, killerEntry());
-
-	int score;
-	for (int x = 0; x < arraySize; x++)
-	{
-		moveList[x].applyMove(board);
-		if (x == 0)
-		{
-			score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, true);
-		}
-		//Late Move Reductions
-		else if(x > 4 && depthLeft >= 3 &&
-						 moveList[x].moveType != capture &&
-						 moveList[x].moveType != queenPromotion &&
-						 moveList[x].moveType != rookPromotion &&
-						 moveList[x].moveType != knightPromotion &&
-						 moveList[x].moveType != bishopPromotion)
-		{
-			//Try a null window search at a reduced depth
-			score = -negascout(-alpha - 1, -alpha, depthLeft - 2, board, data, transpositionTable, killerMoveTable, false);
-
-			//If the score is within the bounds , the first child was not the principle variation
-			if (alpha < score && score < beta)
-				//Therefore do a full re-search
-				score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, false);
-		}
-		else
-		{
-			//Try a null window search
-			score = -negascout(-alpha - 1, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, false);
-
-			//If the score is within the bounds , the first child was not the principle variation
-			if (alpha < score && score < beta)
-				//Therefore do a full re-search
-				score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, false);
-		}
-		moveList[x].undoMove(board);
-		if (score >= beta)
-		{
-			delete killerMoveTable;
-			return bestMove;   //  fail hard beta-cutoff
-		}
-		if (score > alpha)
-		{
-			alpha = score; // alpha acts like max in MiniMax
-			bestMove = moveList[x];
-		}
-		updateEngine(data, &bestMove, alpha);
-	}
-
-	TranspositionEntry newEntry = TranspositionEntry();
-	newEntry.score = alpha;
-	if (alpha <= alphaOriginal)
-	{
-		newEntry.flag = upperBound;
-	}
-	else if (alpha >= beta)
-	{
-		newEntry.flag = lowerBound;
-	}
-	else
-	{
-		newEntry.flag = Exact;
-	}
-	newEntry.depth = depthLeft;
-	newEntry.bestMove = bestMove;
-	newEntry.zorbistKey = board->zorbistKey;
-
-	transpositionTable[board->zorbistKey % TTSize] = newEntry;
-
-	updateEngine(data, &bestMove, alpha);
-
-	delete killerMoveTable;
-	return bestMove;
-}
-
-int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data, TranspositionEntry* transpositionTable, std::vector<killerEntry>* killerMoveTable , bool isPrevMoveNull)
-{
-	if (depthLeft == 0) return quiescence(alpha, beta, 3, board, data, true);
+	if (depthLeft == 0) return quiescence(alpha, beta, 3, board, data, false);
 
 	data->nodes++;
 	int alphaOriginal = alpha;
@@ -163,7 +56,7 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 
 	TranspositionEntry entry = transpositionTable[board->zorbistKey % TTSize];
 
-	std::array<Move, 150> moveList = std::array<Move, 150>();
+	std::array<Move,150> moveList;
 	int arraySize = searchForMoves(board, &moveList);
 	if (entry.zorbistKey == board->zorbistKey && std::find(moveList.begin(), moveList.end(), entry.bestMove) != moveList.end())
 	{
@@ -190,10 +83,6 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 		bestMove = entry.bestMove;
 	}
 
-	//Threefold repetition 
-	if (std::count(board->moveHistory.begin(), board->moveHistory.end(), board->moveHistory.back()) >= 3)
-		return 0;
-
 	//CheckMate / StaleMate
 	if (arraySize == 0)
 	{
@@ -202,7 +91,7 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 		{
 			//Adds the distance to the root node onto the checkmate score.
 			//This is to ensure the search algorithm prioritizes the fastest checkmate
-			return -25000 - (data->depth - depthLeft);
+			return -25000 + (data->depth - depthLeft);
 		}
 		//Stalemate
 		else
@@ -217,25 +106,38 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 		board->doNullMove();
 
 		//Do a null seach at a reduced depth.
-		int nullScore = -negascout(- beta, -alpha, depthLeft - 3, board, data, transpositionTable, killerMoveTable, true);
+		int nullScore = -negascout(-beta, -alpha, depthLeft - 3, board, data, transpositionTable, killerMoveTable, true);
 		board->undoNullMove();
 		//If the score has improved enough to make a cutoff even with a null move
 		//Then this position would almost certainly produce a cutoff without the null move
 
-		if (nullScore > beta)
-		{
-			return nullScore; //Cutoff
-			
-		}
+		//if (nullScore > beta)
+		//{
+		//	return nullScore; //Cutoff
+
+		//}
 	}
 
-	orderSearch(&moveList, board, arraySize, &bestMove, isBestMove, (*killerMoveTable)[depthLeft]);
+	//Threefold repetition 
+	if (board->moveHistory.size() > 0)
+	{
+		if (std::count(board->moveHistory.begin(), board->moveHistory.end(), board->moveHistory.back()) >= 3)
+			return 0;
+	}
+
+	orderSearch(&moveList, board, arraySize, &bestMove, isBestMove,(*killerMoveTable)[depthLeft]);
 
 	int score;
 	for (int x = 0; x < arraySize; x++)
 	{
-		moveList[x].applyMove(board);
+		//If First node
+		if (depthLeft == data->depth)
+		{
+			PVData bestMove = extractPVLine(board, transpositionTable, depthLeft);
+			updateUI(data, moveList[x], x + 1, bestMove.line);
+		}
 
+		moveList[x].applyMove(board);
 		if (x == 0)
 		{
 			score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, false);
@@ -253,8 +155,8 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 
 			//If the score is within the bounds , the first child was not the principle variation
 			if (alpha < score && score < beta)
-			//Therefore do a full re-search
-			score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, false);
+				//Therefore do a full re-search
+				score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, false);
 		}
 		else
 		{
@@ -263,25 +165,24 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 
 			//If the score is within the bounds , the first child was not the principle variation
 			if (alpha < score && score < beta)
-			//Therefore do a full re-search
-			score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, false);
+				//Therefore do a full re-search
+				score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, false);
 		}
 		moveList[x].undoMove(board);
 
-		if (score >= beta)
-		{
-			if (moveList[x].capturedPiece == blank)
-				(*killerMoveTable)[depthLeft].addKillerMove(moveList[x]);
-			return beta;   //  fail hard beta-cutoff
-		}
 		if (score > alpha)
 		{
 			alpha = score; // alpha acts like max in MiniMax
 			bestMove = moveList[x];
 		}
-
+		if (score >= beta)
+		{
+			if(moveList[x].capturedPiece == blank)
+				(*killerMoveTable)[depthLeft].addKillerMove(moveList[x]);
+			break;   //  fail hard beta-cutoff
+		}
+		
 	}
-	
 
 	TranspositionEntry newEntry = TranspositionEntry();
 	newEntry.score = alpha;
@@ -302,7 +203,6 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 	newEntry.zorbistKey = board->zorbistKey;
 
 	transpositionTable[board->zorbistKey % TTSize] = newEntry;
-	
 	return alpha;
 }
 
@@ -322,12 +222,12 @@ int quiescence(int alpha, int beta, int depthLeft, Board* board, searchData * da
 
 	std::array<Move, 150> moveList;
 	int arraySize = searchForMoves(board, &moveList);
-	arraySize = orderQuiescentSearch(&moveList, board, arraySize);
+	arraySize = orderQuiescentSearch(&moveList,board, arraySize);
 
 	for (int x = 0; x < arraySize; x++)
 	{
 		moveList[x].applyMove(board);
-		score = -quiescence(-beta, -alpha, depthLeft - 1, board, data, !continueQuiescence(board, &moveList[x]));
+		score = -quiescence(-beta, -alpha, depthLeft - 1, board, data, !continueQuiescence( board, &moveList[x]));
 		moveList[x].undoMove(board);
 		if (score >= beta)
 		{
@@ -350,6 +250,38 @@ bool continueQuiescence(Board * board, Move * nextMove)
 	return false;
 }
 
+PVData extractPVLine(Board * board, TranspositionEntry * transpositionTable, int expectedDepth)
+{
+	PVData pv;
+
+	if (expectedDepth == 0) return pv;
+
+	TranspositionEntry entry = transpositionTable[board->zorbistKey % TTSize];
+	if (entry.zorbistKey == board->zorbistKey) //The move has previously been searched
+	{
+
+		std::array<Move, 150> moveList;
+		int arraySize = searchForMoves(board, &moveList);
+
+		//If the move is invalid
+		if (std::find(moveList.begin(), moveList.begin() + arraySize, entry.bestMove) == moveList.begin() + arraySize)
+		{
+			return pv;
+		}
+
+		pv.bestMove = entry.bestMove;
+		pv.line += notationFromMove(entry.bestMove) + " ";
+
+		entry.bestMove.applyMove(board);
+
+		pv.line += extractPVLine(board, transpositionTable, expectedDepth - 1).line;
+		entry.bestMove.undoMove(board);
+	}
+
+	return pv;
+}
+
+
 bool canDoNullSearch(Board * board)
 {
 	//If the current player is in check , we cant play a null move.
@@ -358,14 +290,14 @@ bool canDoNullSearch(Board * board)
 	//Positions where the player only has pawns should not be null searched.
 	//These are positions where it is quite likely that the a null move is 
 	//Stronger than being force to move
-	if (board->nextColour == white) 
+	if (board->nextColour == white)
 	{
-		if ((board->whitePawnBitboard | board->whiteKingBitboard) == board->whitePieces) return false;
+		if ((board->getPieceBitboard(white,pawn) | board->getPieceBitboard(white,king)) == board->whitePieces) return false;
 		if (bitSum(board->whitePieces) < 5) return false;
 	}
 	else
 	{
-		if ((board->blackPawnBitboard | board->blackKingBitboard) == board->blackPieces) return false;
+		if ((board->getPieceBitboard(black, pawn) | board->getPieceBitboard(black, king)) == board->blackPieces) return false;
 		if (bitSum(board->blackPieces) < 5) return false;
 	}
 
