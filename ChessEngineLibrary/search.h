@@ -36,4 +36,4 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 int quiescence(int alpha, int beta, int depthLeft, Board* board, searchData* data, bool isQuiet);
 bool continueQuiescence(Board* board, Move* nextMove);
 
-PVData extractPVLine(Board* board, TranspositionEntry* transpositionTable);
+PVData extractPVLine(Board* board, TranspositionEntry* transpositionTable, int expectedDepth);

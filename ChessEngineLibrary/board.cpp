@@ -68,7 +68,7 @@ void Board::defaults()
 	canWhiteCastleKingSide = true;
 
 	generateZorbistKey();
-	updateMaterialScore();
+	updateScoreValues();
 
 	update();
 }
@@ -302,7 +302,7 @@ void Board::loadFromFen(std::string fen)
 	//Halfmove clock
 	//Fullmove clock	
 
-	updateMaterialScore();
+	updateScoreValues();
 	generateZorbistKey();
 	update();
 
@@ -691,7 +691,25 @@ int Board::getOnlyMaterialScore(colours colour)
 	else return blackMaterialScore;
 }
 
-void Board::updateMaterialScore()
+int Board::getPositionalScore(colours colour)
+{
+	if (colour == white) return whitePositionalScore - blackPositionalScore;
+	else return whitePositionalScore - blackPositionalScore;
+}
+
+int Board::getMidGameKingPositionalScore(colours colour)
+{
+	if (colour == white) return whiteMidGameKingPositionalScore;
+	else return blackMidGameKingPositionalScore;
+}
+
+int Board::getLateGameKingPositionalScore(colours colour)
+{
+	if (colour == white) return whiteLateGameKingPositionalScore;
+	else return blackLateGameKingPositionalScore;
+}
+
+void Board::updateScoreValues()
 {
 	whitePawnScore = bitSum(getPieceBitboard(white, pawn)) * 100;
 
@@ -708,6 +726,20 @@ void Board::updateMaterialScore()
 	blackMaterialScore += bitSum(getPieceBitboard(black, bishop)) * 300;
 	blackMaterialScore += bitSum(getPieceBitboard(black, rook)) * 500;
 	blackMaterialScore += bitSum(getPieceBitboard(black, queen)) * 900;
+
+	whitePositionalScore = 0;
+	whitePositionalScore += pieceSquareData::pawnSquare.calcScore(getPieceBitboard(white, pawn), white);
+	whitePositionalScore += pieceSquareData::knightSquare.calcScore(getPieceBitboard(white, knight), white);
+	whitePositionalScore += pieceSquareData::bishopSquare.calcScore(getPieceBitboard(white, bishop), white);
+	whiteMidGameKingPositionalScore = pieceSquareData::midGameKingSquare.calcScore(getPieceBitboard(white, king), white);
+	whiteLateGameKingPositionalScore = pieceSquareData::lateGameKingSquare.calcScore(getPieceBitboard(white, king), white);
+	
+	blackPositionalScore = 0;
+	blackPositionalScore += pieceSquareData::pawnSquare.calcScore(getPieceBitboard(black, pawn), black);
+	blackPositionalScore += pieceSquareData::knightSquare.calcScore(getPieceBitboard(black, knight), black);
+	blackPositionalScore += pieceSquareData::bishopSquare.calcScore(getPieceBitboard(black, bishop), black);
+	blackMidGameKingPositionalScore = pieceSquareData::midGameKingSquare.calcScore(getPieceBitboard(black, king), black);
+	blackLateGameKingPositionalScore = pieceSquareData::lateGameKingSquare.calcScore(getPieceBitboard(black, king), black);
 }
 
 void Board::addMaterialScore(colours colour, pieceType piece)
@@ -723,6 +755,7 @@ void Board::addMaterialScore(colours colour, pieceType piece)
 		{
 			whiteMaterialScore += materialValues[piece];
 		}
+
 	}
 	else
 	{
@@ -760,6 +793,94 @@ void Board::removeMaterialScore(colours colour, pieceType piece)
 		else
 		{
 			blackMaterialScore -= materialValues[piece];
+		}
+	}
+}
+
+void Board::addPositionalScore(colours colour, pieceType piece, int piecePos)
+{
+	if (colour == white)
+	{
+		if (piece == pawn)
+		{
+			whitePositionalScore += pieceSquareData::pawnSquare.getScoreFromPos(piecePos, white);
+		}
+		else if (piece == knight)
+		{
+			whitePositionalScore += pieceSquareData::knightSquare.getScoreFromPos(piecePos, white);
+		}
+		else if (piece == bishop)
+		{
+			whitePositionalScore += pieceSquareData::bishopSquare.getScoreFromPos(piecePos, white);
+		}
+		else if (piece == king)
+		{
+			whiteMidGameKingPositionalScore += pieceSquareData::midGameKingSquare.getScoreFromPos(piecePos, white);
+			whiteLateGameKingPositionalScore += pieceSquareData::lateGameKingSquare.getScoreFromPos(piecePos, white);
+		}
+	}
+	else
+	{
+		if (piece == pawn)
+		{
+			blackPositionalScore += pieceSquareData::pawnSquare.getScoreFromPos(piecePos, black);
+		}
+		else if (piece == knight)
+		{
+			blackPositionalScore += pieceSquareData::knightSquare.getScoreFromPos(piecePos, black);
+		}
+		else if (piece == bishop)
+		{
+			blackPositionalScore += pieceSquareData::bishopSquare.getScoreFromPos(piecePos, black);
+		}
+		else if (piece == king)
+		{
+			blackMidGameKingPositionalScore += pieceSquareData::midGameKingSquare.getScoreFromPos(piecePos, black);
+			blackLateGameKingPositionalScore += pieceSquareData::lateGameKingSquare.getScoreFromPos(piecePos, black);
+		}
+	}
+}
+
+void Board::removePositionalScore(colours colour, pieceType piece, int piecePos)
+{
+	if (colour == white)
+	{
+		if (piece == pawn)
+		{
+			whitePositionalScore -= pieceSquareData::pawnSquare.getScoreFromPos(piecePos, white);
+		}
+		else if (piece == knight)
+		{
+			whitePositionalScore -= pieceSquareData::knightSquare.getScoreFromPos(piecePos, white);
+		}
+		else if (piece == bishop)
+		{
+			whitePositionalScore -= pieceSquareData::bishopSquare.getScoreFromPos(piecePos, white);
+		}
+		else if (piece == king)
+		{
+			whiteMidGameKingPositionalScore -= pieceSquareData::midGameKingSquare.getScoreFromPos(piecePos, white);
+			whiteLateGameKingPositionalScore -= pieceSquareData::lateGameKingSquare.getScoreFromPos(piecePos, white);
+		}
+	}
+	else
+	{
+		if (piece == pawn)
+		{
+			blackPositionalScore -= pieceSquareData::pawnSquare.getScoreFromPos(piecePos, black);
+		}
+		else if (piece == knight)
+		{
+			blackPositionalScore -= pieceSquareData::knightSquare.getScoreFromPos(piecePos, black);
+		}
+		else if (piece == bishop)
+		{
+			blackPositionalScore -= pieceSquareData::bishopSquare.getScoreFromPos(piecePos, black);
+		}
+		else if (piece == king)
+		{
+			blackMidGameKingPositionalScore -= pieceSquareData::midGameKingSquare.getScoreFromPos(piecePos, black);
+			blackLateGameKingPositionalScore -= pieceSquareData::lateGameKingSquare.getScoreFromPos(piecePos, black);
 		}
 	}
 }

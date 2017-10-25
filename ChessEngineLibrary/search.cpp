@@ -36,7 +36,7 @@ Move startSearch(Board* board, TranspositionEntry* transpositionTable, timeManag
 
 		delete killerMoveTable;
 
-		bestMove = extractPVLine(board, transpositionTable);
+		bestMove = extractPVLine(board, transpositionTable, x);
 
 		if (!timer->isMoreTime(x))
 			break;
@@ -115,7 +115,7 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 		//If First node
 		if (depthLeft == data->depth)
 		{
-			PVData bestMove = extractPVLine(board, transpositionTable);
+			PVData bestMove = extractPVLine(board, transpositionTable, depthLeft);
 			updateUI(data, moveList[x], x + 1, bestMove.line);
 		}
 
@@ -232,18 +232,31 @@ bool continueQuiescence(Board * board, Move * nextMove)
 	return false;
 }
 
-PVData extractPVLine(Board * board, TranspositionEntry * transpositionTable)
+PVData extractPVLine(Board * board, TranspositionEntry * transpositionTable, int expectedDepth)
 {
 	PVData pv;
+
+	if (expectedDepth == 0) return pv;
 
 	TranspositionEntry entry = transpositionTable[board->zorbistKey % TTSize];
 	if (entry.zorbistKey == board->zorbistKey) //The move has previously been searched
 	{
+
+		std::array<Move, 150> moveList;
+		int arraySize = searchForMoves(board, &moveList);
+
+		//If the move is invalid
+		if (std::find(moveList.begin(), moveList.begin() + arraySize, entry.bestMove) == moveList.begin() + arraySize)
+		{
+			return pv;
+		}
+
 		pv.bestMove = entry.bestMove;
 		pv.line += notationFromMove(entry.bestMove) + " ";
 
-		entry.bestMove.applyMove(board);
-		pv.line += extractPVLine(board, transpositionTable).line;
+		entry.bestMove.applyMove(board);		
+		
+		pv.line += extractPVLine(board, transpositionTable, expectedDepth - 1).line;
 		entry.bestMove.undoMove(board);
 	}
 

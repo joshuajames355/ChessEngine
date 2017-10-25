@@ -192,33 +192,27 @@ int calculateRookPositionScore(Board * board)
 
 int calculateMaterialScore(Board * board)
 {
-	int whiteScore = 0;
-	whiteScore += pieceSquareData::pawnSquare.calcScore(board->getPieceBitboard(white, pawn), white);
-	whiteScore += pieceSquareData::knightSquare.calcScore(board->getPieceBitboard(white, knight), white);
-	whiteScore += pieceSquareData::bishopSquare.calcScore(board->getPieceBitboard(white, bishop), white);
+	int whiteScore = board->getPositionalScore(white) + board->getMaterialScore(white);
 	//If late game
 	if (board->getOnlyMaterialScore(black) <= 1200)
 	{
-		whiteScore += pieceSquareData::lateGameKingSquare.calcScore(board->getPieceBitboard(white, king), white);
+		whiteScore += board->getLateGameKingPositionalScore(white);
 	}
 
 	int blackScore = 0;
-	blackScore += pieceSquareData::pawnSquare.calcScore(board->getPieceBitboard(black, pawn), black);
-	blackScore += pieceSquareData::knightSquare.calcScore(board->getPieceBitboard(black, knight) , black);
-	blackScore += pieceSquareData::bishopSquare.calcScore(board->getPieceBitboard(black, bishop), black);
 	//If late game
 	if (board->getOnlyMaterialScore(white) <= 1200)
 	{
-		blackScore += pieceSquareData::lateGameKingSquare.calcScore(board->getPieceBitboard(black, king), black);
+		blackScore = board->getLateGameKingPositionalScore(black);
 	}
 
 	if (board->nextColour == black)
 	{
-		return blackScore - whiteScore + board->getMaterialScore(black);
+		return blackScore - whiteScore;
 	}
 	else
 	{
-		return whiteScore - blackScore + board->getMaterialScore(white);
+		return whiteScore - blackScore;
 	}
 }
 
@@ -229,13 +223,13 @@ int calculateKingSafetyScore(Board * board)
 	if (board->getOnlyMaterialScore(black) > 1200)
 	{
 		const float whiteMultiplier = ((float)board->getOnlyMaterialScore(black) / 3100.0);
-		score += whiteMultiplier * (float)(calculateKingSafetyScoreForColour(board, white) + pieceSquareData::midGameKingSquare.calcScore(board->getPieceBitboard(white, king), white));
+		score += whiteMultiplier * (float)(calculateKingSafetyScoreForColour(board, white) + board->getMidGameKingPositionalScore(white));
 	}
 	//If midgame for black
 	if (board->getOnlyMaterialScore(white) > 1200)
 	{
 		const float blackMultiplier = ((float)board->getOnlyMaterialScore(white) / 3100.0);
-		score -= blackMultiplier * (float)(calculateKingSafetyScoreForColour(board, black) + pieceSquareData::midGameKingSquare.calcScore(board->getPieceBitboard(black, king), black));
+		score -= blackMultiplier * (float)(calculateKingSafetyScoreForColour(board, black) + board->getMidGameKingPositionalScore(black));
 	}
 
 	if (board->nextColour == white) return score;

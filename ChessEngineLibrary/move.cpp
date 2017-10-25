@@ -37,10 +37,16 @@ void Move::applyMove(Board * board)
 	updateCastlingRights(board, this);
 	updateZorbistKeys(board, opponentColour);
 
+	board->removePositionalScore(board->nextColour, piece, from);
+
 	if (moveType != capture) board->enPassantSquare = -1;
 	
 	//Updates materialScore for removed pieces
-	if (capturedPiece != blank)	board->removeMaterialScore(opponentColour, capturedPiece);
+	if (capturedPiece != blank)
+	{
+		board->removeMaterialScore(opponentColour, capturedPiece);
+		board->removePositionalScore(opponentColour, capturedPiece, to);
+	}
 	
 	switch (moveType)
 	{
@@ -50,6 +56,8 @@ void Move::applyMove(Board * board)
 		uint64_t bitboard = board->getPieceBitboard(board->nextColour, piece);
 		bitboard = (bitboard & ~((uint64_t)1 << from)) | ((uint64_t)1 << to);
 		board->setBitboard(board->nextColour, piece, bitboard);
+
+		board->addPositionalScore(board->nextColour, piece, to);
 	}
 	break;
 	case capture:
@@ -60,11 +68,14 @@ void Move::applyMove(Board * board)
 			if (board->nextColour == white)
 			{
 				board->removePiece((uint64_t)1 << (to - 8));
+				board->removePositionalScore(opponentColour, pawn, to - 8);
 			}
 			else
 			{
 				board->removePiece((uint64_t)1 << (to + 8));
+				board->removePositionalScore(opponentColour, pawn, to + 8);
 			}
+			board->removeMaterialScore(opponentColour, pawn);
 		}
 		else
 		{
@@ -77,6 +88,8 @@ void Move::applyMove(Board * board)
 		bitboard = (bitboard & ~((uint64_t)1 << from)) | ((uint64_t)1 << to);
 		board->setBitboard(board->nextColour, piece, bitboard);
 		board->enPassantSquare = -1;
+
+		board->addPositionalScore(board->nextColour, piece, to);
 	}
 	break;
 	case knightPromotion:
@@ -91,6 +104,10 @@ void Move::applyMove(Board * board)
 		uint64_t bitboard = board->getPieceBitboard(board->nextColour, knight);
 		bitboard |= ((uint64_t)1 << to);
 		board->setBitboard(board->nextColour, knight, bitboard);
+
+		board->removeMaterialScore(board->nextColour, pawn);
+		board->addMaterialScore(board->nextColour, knight);
+		board->addPositionalScore(board->nextColour, knight, to);
 	}
 	break;
 	case bishopPromotion:
@@ -105,6 +122,10 @@ void Move::applyMove(Board * board)
 		uint64_t bitboard = board->getPieceBitboard(board->nextColour, bishop);
 		bitboard |= ((uint64_t)1 << to);
 		board->setBitboard(board->nextColour, bishop, bitboard);
+
+		board->removeMaterialScore(board->nextColour, pawn);
+		board->addMaterialScore(board->nextColour, bishop);
+		board->addPositionalScore(board->nextColour, bishop, to);
 	}
 	break;
 	case rookPromotion:
@@ -119,6 +140,10 @@ void Move::applyMove(Board * board)
 		uint64_t bitboard = board->getPieceBitboard(board->nextColour, rook);
 		bitboard |= ((uint64_t)1 << to);
 		board->setBitboard(board->nextColour, rook, bitboard);
+
+		board->removeMaterialScore(board->nextColour, pawn);
+		board->addMaterialScore(board->nextColour, rook);
+		board->addPositionalScore(board->nextColour, rook, to);
 	}
 	break;
 	case queenPromotion:
@@ -133,6 +158,10 @@ void Move::applyMove(Board * board)
 		uint64_t bitboard = board->getPieceBitboard(board->nextColour, queen);
 		bitboard |= ((uint64_t)1 << to);
 		board->setBitboard(board->nextColour, queen, bitboard);
+
+		board->removeMaterialScore(board->nextColour, pawn);
+		board->addMaterialScore(board->nextColour, queen);
+		board->addPositionalScore(board->nextColour, queen, to);
 	}
 	break;
 	case pawnDoubleMove:
@@ -151,6 +180,8 @@ void Move::applyMove(Board * board)
 		{
 			board->enPassantSquare = to + 8;
 		}
+
+		board->addPositionalScore(board->nextColour, piece, to);
 	}
 	break;
 	case kingSideCastling:
@@ -163,12 +194,20 @@ void Move::applyMove(Board * board)
 		{
 			//Moves the rook
 			board->setBitboard(white, rook ,(board->getPieceBitboard(white, rook) & ~128) | 32); 
+
+			board->removePositionalScore(white, rook, 7);
+			board->addPositionalScore(white, rook, 5);
 		}
 		else
 		{
 			//Moves the rook
 			board->setBitboard(black, rook, (board->getPieceBitboard(black, rook) & ~9223372036854775808) | 2305843009213693952); 
+
+			board->removePositionalScore(white, rook, 63);
+			board->addPositionalScore(white, rook, 61);
 		}
+
+		board->addPositionalScore(board->nextColour, piece, to);
 	}
 	break;
 	case queenSideCastling:
@@ -181,12 +220,20 @@ void Move::applyMove(Board * board)
 		{
 			//Moves the rook
 			board->setBitboard(white, rook, (board->getPieceBitboard(white, rook) & ~1) | 8); 
+
+			board->removePositionalScore(white, rook, 0);
+			board->addPositionalScore(white, rook, 3);
 		}
 		else
 		{
 			//Moves the rook
 			board->setBitboard(black, rook, (board->getPieceBitboard(black, rook) & ~72057594037927936) | 576460752303423488);
+
+			board->removePositionalScore(white, rook, 56);
+			board->addPositionalScore(white, rook, 59);
 		}
+
+		board->addPositionalScore(board->nextColour, piece, to);
 	}
 	break;
 	}
@@ -313,10 +360,13 @@ void Move::undoMove(Board * board)
 	board->pawnScoreZorbistKey = pawnHash;
 	board->enPassantSquare = enPassantSquare;
 
-	//Updates materialScore
+	board->addPositionalScore(board->nextColour, piece, from);
+
+	//Updates materialScore for removed pieces
 	if (capturedPiece != blank)
 	{
 		board->addMaterialScore(opponentColour, capturedPiece);
+		board->addPositionalScore(opponentColour, capturedPiece, to);
 	}
 
 	switch (moveType)
@@ -327,6 +377,8 @@ void Move::undoMove(Board * board)
 		uint64_t bitboard = board->getPieceBitboard(board->nextColour, piece);
 		bitboard = (bitboard & ~((uint64_t)1 << to)) | ((uint64_t)1 << from);
 		board->setBitboard(board->nextColour, piece, bitboard);
+
+		board->removePositionalScore(board->nextColour, piece, to);
 	}
 	break;
 	case capture:
@@ -337,11 +389,14 @@ void Move::undoMove(Board * board)
 			if (board->nextColour == white)
 			{
 				board->setBitboard(opponentColour, pawn, board->getPieceBitboard(opponentColour, pawn) | ((uint64_t)1 << (to - 8)));
+				board->addPositionalScore(opponentColour, pawn, to - 8);
 			}
 			else
 			{
 				board->setBitboard(opponentColour, pawn, board->getPieceBitboard(opponentColour, pawn) | ((uint64_t)1 << (to + 8)));
+				board->addPositionalScore(opponentColour, pawn, to + 8);
 			}
+			board->addMaterialScore(opponentColour, pawn);
 		}
 		else
 		{
@@ -353,6 +408,8 @@ void Move::undoMove(Board * board)
 		uint64_t bitboard = board->getPieceBitboard(board->nextColour, piece);
 		bitboard = (bitboard & ~((uint64_t)1 << to)) | ((uint64_t)1 << from);
 		board->setBitboard(board->nextColour, piece, bitboard);
+
+		board->removePositionalScore(board->nextColour, piece, to);
 	}
 	break;
 	case knightPromotion:
@@ -368,6 +425,10 @@ void Move::undoMove(Board * board)
 		uint64_t bitboard = board->getPieceBitboard(board->nextColour, knight);
 		bitboard &= ~((uint64_t)1 << to);
 		board->setBitboard(board->nextColour, knight, bitboard);
+
+		board->addMaterialScore(board->nextColour, pawn);
+		board->removeMaterialScore(board->nextColour, knight);
+		board->removePositionalScore(board->nextColour, knight, to);
 	}
 	break;
 	case bishopPromotion:
@@ -383,6 +444,10 @@ void Move::undoMove(Board * board)
 		uint64_t bitboard = board->getPieceBitboard(board->nextColour, bishop);
 		bitboard &= ~((uint64_t)1 << to);
 		board->setBitboard(board->nextColour, bishop, bitboard);
+
+		board->addMaterialScore(board->nextColour, pawn);
+		board->removeMaterialScore(board->nextColour, bishop);
+		board->removePositionalScore(board->nextColour, bishop, to);
 	}
 	break;
 	case rookPromotion:
@@ -398,6 +463,10 @@ void Move::undoMove(Board * board)
 		uint64_t bitboard = board->getPieceBitboard(board->nextColour, rook);
 		bitboard &= ~((uint64_t)1 << to);
 		board->setBitboard(board->nextColour, rook, bitboard);
+
+		board->addMaterialScore(board->nextColour, pawn);
+		board->removeMaterialScore(board->nextColour, rook);
+		board->removePositionalScore(board->nextColour, rook, to);
 	}
 	break;
 	case queenPromotion:
@@ -413,6 +482,10 @@ void Move::undoMove(Board * board)
 		uint64_t bitboard = board->getPieceBitboard(board->nextColour, queen);
 		bitboard &= ~((uint64_t)1 << to);
 		board->setBitboard(board->nextColour, queen, bitboard);
+
+		board->addMaterialScore(board->nextColour, pawn);
+		board->removeMaterialScore(board->nextColour, queen);
+		board->removePositionalScore(board->nextColour, queen, to);
 	}
 	break;
 	case pawnDoubleMove:
@@ -421,6 +494,8 @@ void Move::undoMove(Board * board)
 		uint64_t bitboard = board->getPieceBitboard(board->nextColour, piece);
 		bitboard = (bitboard & ~((uint64_t)1 << to)) | ((uint64_t)1 << from);
 		board->setBitboard(board->nextColour, piece, bitboard);
+
+		board->removePositionalScore(board->nextColour, piece, to);
 	}
 	break;
 	case kingSideCastling:
@@ -432,11 +507,19 @@ void Move::undoMove(Board * board)
 		if (board->nextColour == white)
 		{
 			board->setBitboard(white, rook, (board->getPieceBitboard(white, rook) & ~32) | 128); //Moves the rook
+
+			board->addPositionalScore(white, rook, 7);
+			board->removePositionalScore(white, rook, 5);
 		}
 		else
 		{
 			board->setBitboard(black, rook, (board->getPieceBitboard(black, rook) & ~2305843009213693952) | 9223372036854775808); //Moves the rook
+		
+			board->addPositionalScore(white, rook, 63);
+			board->removePositionalScore(white, rook, 61);
 		}
+
+		board->removePositionalScore(board->nextColour, piece, to);
 	}
 	break;
 	case queenSideCastling:
@@ -448,12 +531,16 @@ void Move::undoMove(Board * board)
 		if (board->nextColour == white)
 		{
 			board->setBitboard(white, rook, (board->getPieceBitboard(white, rook) & ~8) | 1); //Moves the rook
+			board->addPositionalScore(white, rook, 0);
+			board->removePositionalScore(white, rook, 3);
 		}
 		else
 		{
 			board->setBitboard(black, rook, (board->getPieceBitboard(black, rook) & ~576460752303423488) | 72057594037927936); //Moves the rook
-
+			board->addPositionalScore(white, rook, 56);
+			board->removePositionalScore(white, rook, 59);
 		}
+		board->removePositionalScore(board->nextColour, piece, to);
 	}
 	break;
 	}

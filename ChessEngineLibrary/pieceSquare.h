@@ -7,7 +7,7 @@
 #include <stdint.h>
 
 #include "piece.h"
-#include "board.h"
+#include "bitboard.h"
 
 
 class pieceSquare

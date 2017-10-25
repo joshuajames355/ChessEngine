@@ -9,6 +9,7 @@
 #include "piece.h"
 #include "transpositionTable.h"
 #include "moveGenerationTables.h"
+#include "pieceSquare.h"
 
 class Board
 {
@@ -66,19 +67,46 @@ public:
 	int getMaterialScore(colours colour);
 	//returns the material score (no pawns) , for only one colour.
 	int getOnlyMaterialScore(colours colour);
-	void updateMaterialScore();
-	//Adds the value of a piece
+
+	//returns total positional score (not including kings)
+	int getPositionalScore(colours colour);
+	//returns the current positional score for the king (mid game)
+	int getMidGameKingPositionalScore(colours colour);
+	//returns the current positional score for the king (late game)
+	int getLateGameKingPositionalScore(colours colour);
+
+	//updates the values for material and positional scores.
+	//Only run once , values are updated incrementally from then on.
+	void updateScoreValues();
+
+	//Adds the material value of a piece.
 	void addMaterialScore(colours colour, pieceType piece);
-	//Removes the value of a piece.
+	//Removes the material value of the piece .
 	void removeMaterialScore(colours colour, pieceType piece);
 
-private:
-	uint64_t pieceBitboards[2][6];
+	//Adds the material value of a piece.
+	void addPositionalScore(colours colour, pieceType piece, int piecePos);
+	//Removes the material value of the piece .
+	void removePositionalScore(colours colour, pieceType piece, int piecePos);
 
-	//Score not including pawns. (used for phase changed in scoring.cpp)
+	//Material score not including pawns. (used for phase changed in scoring.cpp)
 	int whiteMaterialScore;
 	int blackMaterialScore;
 
+	//Material score of pawns
 	int whitePawnScore;
 	int blackPawnScore;
+
+	//Positional scores based on piece-square tables.
+	int whitePositionalScore;
+	int blackPositionalScore;
+
+	//Positional scores of kings. (usage changes based on game phase)
+	int whiteMidGameKingPositionalScore;
+	int blackMidGameKingPositionalScore;
+	int whiteLateGameKingPositionalScore;
+	int blackLateGameKingPositionalScore;
+
+private:
+	uint64_t pieceBitboards[2][6];
 };
