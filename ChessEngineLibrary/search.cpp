@@ -23,21 +23,38 @@ Move startSearch(Board* board, TranspositionEntry* transpositionTable, timeManag
 	searchData data;
 	data.startTime = time(0);
 	data.nodes = 0;
+
+
+	int score = 0;
 	
 	PVData bestMove;
 	for (int x = 1; x <= 50; x++)
 	{
 		data.depth = x;
-
 		std::vector<killerEntry>* killerMoveTable = new std::vector<killerEntry>();
 		killerMoveTable->resize(x + 1);
 
-		negascout(-30000, 30000, x, board, &data, transpositionTable, killerMoveTable);
+		if (x == 1)
+		{
+			score = negascout(-30000, 30000, x, board, &data, transpositionTable, killerMoveTable);
+		}
+		else
+		{
+			//Search with a narrow (half a pawn width) aspiration window.
+			int alpha = score - 25;
+			int beta = score + 25;
+			score = negascout(alpha, beta, x, board, &data, transpositionTable, killerMoveTable);
 
-		delete killerMoveTable;
+			//Score outside range , therefore full re-search needed
+			if (score <= alpha || score >= beta)
+			{
+				score = negascout(-30000, 30000, x, board, &data, transpositionTable, killerMoveTable);
+			}
+		}	
 
 		bestMove = extractPVLine(board, transpositionTable, x);
 
+		delete killerMoveTable;
 		if (!timer->isMoreTime(x))
 			break;
 	}
