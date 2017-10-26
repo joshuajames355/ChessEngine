@@ -100,6 +100,32 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 		}
 	}
 
+	//Futility pruning
+	if (depthLeft == 1 || depthLeft == 2 && !board->isInCheck())
+	{
+		int score = calculateScoreDiff(board);
+
+		if (depthLeft == 1)
+		{
+			//If the score is a lot lower than alpha , the chance of the one remaining move 
+			//being able to raise alpha is quite low.
+			if (score + 125 < alpha)
+			{
+				return quiescence(alpha, beta, 3, board, data, false);
+			}
+		}
+		else if (depthLeft == 2)
+		{
+			//If the score is a lot lower than alpha , the chance of the one remaining move 
+			//being able to raise alpha is quite low.
+			if (score + 600 < alpha)
+			{
+				return quiescence(alpha, beta, 3, board, data, false);
+			}
+		}
+	}
+
+
 	//Threefold repetition 
 	if (board->moveHistory.size() > 0)
 	{

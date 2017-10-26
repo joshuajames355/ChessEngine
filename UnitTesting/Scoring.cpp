@@ -55,5 +55,6 @@ TEST(Scoring, calculateScoreDiff)
 
 	EXPECT_EQ(calculatePawnStructureScore(&board), -96);
 	EXPECT_EQ(calculateKingSafetyScore(&board), -24);
+	EXPECT_EQ(calculateMaterialScore(&board), 21);
 
 }
