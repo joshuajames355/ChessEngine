@@ -39,7 +39,9 @@ void Board::clearBoard()
 	whiteMaterialScore = 0;
 	blackMaterialScore = 0;
 
-	generateZorbistKey();
+	zorbistKey = 0;
+	pawnScoreZorbistKey = 0;
+
 	update();
 }
 
@@ -69,7 +71,6 @@ void Board::defaults()
 
 	generateZorbistKey();
 	updateScoreValues();
-
 	update();
 }
 
@@ -565,19 +566,19 @@ void Board::generateZorbistKey()
 		uint64_t currentPosBitboard = (uint64_t)1 << x;
 		if (currentPosBitboard & allPieces) //If their is a piece at the square.
 		{
-			//std::cout << "current hash " << ((uint64_t)1 << x) << "\n";
-			for (int colour = 0; colour < 2; colour++)
-			{
-				for (int piece = 0; piece <= 6; piece++)
-				{
-					if ((pieceBitboards[colour][piece] & currentPosBitboard) > 0)
-					{
-						hash ^= ZorbistKeys::pieceKeys[x][colour * 6 + piece];
+			colours colour;
+			if (whitePieces & currentPosBitboard) colour = white;
+			else colour = black;
 
-						if (piece == pawn)
-						{
-							pawnHash ^= ZorbistKeys::pieceKeys[x][colour * 6 + piece];
-						}
+			for (int piece = 0; piece < 6; piece++)
+			{
+				if ((pieceBitboards[colour][piece] & currentPosBitboard) > 0)
+				{
+					hash ^= ZorbistKeys::pieceKeys[x][colour * 6 + piece];
+
+					if (piece == pawn)
+					{
+						pawnHash ^= ZorbistKeys::pieceKeys[x][colour * 6 + piece];
 					}
 				}
 			}
@@ -593,7 +594,7 @@ void Board::generateZorbistKey()
 		hash ^= ZorbistKeys::whiteQueenSideCastlingKey;
 	if (canWhiteCastleKingSide)
 		hash ^= ZorbistKeys::whiteKingSideCastlingKey;
-	if (enPassantSquare == -1)
+	if (enPassantSquare != -1)
 		hash ^= ZorbistKeys::enPassantKeys[enPassantSquare % 8]; //Adds the hash for the column the of en passant square
 
 	zorbistKey = hash;

@@ -549,6 +549,8 @@ void Move::undoMove(Board * board)
 
 void Move::updateZorbistKeys(Board * board, colours opponentColour)
 {
+	board->zorbistKey ^= ZorbistKeys::blackMoveKey;
+
 	//Removes en passant file from hash.
 	if (board->enPassantSquare != -1)
 	{
@@ -603,6 +605,9 @@ void Move::updateZorbistKeys(Board * board, colours opponentColour)
 		//Switches hash to promoted pieceType
 		board->zorbistKey ^= ZorbistKeys::pieceKeys[to][piece + 6 * board->nextColour];
 		board->zorbistKey ^= ZorbistKeys::pieceKeys[to][knight + 6 * board->nextColour];
+
+		//Removes piece from pawn hash
+		board->pawnScoreZorbistKey ^= ZorbistKeys::pieceKeys[to][pawn + 6 * board->nextColour];
 	}
 	break;
 	case bishopPromotion:
@@ -610,6 +615,9 @@ void Move::updateZorbistKeys(Board * board, colours opponentColour)
 		//Switches hash to promoted pieceType
 		board->zorbistKey ^= ZorbistKeys::pieceKeys[to][piece + 6 * board->nextColour];
 		board->zorbistKey ^= ZorbistKeys::pieceKeys[to][bishop + 6 * board->nextColour];
+
+		//Removes piece from pawn hash
+		board->pawnScoreZorbistKey ^= ZorbistKeys::pieceKeys[to][pawn + 6 * board->nextColour];
 	}
 	break;
 	case rookPromotion:
@@ -617,6 +625,9 @@ void Move::updateZorbistKeys(Board * board, colours opponentColour)
 		//Switches hash to promoted pieceType
 		board->zorbistKey ^= ZorbistKeys::pieceKeys[to][piece + 6 * board->nextColour];
 		board->zorbistKey ^= ZorbistKeys::pieceKeys[to][rook + 6 * board->nextColour];
+
+		//Removes piece from pawn hash
+		board->pawnScoreZorbistKey ^= ZorbistKeys::pieceKeys[to][pawn + 6 * board->nextColour];
 	}
 	break;
 	case queenPromotion:
@@ -624,6 +635,9 @@ void Move::updateZorbistKeys(Board * board, colours opponentColour)
 		//Switches hash to promoted pieceType
 		board->zorbistKey ^= ZorbistKeys::pieceKeys[to][piece + 6 * board->nextColour];
 		board->zorbistKey ^= ZorbistKeys::pieceKeys[to][queen + 6 * board->nextColour];
+
+		//Removes piece from pawn hash
+		board->pawnScoreZorbistKey ^= ZorbistKeys::pieceKeys[to][pawn + 6 * board->nextColour];
 	}
 	break;
 	case pawnDoubleMove:

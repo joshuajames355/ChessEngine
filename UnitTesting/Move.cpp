@@ -301,3 +301,34 @@ TEST(Move, IncrementingScores)
 	EXPECT_EQ(board.getOnlyMaterialScore(black), 500);
 	EXPECT_EQ(board.getOnlyMaterialScore(white), 0);
 }
+
+TEST(Move, IncrementingZorbistKeys)
+{
+	Board board;
+	board.defaults();
+
+	Move move = moveFromNotation("a2a3", &board);
+	move.applyMove(&board);
+	uint64_t key1 = board.zorbistKey;
+	board.generateZorbistKey();
+	uint64_t key2 = board.zorbistKey;
+	EXPECT_EQ(key1, key2);
+
+
+	board.defaults();
+	move = moveFromNotation("a2a4", &board);
+	move.applyMove(&board);
+	key1 = board.zorbistKey;
+	board.generateZorbistKey();
+	key2 = board.zorbistKey;
+	EXPECT_EQ(key1, key2);
+
+	board.loadFromFen("8/P7/8/8/8/8/8/8 w - -");
+	move = moveFromNotation("a7a8q", &board);
+	move.applyMove(&board);
+
+	key1 = board.zorbistKey;
+	board.generateZorbistKey();
+	key2 = board.zorbistKey;
+	EXPECT_EQ(key1, key2);
+}
