@@ -13,6 +13,7 @@ int main(int argc, char **argv)
 	temp.setupMagicBitboards();
 	setupBitboardUtils();
 	setupMoveGen();
+	ZorbistKeys::initialize();
 	::testing::InitGoogleTest(&argc, argv);
 	return RUN_ALL_TESTS();
 }

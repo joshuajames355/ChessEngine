@@ -14,9 +14,6 @@ pieceSquare::pieceSquare(std::string filename, pieceType typeNew, colours defaul
 
 void pieceSquare::loadFromFile(std::string filename)
 {
-	//Used to add the material scores of each piece into the table.
-	int materialValues[6] = { 100,320,330,500,900,20000 };
-
 	std::ifstream tableFile;
 	tableFile.open(filename);
 	std::string line;
@@ -36,7 +33,7 @@ void pieceSquare::loadFromFile(std::string filename)
 				}
 				else
 				{
-					square[colNum][lineNum] = std::stoi(temp) + materialValues[type];
+					square[colNum][lineNum] = std::stoi(temp);
 					temp = "";
 					colNum++;
 				}
@@ -56,7 +53,7 @@ int pieceSquare::calcScore(uint64_t bitboard,colours targetColour)
 {
 
 	int score = 0;
-	int bitPos, x, y;
+	int bitPos;
 	while (bitboard)
 	{
 		bitPos = bitScanForward(pop(bitboard));
@@ -79,8 +76,6 @@ int pieceSquare::getScoreFromPos(int pos, colours targetColour)
 pieceSquare pieceSquareData::pawnSquare = pieceSquare("WPSquareTable.txt", pawn, white);
 pieceSquare pieceSquareData::knightSquare = pieceSquare("WNSquareTable.txt", knight, white);
 pieceSquare pieceSquareData::bishopSquare = pieceSquare("WBSquareTable.txt", bishop, white);
-pieceSquare pieceSquareData::rookSquare = pieceSquare("WRSquareTable.txt", rook, white);
-pieceSquare pieceSquareData::queenSquare = pieceSquare("WQSquareTable.txt", queen, white);
 pieceSquare pieceSquareData::midGameKingSquare = pieceSquare("WKMiddleSquareTable.txt", king, white);
 pieceSquare pieceSquareData::lateGameKingSquare = pieceSquare("WKEndSquareTable.txt", king, white);
 
