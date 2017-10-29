@@ -24,6 +24,7 @@ Move startSearch(Board* board, TranspositionEntry* transpositionTable, timeManag
 	data.startTime = time(0);
 	data.nodes = 0;
 
+	std::array<std::array<std::array<Move, 64>, 64>, 2> counterMoves;
 
 	int score = 0;
 	
@@ -36,19 +37,19 @@ Move startSearch(Board* board, TranspositionEntry* transpositionTable, timeManag
 
 		if (x == 1)
 		{
-			score = negascout(-30000, 30000, x, board, &data, transpositionTable, killerMoveTable);
+			score = negascout(-30000, 30000, x, board, &data, transpositionTable, killerMoveTable, &counterMoves, nullptr);
 		}
 		else
 		{
 			//Search with a narrow (half a pawn width) aspiration window.
 			int alpha = score - 25;
 			int beta = score + 25;
-			score = negascout(alpha, beta, x, board, &data, transpositionTable, killerMoveTable);
+			score = negascout(alpha, beta, x, board, &data, transpositionTable, killerMoveTable, &counterMoves, nullptr);
 
 			//Score outside range , therefore full re-search needed
 			if (score <= alpha || score >= beta)
 			{
-				score = negascout(-30000, 30000, x, board, &data, transpositionTable, killerMoveTable);
+				score = negascout(-30000, 30000, x, board, &data, transpositionTable, killerMoveTable, &counterMoves, nullptr);
 			}
 		}	
 
@@ -62,7 +63,7 @@ Move startSearch(Board* board, TranspositionEntry* transpositionTable, timeManag
 	return bestMove.bestMove;
 }
 
-int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data, TranspositionEntry* transpositionTable, std::vector<killerEntry>* killerMoveTable)
+int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data, TranspositionEntry* transpositionTable, std::vector<killerEntry>* killerMoveTable, std::array<std::array<std::array<Move, 64>, 64>, 2>* counterMoves, Move* prevMove)
 {
 	if (depthLeft == 0) return quiescence(alpha, beta, 3, board, data, false);
 
@@ -150,7 +151,7 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 			return 0;
 	}
 
-	orderSearch(&moveList, board, arraySize, &bestMove, isBestMove,(*killerMoveTable)[depthLeft]);
+	orderSearch(&moveList, board, arraySize, &bestMove, isBestMove,(*killerMoveTable)[depthLeft], counterMoves, prevMove);
 
 	int score;
 	for (int x = 0; x < arraySize; x++)
@@ -165,7 +166,7 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 		moveList[x].applyMove(board);
 		if (x == 0)
 		{
-			score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable);
+			score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, counterMoves, &moveList[x]);
 		}
 		//Late Move Reductions
 		else if (x > 4 && depthLeft >= 3 &&
@@ -176,22 +177,22 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 			moveList[x].moveType != bishopPromotion)
 		{
 			//Try a null window search at a reduced depth
-			score = -negascout(-alpha - 1, -alpha, depthLeft - 2, board, data, transpositionTable, killerMoveTable);
+			score = -negascout(-alpha - 1, -alpha, depthLeft - 2, board, data, transpositionTable, killerMoveTable, counterMoves, &moveList[x]);
 
 			//If the score is within the bounds , the first child was not the principle variation
 			if (alpha < score && score < beta)
 				//Therefore do a full re-search
-				score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable);
+				score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, counterMoves, &moveList[x]);
 		}
 		else
 		{
 			//Try a null window search
-			score = -negascout(-alpha - 1, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable);
+			score = -negascout(-alpha - 1, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, counterMoves, &moveList[x]);
 
 			//If the score is within the bounds , the first child was not the principle variation
 			if (alpha < score && score < beta)
 				//Therefore do a full re-search
-				score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable);
+				score = -negascout(-beta, -alpha, depthLeft - 1, board, data, transpositionTable, killerMoveTable, counterMoves, &moveList[x]);
 		}
 		moveList[x].undoMove(board);
 
@@ -202,8 +203,14 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 		}
 		if (score >= beta)
 		{
-			if(moveList[x].capturedPiece == blank)
+			if (moveList[x].capturedPiece == blank)
+			{
 				(*killerMoveTable)[depthLeft].addKillerMove(moveList[x]);
+				if (data->depth - depthLeft > 0)
+				{
+					(*counterMoves)[board->nextColour][prevMove->from][prevMove->from] = moveList[x];
+				}
+			}
 			break;   //  fail hard beta-cutoff
 		}
 		

@@ -32,7 +32,7 @@ void updateUI(searchData * data, Move currentMove, int currentMoveNumber, std::s
 void finalUIUpdate(searchData * data, std::string pvLine);
 
 Move startSearch(Board* board, TranspositionEntry* transpositionTable, timeManagement* timer);
-int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data, TranspositionEntry* transpositionTable, std::vector<killerEntry>* killerMoveTable);
+int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data, TranspositionEntry* transpositionTable, std::vector<killerEntry>* killerMoveTable, std::array<std::array<std::array<Move, 64>, 64>, 2>* counterMoves, Move* prevMove);
 int quiescence(int alpha, int beta, int depthLeft, Board* board, searchData* data, bool isQuiet);
 bool continueQuiescence(Board* board, Move* nextMove);
 

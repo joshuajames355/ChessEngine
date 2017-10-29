@@ -5,7 +5,7 @@ int moveRatingComparisonFunc(Move move1, Move move2)
 	return move1.moveRating > move2.moveRating;
 }
 
-void orderSearch(std::array<Move, 150>* moveList, Board* board, int arraySize, Move* TTMove, bool isBestMove, killerEntry killerMoves)
+void orderSearch(std::array<Move, 150>* moveList, Board* board, int arraySize, Move* TTMove, bool isBestMove, killerEntry killerMoves, std::array<std::array<std::array<Move, 64>, 64>, 2>* counterMoves, Move* prevMove)
 {
 	std::vector<Move> killerMoveVector = killerMoves.getKillerMoves();
 	int MVVLVAScore;
@@ -32,12 +32,15 @@ void orderSearch(std::array<Move, 150>* moveList, Board* board, int arraySize, M
 				(*moveList)[x].moveRating = 3998;
 			else if ((*moveList)[x].moveType == knightPromotion)
 				(*moveList)[x].moveRating = 3997;
-			else if ((*moveList)[x].moveType == capture && seeScore > 0)
+			else if ((*moveList)[x].capturedPiece != blank && seeScore > 0)
 				(*moveList)[x].moveRating = 3000 + seeScore;
 			//If the move is in the killerMoveTable
 			else if (std::find(killerMoveVector.begin(), killerMoveVector.end(), (*moveList)[x]) != killerMoveVector.begin())
 				(*moveList)[x].moveRating = 2500;
-			else if ((*moveList)[x].moveType == capture)
+			//If the move is in the countermove table
+			else if (prevMove != nullptr && (*moveList)[x] == (*counterMoves)[board->nextColour][prevMove->from][prevMove->to])
+						(*moveList)[x].moveRating = 2400;
+			else if ((*moveList)[x].capturedPiece != blank)
 			{
 				(*moveList)[x].moveRating = 2000 + seeScore;
 			}
