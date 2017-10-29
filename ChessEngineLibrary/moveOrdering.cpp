@@ -11,6 +11,14 @@ void orderSearch(std::array<Move, 150>* moveList, Board* board, int arraySize, M
 	int MVVLVAScore;
 	int seeScore;
 
+	//Move order scheme:
+	//1. Move from hash table (score 5000)
+	//2. Promotions (Score ~ 4000)
+	//3. Winning or equal captures (SEE >= 0) , (Score 3000 + SEE)
+	//4. Strong non-captures (killer move , then countermove heuristic)
+	//5. Losing captures
+	//6. Other moves
+
 	for (int x = 0; x < arraySize; x++)
 	{
 		if ((*moveList)[x] == *TTMove)
@@ -32,7 +40,7 @@ void orderSearch(std::array<Move, 150>* moveList, Board* board, int arraySize, M
 				(*moveList)[x].moveRating = 3998;
 			else if ((*moveList)[x].moveType == knightPromotion)
 				(*moveList)[x].moveRating = 3997;
-			else if ((*moveList)[x].capturedPiece != blank && seeScore > 0)
+			else if ((*moveList)[x].capturedPiece != blank && seeScore >= 0)
 				(*moveList)[x].moveRating = 3000 + seeScore;
 			//If the move is in the killerMoveTable
 			else if (std::find(killerMoveVector.begin(), killerMoveVector.end(), (*moveList)[x]) != killerMoveVector.begin())
@@ -68,10 +76,15 @@ int orderQuiescentSearch(std::array<Move, 150>* moveList, Board * board, int arr
 	}
 	arraySize = counter;
 
+	const int materialValues[6] = { 100,300,300,500,900,0 };
 
 	for (int x = 0; x < arraySize; x++)
 	{
-		(*moveList)[x].moveRating = SEE(&(*moveList)[x], board);
+		//When weaker pieces capture stronger pieces, the move is probably strong , no need to waste time in SEE
+		if (materialValues[(*moveList)[x].piece] < materialValues[(*moveList)[x].capturedPiece])
+			(*moveList)[x].moveRating = materialValues[(*moveList)[x].capturedPiece];
+		else
+			(*moveList)[x].moveRating = SEE(&(*moveList)[x], board);
 	}
 	
 	std::sort(moveList->begin(), moveList->begin() + arraySize, moveRatingComparisonFunc);
