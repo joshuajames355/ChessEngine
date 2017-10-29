@@ -16,6 +16,11 @@ Move::Move(int newFrom, int newTo, MoveType newMoveType, pieceType newPieceType,
 	{
 		capturedPiece = board->getPieceTypeInSquare((uint64_t)1 << to);
 	}
+	//En passant capture
+	else if (to == board->enPassantSquare && piece == pawn)
+	{
+		capturedPiece = pawn;
+	}
 	else
 	{
 		capturedPiece = blank;
@@ -45,7 +50,7 @@ void Move::applyMove(Board * board)
 	if (capturedPiece != blank)
 	{
 		board->removeMaterialScore(opponentColour, capturedPiece);
-		board->removePositionalScore(opponentColour, capturedPiece, to);
+		if (piece != pawn || to != board->enPassantSquare) board->removePositionalScore(opponentColour, capturedPiece, to);
 	}
 	
 	switch (moveType)
@@ -75,7 +80,6 @@ void Move::applyMove(Board * board)
 				board->removePiece((uint64_t)1 << (to + 8));
 				board->removePositionalScore(opponentColour, pawn, to + 8);
 			}
-			board->removeMaterialScore(opponentColour, pawn);
 		}
 		else
 		{
@@ -366,6 +370,7 @@ void Move::undoMove(Board * board)
 	if (capturedPiece != blank)
 	{
 		board->addMaterialScore(opponentColour, capturedPiece);
+		if(capturedPiece != blank && (piece != pawn || to != board->enPassantSquare))
 		board->addPositionalScore(opponentColour, capturedPiece, to);
 	}
 
@@ -396,7 +401,6 @@ void Move::undoMove(Board * board)
 				board->setBitboard(opponentColour, pawn, board->getPieceBitboard(opponentColour, pawn) | ((uint64_t)1 << (to + 8)));
 				board->addPositionalScore(opponentColour, pawn, to + 8);
 			}
-			board->addMaterialScore(opponentColour, pawn);
 		}
 		else
 		{
@@ -569,7 +573,7 @@ void Move::updateZorbistKeys(Board * board, colours opponentColour)
 	}
 
 	//Removed captured piece from hash when capture is not enpassant
-	if (capturedPiece != blank && to != enPassantSquare)
+	if (capturedPiece != blank && (to != enPassantSquare || piece != pawn))
 	{
 		board->zorbistKey ^= ZorbistKeys::pieceKeys[to][capturedPiece + 6 * opponentColour];
 
