@@ -5,7 +5,7 @@ int moveRatingComparisonFunc(Move move1, Move move2)
 	return move1.moveRating > move2.moveRating;
 }
 
-void orderSearch(std::array<Move, 150>* moveList, Board* board, int arraySize, Move* TTMove, bool isBestMove, killerEntry killerMoves, std::array<std::array<std::array<Move, 64>, 64>, 2>* counterMoves, Move* prevMove)
+void orderSearch(std::array<Move, 150>* moveList, Board* board, int arraySize, Move* TTMove, bool isBestMove, killerEntry killerMoves, std::array<std::array<std::array<Move, 64>, 64>, 2>* counterMoves, Move* prevMove, std::array<std::array<std::array<int, 64>, 64>, 2>* historyMoves)
 {
 	std::vector<Move> killerMoveVector = killerMoves.getKillerMoves();
 	int MVVLVAScore;
@@ -15,9 +15,9 @@ void orderSearch(std::array<Move, 150>* moveList, Board* board, int arraySize, M
 	//1. Move from hash table (score 5000)
 	//2. Promotions (Score ~ 4000)
 	//3. Winning or equal captures (SEE >= 0) , (Score 3000 + SEE)
-	//4. Strong non-captures (killer move , then countermove heuristic)
-	//5. Losing captures
-	//6. Other moves
+	//4. Strong non-captures (killer move , then countermove heuristic), (Score 2500, 2400)
+	//5. Other non-captures sorted by history heuristic, (Score 2000 + history)
+	//6. Losing captures, ( Score 2000 - SEE penalty)
 
 	for (int x = 0; x < arraySize; x++)
 	{
@@ -48,13 +48,14 @@ void orderSearch(std::array<Move, 150>* moveList, Board* board, int arraySize, M
 			//If the move is in the countermove table
 			else if (prevMove != nullptr && (*moveList)[x] == (*counterMoves)[board->nextColour][prevMove->from][prevMove->to])
 						(*moveList)[x].moveRating = 2400;
+			//If the move is in the history table
 			else if ((*moveList)[x].capturedPiece != blank)
 			{
 				(*moveList)[x].moveRating = 2000 + seeScore;
 			}
 			else
 			{
-				(*moveList)[x].moveRating = 0;
+				(*moveList)[x].moveRating = 2000 + (*historyMoves)[board->nextColour][(*moveList)[x].from][(*moveList)[x].to];
 			}
 		}
 	}

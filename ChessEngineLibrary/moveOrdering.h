@@ -33,7 +33,7 @@ struct SEEPiece
 	}
 };
 
-void orderSearch(std::array<Move, 150>* moveList, Board* board, int arraySize, Move* TTMove, bool isBestMove, killerEntry killerMoves, std::array<std::array<std::array<Move, 64>, 64>, 2>* counterMoves, Move* prevMove);
+void orderSearch(std::array<Move, 150>* moveList, Board* board, int arraySize, Move* TTMove, bool isBestMove, killerEntry killerMoves, std::array<std::array<std::array<Move, 64>, 64>, 2>* counterMoves, Move* prevMove, std::array<std::array<std::array<int, 64>, 64>, 2>* historyMoves);
 int orderQuiescentSearch(std::array<Move, 150>* moveList, Board * board, int arraySize);
 
 int getMVVLVAScore(Move* move);
