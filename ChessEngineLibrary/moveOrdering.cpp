@@ -48,7 +48,6 @@ void orderSearch(std::array<Move, 150>* moveList, Board* board, int arraySize, M
 			//If the move is in the countermove table
 			else if (prevMove != nullptr && (*moveList)[x] == (*counterMoves)[board->nextColour][prevMove->from][prevMove->to])
 						(*moveList)[x].moveRating = 2400;
-			//If the move is in the history table
 			else if ((*moveList)[x].capturedPiece != blank)
 			{
 				(*moveList)[x].moveRating = 2000 + seeScore;

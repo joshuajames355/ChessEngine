@@ -154,6 +154,35 @@ TEST(Board, IsPieceAttacked)
 	EXPECT_EQ(board.isPieceAttacked(0, white), false);
 }
 
+TEST(Board, isMaterialDraw)
+{
+	Board board;
+
+	board.defaults();
+	EXPECT_EQ(board.isMaterialDraw(), false);
+
+	board = Board("K7/8/k7/8/8/8/8/8 w -- 0 1");
+	EXPECT_EQ(board.isMaterialDraw(), true);
+
+	board = Board("K7/8/k7/8/N7/8/8/8 w -- 0 1");
+	EXPECT_EQ(board.isMaterialDraw(), true);
+
+	board = Board("K7/8/k7/8/NN6/8/8/8 w -- 0 1");
+	EXPECT_EQ(board.isMaterialDraw(), false);
+
+	board = Board("K7/8/k7/8/8/8/8/B7 w -- 0 1");
+	EXPECT_EQ(board.isMaterialDraw(), true);
+
+	board = Board("K7/8/k7/8/8/8/8/B1B5 w -- 0 1");
+	EXPECT_EQ(board.isMaterialDraw(), true);
+
+	board = Board("K7/8/k7/8/8/8/8/B1B1b1b w -- 0 1");
+	EXPECT_EQ(board.isMaterialDraw(), true);
+
+	board = Board("K7/8/k7/8/8/8/8/B1B1bb1 w -- 0 1");
+	EXPECT_EQ(board.isMaterialDraw(), false);
+}
+
 TEST(Bitboard, bitsum)
 {
 	EXPECT_EQ(bitSum(15), 4);
@@ -186,4 +215,5 @@ TEST(Bitboard, bitScanForward)
 	EXPECT_EQ(bitScanForward(256), 8);
 	EXPECT_EQ(bitScanForward(64), 6);
 }
+
 

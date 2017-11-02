@@ -69,6 +69,10 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 {
 	if (depthLeft == 0) return quiescence(alpha, beta, 3, board, data, false);
 
+
+	//The score assigned to draws (slightly negative to try to avoid premature draws)
+	const int DRAWSCORE = -25;
+
 	data->nodes++;
 	int alphaOriginal = alpha;
 	Move bestMove;
@@ -103,6 +107,12 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 		bestMove = entry.bestMove;
 	}
 
+	//Draws by insufficient material for mating
+	if (board->isMaterialDraw())
+	{
+		return DRAWSCORE;
+	}
+
 	//CheckMate / StaleMate
 	if (arraySize == 0)
 	{
@@ -116,7 +126,7 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 		//Stalemate
 		else
 		{
-			return 0;
+			return DRAWSCORE;
 		}
 	}
 
@@ -150,7 +160,7 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 	if (board->moveHistory.size() > 0)
 	{
 		if (std::count(board->moveHistory.begin(), board->moveHistory.end(), board->moveHistory.back()) >= 3)
-			return 0;
+			return DRAWSCORE;
 	}
 
 	orderSearch(&moveList, board, arraySize, &bestMove, isBestMove,(*killerMoveTable)[depthLeft], counterMoves, prevMove, historyMoves);

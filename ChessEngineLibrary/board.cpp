@@ -601,6 +601,47 @@ void Board::generateZorbistKey()
 	pawnScoreZorbistKey = pawnHash;
 }
 
+bool Board::isMaterialDraw()
+{
+	const uint64_t bothKingsBitboard = getPieceBitboard(white, king) | getPieceBitboard(black, king);
+
+	//If their are only kings on the board , its a draw.
+	if (bothKingsBitboard == allPieces)
+	{
+		return true;
+	}
+	//If King + knight vs King , its a draw
+	else if ((bothKingsBitboard | getPieceBitboard(white, knight)) == allPieces && bitSum(getPieceBitboard(white, knight)) == 1
+		 || (bothKingsBitboard | getPieceBitboard(black, knight)) == allPieces && bitSum(getPieceBitboard(black, knight)) == 1)
+	{
+		return true;
+	}
+	//If their are only kings and bishops , and the bishops are on the same , colour square , its a draw
+	else if ((bothKingsBitboard | getPieceBitboard(white, bishop) | getPieceBitboard(black, bishop)) == allPieces)
+	{
+		uint64_t bishopsBitboard = getPieceBitboard(white, bishop) | getPieceBitboard(black, bishop);
+		const colours firstColour = getPieceColour(bitScanForward(pop(bishopsBitboard)));
+
+		while (bishopsBitboard)
+		{
+			if (firstColour != getPieceColour(bitScanForward(pop(bishopsBitboard))))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	return false;
+
+}
+
+colours Board::getPieceColour(int pos)
+{
+	const colours coloursArray[] = { black, white, black, white, black, white, black, white, white, black, white, black, white, black, white, black };
+	return coloursArray[pos % 16];
+}
+
 bool Board::isInCheck()
 {
 	if (kingDangerSquares == 0)	generateKingDangerSquares();

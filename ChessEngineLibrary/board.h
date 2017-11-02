@@ -35,6 +35,12 @@ public:
 
 	void generateZorbistKey();
 
+	//Checks whether the game is drawn by lack of material
+	bool isMaterialDraw();
+
+	//Gets the colour of a piece on the board
+	colours  getPieceColour(int pos);
+
 	//Used for detecting three-fold repitition.
 	std::vector<uint64_t> moveHistory;
 
