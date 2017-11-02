@@ -96,7 +96,7 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 			}
 			else if (entry.flag == upperBound)
 			{
-				beta = std::max(beta, entry.score);
+				beta = std::min(beta, entry.score);
 			}
 			if (alpha >= beta)
 			{
