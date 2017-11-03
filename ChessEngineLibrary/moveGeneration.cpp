@@ -94,7 +94,7 @@ int generatePawnMoves(Board* board, std::array<Move,150>* Movelist, uint64_t pin
 	//Adds en-passant position to capture moves (if not pinned)
 	if (board->enPassantSquare != -1)
 	{
-		const uint64_t enemyEnPassantTarget = captureMask & board->getPieceBitboard(switchColour(board->nextColour), pawn);
+		const uint64_t enemyEnPassantTarget = captureMask & shift((uint64_t)1 << board->enPassantSquare,-forwards);
 		if (enemyEnPassantTarget)
 		{
 			//The two pieces that will be (re)moved by an enpassant capture
@@ -165,11 +165,17 @@ int generatePawnMoves(Board* board, std::array<Move,150>* Movelist, uint64_t pin
 		int pawnPosIndex = bitScanForward(pawnPos);
 
 		pawnMoves = shift(pawnPos, forwards) & ~board->allPieces & legalMoves; //Move forward
-		pawnDoubleMoves = shift(pawnMoves & rank3,  forwards) & ~board->allPieces & legalMoves & pushMask; //Move twice on first turn if first is clear
+		pawnDoubleMoves = shift(pawnMoves & rank3BB,  forwards) & ~board->allPieces & legalMoves & pushMask; //Move twice on first turn if first is clear
 		pawnMoves &= pushMask;
 
 		pawnAttacks = ((board->nextColour == white) ? pawnWhiteAttacksArray[pawnPosIndex] : pawnBlackAttacksArray[pawnPosIndex]) & enemyPieces;
 		pawnAttacks &= legalMoves & captureMask;
+
+		if (pawnDoubleMoves)
+		{
+			(*Movelist)[arraySize] = Move(pawnPosIndex, pawnPosIndex + forwards*2, pawnDoubleMove, pawn, board);
+			arraySize++;
+		}
 
 		arraySize = addPawnMoves(pawnPosIndex, pawnMoves, pawnAttacks, board, Movelist, arraySize);
 	}
