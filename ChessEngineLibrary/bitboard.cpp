@@ -130,3 +130,8 @@ void setupBitboardUtils()
 		}
 	}
 }
+
+uint64_t shift(uint64_t bitboard, int shift)
+{
+	return (shift > 0) ? bitboard << shift : bitboard >> -shift;
+}

@@ -76,97 +76,104 @@ int searchForMoves(Board * board, std::array<Move,150>* moveList)
 int generatePawnMoves(Board* board, std::array<Move,150>* Movelist, uint64_t pinnedPieces, uint64_t pushMask, uint64_t captureMask, int arraySize)
 {
 	uint64_t pawnPos, pawnMoves, pawnAttacks, pawnDoubleMoves, legalMoves;
+	bool isPinned;
 
-	if (board->nextColour == white)
+	//Calculates constants used later
+	const int forwards = (board->nextColour == white) ? 8 : -8;
+	const uint64_t rank3BB = (board->nextColour == white) ? rank3 : rank6;
+	const uint64_t emptySquares = ~board->allPieces;
+	//const uint64_t emptySquares = ~board->allPieces & pushMask;
+	const int leftAttack = (board->nextColour == white) ? 7 : -9;
+	const int rightAttack = (board->nextColour == white) ? 9 : -7;
+	const uint64_t enemyPieces = ((board->nextColour == white) ? board->blackPieces : board->whitePieces) | (uint64_t)1 << board->enPassantSquare;
+
+	//The bitboard of all pawns that are not pinned. (pinned pieces need to be calculated seperatly)
+	uint64_t pawnBitboard = board->getPieceBitboard(board->nextColour, pawn) & ~pinnedPieces;
+	uint64_t pinnedPawnBitboard = board->getPieceBitboard(board->nextColour, pawn) & pinnedPieces;
+
+	//Adds en-passant position to capture moves (if not pinned)
+	if (board->enPassantSquare != -1)
 	{
-		//Adds en-passant position to capture moves
-		if (captureMask != 0xFFFFFFFFFFFFFFFF && bitScanForward(captureMask & board->getPieceBitboard(black,pawn)) + 8 == board->enPassantSquare)
+		const uint64_t enemyEnPassantTarget = captureMask & board->getPieceBitboard(switchColour(board->nextColour), pawn);
+		if (enemyEnPassantTarget)
 		{
-			captureMask |= (uint64_t)1 << board->enPassantSquare;
-		}
+			//The two pieces that will be (re)moved by an enpassant capture
+			uint64_t leftPos = (uint64_t)1 << (board->enPassantSquare - forwards - 1) & ~fileH & board->getPieceBitboard(board->nextColour, pawn);
+			uint64_t rightPos = (uint64_t)1 << (board->enPassantSquare - forwards + 1) & ~fileA & board->getPieceBitboard(board->nextColour, pawn);
 
-		uint64_t pawnBitboard = board->getPieceBitboard(white, pawn);
-		while (pawnBitboard)
-		{
-			pawnPos = pop(pawnBitboard);
-			if (pawnPos & pinnedPieces) legalMoves = generateLegalFilterForPinnedPiece(board, pawnPos);
-			else legalMoves = ~0;
-
-			int pawnPosIndex = bitScanForward(pawnPos);
-
-			pawnMoves = pawnPos << 8 & ~board->allPieces & legalMoves; //Move forward
-			pawnDoubleMoves = ((pawnMoves & rank3) << 8) & ~board->allPieces & legalMoves & pushMask; //Move twice on first turn if first is clear
-			pawnMoves &= pushMask;
-
-			pawnAttacks = pawnWhiteAttacksArray[pawnPosIndex] & board->blackPieces;
-
-			//Attack either enemy pieces or the en passent target square.
-			if(board->enPassantSquare != -1)
+			if (leftPos && rightPos)
 			{
-				uint64_t movedPieces = pawnPos | ((uint64_t)1 << board->enPassantSquare >> 8);
-				if (!isPinnedEnPassant(board, movedPieces))
-					pawnAttacks |= pawnWhiteAttacksArray[pawnPosIndex] & ((uint64_t)1 << board->enPassantSquare);
+				captureMask |= (uint64_t)1 << board->enPassantSquare;
 			}
-
-
-			pawnAttacks &= legalMoves & captureMask;
-
-			while (pawnDoubleMoves)
+			else if (leftPos && !isPinnedEnPassant(board, leftPos | enemyEnPassantTarget))
 			{
-				uint64_t currentMove = pop(pawnDoubleMoves);
-				(*Movelist)[arraySize] = Move(pawnPosIndex, bitScanForward(currentMove), pawnDoubleMove , pawn, board);
-				arraySize++;
+				captureMask |= (uint64_t)1 << board->enPassantSquare;
 			}
-
-			arraySize = addPawnMoves(pawnPosIndex, pawnMoves, pawnAttacks, board, Movelist, arraySize);
-		}
-	}
-	else //Colour is black
-	{
-		//Adds en-passant position to capture move
-		if (captureMask != 0xFFFFFFFFFFFFFFFF && bitScanForward(captureMask & board->getPieceBitboard(white, pawn)) - 8 == board->enPassantSquare)
-		{
-			captureMask |= (uint64_t)1 >> board->enPassantSquare;
-		}
-
-		uint64_t pawnBitboard = board->getPieceBitboard(black, pawn);
-		while (pawnBitboard)
-		{
-			pawnPos = pop(pawnBitboard);
-			if (pawnPos & pinnedPieces) legalMoves = generateLegalFilterForPinnedPiece(board, pawnPos);
-			else legalMoves = ~0;
-
-			int pawnPosIndex = bitScanForward(pawnPos);
-
-			pawnMoves = pawnPos >> 8 & ~board->allPieces & legalMoves; //Move forward
-			pawnDoubleMoves = ((pawnMoves & rank6) >> 8) & ~board->allPieces & legalMoves & pushMask;  //Move twice on first turn if first is clear
-			pawnMoves &= pushMask;
-
-			pawnAttacks = pawnBlackAttacksArray[pawnPosIndex] & board->whitePieces;
-
-			//Attack either enemy pieces or the en passent target square.
-			if(board->enPassantSquare != -1)
+			else if (rightPos && !isPinnedEnPassant(board, rightPos | enemyEnPassantTarget))
 			{
-				uint64_t movedPieces = pawnPos | ((uint64_t)1 << board->enPassantSquare << 8);
-				if(!isPinnedEnPassant(board,movedPieces))
-					pawnAttacks |= pawnBlackAttacksArray[pawnPosIndex] & ((uint64_t)1 << board->enPassantSquare);
+				captureMask |= (uint64_t)1 << board->enPassantSquare;
 			}
 			else
 			{
-				pawnAttacks = (pawnPos >> 9) & (board->whitePieces) &  ~fileH | (pawnPos >> 7) & (board->whitePieces) & ~fileA;
+				captureMask &= ~((uint64_t)1 << board->enPassantSquare);
 			}
-			pawnAttacks &= legalMoves & captureMask;
-
-			while (pawnDoubleMoves)
-			{
-				uint64_t currentMove = pop(pawnDoubleMoves);
-				(*Movelist)[arraySize] = Move(pawnPosIndex, bitScanForward(currentMove), pawnDoubleMove, pawn, board);
-				arraySize++;
-			}
-
-			arraySize = addPawnMoves(pawnPosIndex, pawnMoves, pawnAttacks, board, Movelist, arraySize);
 		}
 	}
+
+
+	//Adds quiet moves to moveList
+	pawnMoves = shift(pawnBitboard, forwards) & emptySquares;
+	pawnDoubleMoves = shift(pawnMoves & rank3BB, forwards) & emptySquares & pushMask;
+	pawnMoves &= pushMask; //Done after calculating double moves to allow double moves , where the single move would be illegal (in check).
+	while (pawnMoves)
+	{
+		uint64_t currentMove = pop(pawnMoves);
+		int to = bitScanForward(currentMove);
+		arraySize = addPawnMovesPromotions(to - forwards, to, currentMove, quietMove, board, Movelist, arraySize);
+	}
+	while (pawnDoubleMoves)
+	{
+		uint64_t currentMove = pop(pawnDoubleMoves);
+		int to = bitScanForward(currentMove);
+		(*Movelist)[arraySize] = Move(to - forwards * 2, to, pawnDoubleMove, pawn, board);
+		arraySize++;
+	}
+
+	//Adds captures moves to moveList. (right and left attacks are handled seperatly)
+	pawnAttacks = shift(pawnBitboard, rightAttack) & enemyPieces & ~fileA & captureMask;
+	while (pawnAttacks)
+	{
+		uint64_t currentMove = pop(pawnAttacks);
+		int to = bitScanForward(currentMove);
+		arraySize = addPawnMovesPromotions(to - rightAttack, to, currentMove, capture, board, Movelist, arraySize);
+
+	}
+	pawnAttacks = shift(pawnBitboard, leftAttack) & enemyPieces & ~fileH & captureMask;
+	while (pawnAttacks)
+	{
+		uint64_t currentMove = pop(pawnAttacks);
+		int to = bitScanForward(currentMove);
+		arraySize = addPawnMovesPromotions(to - leftAttack, to, currentMove, capture, board, Movelist, arraySize);
+	}
+
+
+	while (pinnedPawnBitboard)
+	{
+		pawnPos = pop(pinnedPawnBitboard);
+		legalMoves = generateLegalFilterForPinnedPiece(board, pawnPos);
+
+		int pawnPosIndex = bitScanForward(pawnPos);
+
+		pawnMoves = shift(pawnPos, forwards) & ~board->allPieces & legalMoves; //Move forward
+		pawnDoubleMoves = shift(pawnMoves & rank3,  forwards) & ~board->allPieces & legalMoves & pushMask; //Move twice on first turn if first is clear
+		pawnMoves &= pushMask;
+
+		pawnAttacks = ((board->nextColour == white) ? pawnWhiteAttacksArray[pawnPosIndex] : pawnBlackAttacksArray[pawnPosIndex]) & enemyPieces;
+		pawnAttacks &= legalMoves & captureMask;
+
+		arraySize = addPawnMoves(pawnPosIndex, pawnMoves, pawnAttacks, board, Movelist, arraySize);
+	}
+
 	return arraySize;
 }
 
@@ -427,6 +434,24 @@ int addMoves(int start, int end, pieceType piece, std::array<Move,150>* Movelist
 	else
 	{
 		(*Movelist)[arraySize] = Move(start, end, quietMove, piece, board);
+		arraySize++;
+	}
+	return arraySize;
+}
+
+int addPawnMovesPromotions(int from, int to, uint64_t move, MoveType type, Board* board, std::array<Move, 150>* Movelist, int arraySize)
+{
+	if ((board->nextColour == white && (move & rank8)) || (board->nextColour == black && (move & rank1)))
+	{
+		(*Movelist)[arraySize] = Move(from, to, rookPromotion, pawn, board);
+		(*Movelist)[arraySize + 1] = Move(from, to, knightPromotion, pawn, board);
+		(*Movelist)[arraySize + 2] = Move(from, to, queenPromotion, pawn, board);
+		(*Movelist)[arraySize + 3] = Move(from, to, bishopPromotion, pawn, board);
+		arraySize += 4;
+	}
+	else
+	{
+		(*Movelist)[arraySize] = Move(from, to, type, pawn, board);
 		arraySize++;
 	}
 	return arraySize;

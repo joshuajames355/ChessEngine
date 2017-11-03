@@ -30,3 +30,4 @@ int bitScanForward(uint64_t bitboard);
 std::vector<int> getSetBits(uint64_t bitboard);
 uint64_t inBetween(int from, int to);
 void setupBitboardUtils();
+uint64_t shift(uint64_t bitboard, int shift);

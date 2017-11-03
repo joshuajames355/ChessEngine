@@ -19,8 +19,9 @@ int generateBishopMoves(Board * board, std::array<Move, 150>* Movelist, uint64_t
 int generateQueenMoves(Board * board, std::array<Move, 150>* Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, uint64_t pinnedPieces, uint64_t pushMask, uint64_t captureMask, int arraySize);
 int generateCastlingMoves(Board * board, std::array<Move, 150>* Movelist, uint64_t friendlyPieces, uint64_t enemyPieces, uint64_t kingDangerSquares, int arraySize);
 
-int addPawnMoves(int start, uint64_t quietMoves, uint64_t captureMoves, Board* board, std::array<Move, 150>*, int arraySize);
+int addPawnMoves(int start, uint64_t quietMoves, uint64_t captureMoves, Board* board, std::array<Move, 150>* Movelist, int arraySize);
 int addMoves(int start, int end, pieceType piece, std::array<Move, 150>*, uint64_t enemyPieces, Board* board, int arraySize);
+int addPawnMovesPromotions(int from, int to, uint64_t move, MoveType type, Board* board, std::array<Move, 150>* Movelist, int arraySize);
 
 uint64_t generateAttackSet(Board* board, colours colour, uint64_t allPieces);
 uint64_t getPinnedPieces(Board* board);
