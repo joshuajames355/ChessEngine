@@ -64,12 +64,12 @@ int pieceSquare::calcScore(uint64_t bitboard,colours targetColour)
 
 int pieceSquare::getScoreFromPos(int pos, colours targetColour)
 {
-	if (targetColour == defaultColour)
-	{
-		pos = 63 - pos;
-	}
 	int x = pos % 8;
 	int y = (pos - x) / 8;
+	if (targetColour == defaultColour)
+	{
+		y = 7 - y;
+	}
 	return square[x][y];
 }
 
