@@ -123,8 +123,9 @@ int generatePawnMoves(Board* board, std::array<Move,150>* Movelist, uint64_t pin
 
 	//Adds quiet moves to moveList
 	pawnMoves = shift(pawnBitboard, forwards) & emptySquares;
-	pawnDoubleMoves = shift(pawnMoves & rank3BB, forwards) & emptySquares & pushMask;
-	pawnMoves &= pushMask; //Done after calculating double moves to allow double moves , where the single move would be illegal (in check).
+	pawnDoubleMoves= shift(pawnMoves & rank3BB, forwards) & emptySquares & pushMask;
+	pawnMoves &= pushMask;
+
 	while (pawnMoves)
 	{
 		uint64_t currentMove = pop(pawnMoves);
@@ -135,7 +136,7 @@ int generatePawnMoves(Board* board, std::array<Move,150>* Movelist, uint64_t pin
 	{
 		uint64_t currentMove = pop(pawnDoubleMoves);
 		int to = bitScanForward(currentMove);
-		(*Movelist)[arraySize] = Move(to - forwards * 2, to, pawnDoubleMove, pawn, board);
+		(*Movelist)[arraySize] = Move(to - forwards * 2, to, quietMove, pawn, board);
 		arraySize++;
 	}
 
@@ -168,14 +169,15 @@ int generatePawnMoves(Board* board, std::array<Move,150>* Movelist, uint64_t pin
 		pawnDoubleMoves = shift(pawnMoves & rank3BB,  forwards) & ~board->allPieces & legalMoves & pushMask; //Move twice on first turn if first is clear
 		pawnMoves &= pushMask;
 
-		pawnAttacks = ((board->nextColour == white) ? pawnWhiteAttacksArray[pawnPosIndex] : pawnBlackAttacksArray[pawnPosIndex]) & enemyPieces;
-		pawnAttacks &= legalMoves & captureMask;
-
 		if (pawnDoubleMoves)
 		{
-			(*Movelist)[arraySize] = Move(pawnPosIndex, pawnPosIndex + forwards*2, pawnDoubleMove, pawn, board);
+			int to = bitScanForward(pawnDoubleMoves);
+			(*Movelist)[arraySize] = Move(to - forwards * 2, to, quietMove, pawn, board);
 			arraySize++;
 		}
+
+		pawnAttacks = ((board->nextColour == white) ? pawnWhiteAttacksArray[pawnPosIndex] : pawnBlackAttacksArray[pawnPosIndex]) & enemyPieces;
+		pawnAttacks &= legalMoves & captureMask;
 
 		arraySize = addPawnMoves(pawnPosIndex, pawnMoves, pawnAttacks, board, Movelist, arraySize);
 	}
@@ -255,10 +257,7 @@ int generateRookMoves(Board * board, std::array<Move, 150>* Movelist, uint64_t f
 		if (currentRook & pinnedPieces) legalMoves = generateLegalFilterForPinnedPiece(board, currentRook);
 		else legalMoves = ~0;
 
-		uint64_t occupancy = magicBitboards::rookMask[currentPos] & board->allPieces;
-		uint64_t magicResult = occupancy * magicBitboards::magicNumberRook[currentPos];
-		int arrayIndex = magicResult >> magicBitboards::magicNumberShiftRook[currentPos];
-		uint64_t moves = magicBitboards::magicMovesRook[currentPos][arrayIndex] & ~friendlyPieces & legalMoves & (pushMask | captureMask);
+		uint64_t moves = rookMoves(currentPos, board->allPieces) & ~friendlyPieces & legalMoves & (pushMask | captureMask);
 
 		while (moves)
 		{
@@ -288,10 +287,7 @@ int generateBishopMoves(Board * board, std::array<Move, 150>* Movelist, uint64_t
 		if (currentBishop & pinnedPieces) legalMoves = generateLegalFilterForPinnedPiece(board, currentBishop);
 		else legalMoves = ~0;
 
-		uint64_t occupancy = magicBitboards::bishopMask[currentPos] & board->allPieces;
-		uint64_t magicResult = occupancy * magicBitboards::magicNumberBishop[currentPos];
-		int arrayIndex = magicResult >> magicBitboards::magicNumberShiftBishop[currentPos];
-		uint64_t moves = magicBitboards::magicMovesBishop[currentPos][arrayIndex] & ~friendlyPieces & legalMoves & (pushMask | captureMask);
+		uint64_t moves = bishopMoves(currentPos, board->allPieces) & ~friendlyPieces & legalMoves & (pushMask | captureMask);
 
 		while (moves)
 		{
@@ -321,17 +317,7 @@ int generateQueenMoves(Board * board, std::array<Move,150>* Movelist, uint64_t f
 		if (currentQueen & pinnedPieces) legalMoves = generateLegalFilterForPinnedPiece(board, currentQueen);
 		else legalMoves = ~0;
 
-		//Moves bishop moves
-		uint64_t occupancy = magicBitboards::bishopMask[currentPos] & board->allPieces;
-		uint64_t magicResult = occupancy * magicBitboards::magicNumberBishop[currentPos];
-		int arrayIndex = magicResult >> magicBitboards::magicNumberShiftBishop[currentPos];
-		uint64_t moves = magicBitboards::magicMovesBishop[currentPos][arrayIndex] & ~friendlyPieces & legalMoves & (pushMask | captureMask);
-
-		//Rook moves
-		occupancy = magicBitboards::rookMask[currentPos] & board->allPieces;
-		magicResult = occupancy * magicBitboards::magicNumberRook[currentPos];
-		arrayIndex = magicResult >> magicBitboards::magicNumberShiftRook[currentPos];
-		moves |= magicBitboards::magicMovesRook[currentPos][arrayIndex] & ~friendlyPieces & legalMoves & (pushMask | captureMask);
+		uint64_t moves = queenMoves(currentPos, board->allPieces) & ~friendlyPieces & legalMoves & (pushMask | captureMask);
 
 		while (moves)
 		{
@@ -470,22 +456,10 @@ uint64_t getPinnedPieces(Board * board)
 	uint64_t kingBitBoard = board->getPieceBitboard(board->nextColour, king);
 	int kingPos = bitScanForward(kingBitBoard);
 
-	uint64_t enemyPieces, friendlyPieces;
-	if (board->nextColour == white)
-	{
-		enemyPieces = board->blackPieces;
-		friendlyPieces = board->whitePieces;
-	}
-	else
-	{
-		enemyPieces = board->whitePieces;
-		friendlyPieces = board->blackPieces;
-	}
+	const uint64_t enemyPieces = (board->nextColour == white) ? board->blackPieces : board->whitePieces;
+	const uint64_t friendlyPieces = (board->nextColour == white) ? board->whitePieces : board->blackPieces;
 
-	uint64_t occupancy = magicBitboards::rookMask[kingPos] & enemyPieces;
-	uint64_t magicResult = occupancy * magicBitboards::magicNumberRook[kingPos];
-	int arrayIndex = magicResult >> magicBitboards::magicNumberShiftRook[kingPos];
-	uint64_t kingRaysRook = magicBitboards::magicMovesRook[kingPos][arrayIndex] & (board->getPieceBitboard(switchColour(board->nextColour), rook) | board->getPieceBitboard(switchColour(board->nextColour), queen));
+	uint64_t kingRaysRook = rookMoves(kingPos, enemyPieces) & (board->getPieceBitboard(switchColour(board->nextColour), rook) | board->getPieceBitboard(switchColour(board->nextColour), queen));
 	while (kingRaysRook)
 	{
 		uint64_t pinner = pop(kingRaysRook);
@@ -493,11 +467,7 @@ uint64_t getPinnedPieces(Board * board)
 		if (bitSum(pinnedPiece) == 1) pinnedPieces |= pinnedPiece;
 	}
 
-
-	occupancy = magicBitboards::bishopMask[kingPos] & enemyPieces;
-	magicResult = occupancy * magicBitboards::magicNumberBishop[kingPos];
-	arrayIndex = magicResult >> magicBitboards::magicNumberShiftBishop[kingPos];
-	uint64_t kingRaysBishop = magicBitboards::magicMovesBishop[kingPos][arrayIndex] & (board->getPieceBitboard(switchColour(board->nextColour), bishop) | board->getPieceBitboard(switchColour(board->nextColour), queen));;
+	uint64_t kingRaysBishop = bishopMoves(kingPos, enemyPieces) & (board->getPieceBitboard(switchColour(board->nextColour), bishop) | board->getPieceBitboard(switchColour(board->nextColour), queen));;
 	while (kingRaysBishop)
 	{
 		uint64_t pinner = pop(kingRaysBishop);
@@ -515,17 +485,13 @@ uint64_t generateLegalFilterForPinnedPiece(Board* board, uint64_t pinnedPiece)
 	uint64_t kingBitBoard = board->getPieceBitboard(board->nextColour, king);
 	int kingPos = bitScanForward(kingBitBoard);
 
-	uint64_t currentPos, currentRay, rookRays, bishopRays;
+	uint64_t currentPos, currentRay;
 	uint64_t rookBitboard = board->getPieceBitboard(switchColour(board->nextColour), rook) | board->getPieceBitboard(switchColour(board->nextColour), queen);
 	while (rookBitboard)
 	{
 		currentPos = pop(rookBitboard);
 		int piecePos = bitScanForward(currentPos);
 
-		uint64_t occupancy = magicBitboards::rookMask[piecePos] & allPiecesWithoutPiece;
-		uint64_t magicResult = occupancy * magicBitboards::magicNumberRook[piecePos];
-		int arrayIndex = magicResult >> magicBitboards::magicNumberShiftRook[piecePos];
-		rookRays = magicBitboards::magicMovesRook[piecePos][arrayIndex] & kingBitBoard;
 		if (inBetween(kingPos, piecePos) & pinnedPiece)
 		{
 			return inBetween(kingPos, piecePos) | currentPos;
@@ -539,10 +505,6 @@ uint64_t generateLegalFilterForPinnedPiece(Board* board, uint64_t pinnedPiece)
 		currentPos = pop(bishopBitboard);
 		int piecePos = bitScanForward(currentPos);
 
-		uint64_t occupancy = magicBitboards::bishopMask[piecePos] & allPiecesWithoutPiece;
-		uint64_t magicResult = occupancy * magicBitboards::magicNumberBishop[piecePos];
-		int arrayIndex = magicResult >> magicBitboards::magicNumberShiftBishop[piecePos];
-		bishopRays = magicBitboards::magicMovesBishop[piecePos][arrayIndex] & kingBitBoard;
 		if (inBetween(kingPos, piecePos) & pinnedPiece)
 		{
 			return inBetween(kingPos, piecePos) | currentPos;
@@ -569,27 +531,16 @@ uint64_t getAttackers(Board * board, colours colour, uint64_t targetBitboard)
 	}
 
 	//KnightMoves
-	uint64_t knightMoves = knightMovesArray[targetPos];
-	attackers |= knightMoves & board->getPieceBitboard(opponentColour, knight);
+	attackers |= knightMovesArray[targetPos] & board->getPieceBitboard(opponentColour, knight);
 
-	uint64_t moves = kingMovesArray[targetPos];
-	attackers |= moves & board->getPieceBitboard(opponentColour, king);
+	//KingMoves
+	attackers |= kingMovesArray[targetPos] & board->getPieceBitboard(opponentColour, king);
 	
 	//Rook and half of queen moves
-	uint64_t occupancy = magicBitboards::rookMask[targetPos] & board->allPieces;
-	uint64_t magicResult = occupancy * magicBitboards::magicNumberRook[targetPos];
-	int arrayIndex = magicResult >> magicBitboards::magicNumberShiftRook[targetPos];
-	uint64_t magicMoves = magicBitboards::magicMovesRook[targetPos][arrayIndex];
-
-	attackers |= magicMoves & (board->getPieceBitboard(opponentColour, rook) | (board->getPieceBitboard(opponentColour, queen)));
+	attackers |= rookMoves(targetPos, board->allPieces) & (board->getPieceBitboard(opponentColour, rook) | (board->getPieceBitboard(opponentColour, queen)));
 	
 	//Bishop and half of queen moves
-	occupancy = magicBitboards::bishopMask[targetPos] & board->allPieces;
-	magicResult = occupancy * magicBitboards::magicNumberBishop[targetPos];
-	arrayIndex = magicResult >> magicBitboards::magicNumberShiftBishop[targetPos];
-	magicMoves = magicBitboards::magicMovesBishop[targetPos][arrayIndex];
-
-	attackers |= magicMoves & (board->getPieceBitboard(opponentColour, bishop) | (board->getPieceBitboard(opponentColour, queen)));
+	attackers |= bishopMoves(targetPos, board->allPieces) & (board->getPieceBitboard(opponentColour, bishop) | (board->getPieceBitboard(opponentColour, queen)));
 
 	return attackers;
 }
@@ -599,27 +550,13 @@ bool isPinnedEnPassant(Board* board, uint64_t pieces)
 	uint64_t kingBitBoard = board->getPieceBitboard(board->nextColour, king);
 	int kingPos = bitScanForward(kingBitBoard);
 
-	uint64_t magicResult = 0 * magicBitboards::magicNumberRook[kingPos];
-	int arrayIndex = magicResult >> magicBitboards::magicNumberShiftRook[kingPos];
-	uint64_t kingRaysRook = magicBitboards::magicMovesRook[kingPos][arrayIndex];
-	kingRaysRook &= (board->getPieceBitboard(switchColour(board->nextColour), rook) | board->getPieceBitboard(switchColour(board->nextColour), queen));
+	uint64_t kingRaysRook = rookMoves(kingPos, 0) & (board->getPieceBitboard(switchColour(board->nextColour), rook) | board->getPieceBitboard(switchColour(board->nextColour), queen));
 	while (kingRaysRook)
 	{
 		uint64_t pinner = pop(kingRaysRook);
 		uint64_t pinnedPiece = inBetween(kingPos, bitScanForward(pinner)) & board->allPieces;
 		if (pinnedPiece ==  pieces) return true;
 	}
-	/*
-	magicResult = 0 * magicBitboards::magicNumberBishop[kingPos];
-	arrayIndex = magicResult >> magicBitboards::magicNumberShiftBishop[kingPos];
-	uint64_t kingRaysBishop = magicBitboards::magicMovesBishop[kingPos][arrayIndex];
-	kingRaysBishop &= (board->getPieceBitboard(switchColour(board->nextColour), bishop) | board->getPieceBitboard(switchColour(board->nextColour), queen));
-	while (kingRaysBishop)
-	{
-		uint64_t pinner = pop(kingRaysBishop);
-		uint64_t pinnedPiece = inBetween(kingPos, bitScanForward(pinner)) & board->allPieces;
-		if (pinnedPiece & pieces > 0 && bitSum(pinnedPiece) == bitSum(pinnedPiece & pieces)) return true;
-	}
-	*/
+
 	return false;
 }

@@ -28,3 +28,6 @@ private:
 	static void generateMagicMovesBishop();
 };
 
+uint64_t rookMoves(int pos, uint64_t allpieces);
+uint64_t bishopMoves(int pos, uint64_t allpieces);
+uint64_t queenMoves(int pos, uint64_t allpieces);

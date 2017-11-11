@@ -43,14 +43,14 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -153,6 +153,9 @@
     <ClInclude Include="pieceSquare.h" />
     <ClInclude Include="scoring.h" />
     <ClInclude Include="search.h" />
+    <ClInclude Include="syzygy\tbconfig.h" />
+    <ClInclude Include="syzygy\tbcore.h" />
+    <ClInclude Include="syzygy\tbprobe.h" />
     <ClInclude Include="timeManagement.h" />
     <ClInclude Include="transpositionEntry.h" />
     <ClInclude Include="transpositionTable.h" />
@@ -170,6 +173,8 @@
     <ClCompile Include="pieceSquare.cpp" />
     <ClCompile Include="scoring.cpp" />
     <ClCompile Include="search.cpp" />
+    <ClCompile Include="syzygy\tbcore.cpp" />
+    <ClCompile Include="syzygy\tbprobe.cpp" />
     <ClCompile Include="timeManagement.cpp" />
     <ClCompile Include="transpositionEntry.cpp" />
     <ClCompile Include="transpositionTable.cpp" />

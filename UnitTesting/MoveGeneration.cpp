@@ -33,7 +33,7 @@ TEST(MoveGeneration, PawnMoves)
 		EXPECT_EQ(Movelist[0].moveType, quietMove);
 
 		EXPECT_EQ(Movelist[1].piece, pawn);
-		EXPECT_EQ(Movelist[1].moveType, pawnDoubleMove);
+		EXPECT_EQ(Movelist[1].moveType, quietMove);
 		EXPECT_EQ(Movelist[1].to, 24);
 	}
 	else
@@ -42,7 +42,7 @@ TEST(MoveGeneration, PawnMoves)
 		EXPECT_EQ(Movelist[1].moveType, quietMove);
 
 		EXPECT_EQ(Movelist[0].piece, pawn);
-		EXPECT_EQ(Movelist[0].moveType, pawnDoubleMove);
+		EXPECT_EQ(Movelist[0].moveType, quietMove);
 		EXPECT_EQ(Movelist[0].to, 24);
 	}
 
@@ -415,6 +415,24 @@ TEST(MoveGeneration, CastlingMoves)
 	EXPECT_EQ(movelist[0].moveType, queenSideCastling);
 }
 
+TEST(MoveGeneration, getPinnedPieces)
+{
+	Board board = Board("3k4/3p4/8/8/8/8/8/3R3K b - - 1 8 ");
+	EXPECT_EQ(getPinnedPieces(&board), (uint64_t)1 << 51);
+
+	board = Board("4k3/3p4/8/8/8/8/8/3R3K b - - 1 8 ");
+	EXPECT_EQ(getPinnedPieces(&board), 0);
+
+	board = Board("3k4/4p3/8/8/7B/8/8/7K b - - 1 8 ");
+	EXPECT_EQ(getPinnedPieces(&board), (uint64_t)1 << 52);
+
+	board = Board("3k4/3p4/8/8/8/8/8/3Q3K b - - 1 8 ");
+	EXPECT_EQ(getPinnedPieces(&board), (uint64_t)1 << 51);
+
+	board = Board("3k4/4p3/8/8/7Q/8/8/7K b - - 1 8 ");
+	EXPECT_EQ(getPinnedPieces(&board), (uint64_t)1 << 52);
+}
+
 uint64_t perft(int depth, Board* board, int divide)
 {
 	std::array<Move,150> moveList;
@@ -435,7 +453,7 @@ uint64_t perft(int depth, Board* board, int divide)
 	}
 	return nodes;
 }
-
+/*
 TEST(MoveGeneration, Perft)
 {
 	Board board;
@@ -491,4 +509,4 @@ TEST(MoveGeneration, Perft)
 	EXPECT_EQ(perft(2, &board, -1), 2079);
 	EXPECT_EQ(perft(3, &board, -1), 89890);
 	EXPECT_EQ(perft(4, &board, -1), 3894594);
-}
+}*/

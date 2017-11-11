@@ -33,6 +33,7 @@ Move::Move(int newFrom, int newTo, MoveType newMoveType, pieceType newPieceType,
 	enPassantSquare = board->enPassantSquare;
 	hash = board->zorbistKey; 
 	pawnHash = board->pawnScoreZorbistKey;
+	fiftyMoveTimer = board->getFiftyMoveTimer();
 }
 
 void Move::applyMove(Board * board)
@@ -41,6 +42,7 @@ void Move::applyMove(Board * board)
 
 	updateCastlingRights(board, this);
 	updateZorbistKeys(board, opponentColour);
+	board->incrementFiftyMoveTimer();
 
 	board->removePositionalScore(board->nextColour, piece, from);
 
@@ -52,6 +54,8 @@ void Move::applyMove(Board * board)
 		board->removeMaterialScore(opponentColour, capturedPiece);
 		if (piece != pawn || to != board->enPassantSquare) board->removePositionalScore(opponentColour, capturedPiece, to);
 	}
+
+	if (piece == pawn) board->resetFiftyMoveTimer();
 	
 	switch (moveType)
 	{
@@ -61,6 +65,12 @@ void Move::applyMove(Board * board)
 		uint64_t bitboard = board->getPieceBitboard(board->nextColour, piece);
 		bitboard = (bitboard & ~((uint64_t)1 << from)) | ((uint64_t)1 << to);
 		board->setBitboard(board->nextColour, piece, bitboard);
+
+		//Double pawn moves
+		if (piece == pawn && std::abs(to-from) == 16)
+		{
+			board->enPassantSquare = (to + from) / 2;
+		}
 
 		board->addPositionalScore(board->nextColour, piece, to);
 	}
@@ -94,6 +104,8 @@ void Move::applyMove(Board * board)
 		board->enPassantSquare = -1;
 
 		board->addPositionalScore(board->nextColour, piece, to);
+
+		board->resetFiftyMoveTimer();
 	}
 	break;
 	case knightPromotion:
@@ -166,26 +178,6 @@ void Move::applyMove(Board * board)
 		board->removeMaterialScore(board->nextColour, pawn);
 		board->addMaterialScore(board->nextColour, queen);
 		board->addPositionalScore(board->nextColour, queen, to);
-	}
-	break;
-	case pawnDoubleMove:
-	{
-		//Moves the piece
-		uint64_t bitboard = board->getPieceBitboard(board->nextColour, piece);
-		bitboard = (bitboard & ~((uint64_t)1 << from)) | ((uint64_t)1 << to);
-		board->setBitboard(board->nextColour, piece, bitboard);
-
-		//Sets En passant target square and hash.
-		if (board->nextColour == white)
-		{
-			board->enPassantSquare = to - 8;
-		}
-		else
-		{
-			board->enPassantSquare = to + 8;
-		}
-
-		board->addPositionalScore(board->nextColour, piece, to);
 	}
 	break;
 	case kingSideCastling:
@@ -492,16 +484,6 @@ void Move::undoMove(Board * board)
 		board->removePositionalScore(board->nextColour, queen, to);
 	}
 	break;
-	case pawnDoubleMove:
-	{
-		//Moves the piece
-		uint64_t bitboard = board->getPieceBitboard(board->nextColour, piece);
-		bitboard = (bitboard & ~((uint64_t)1 << to)) | ((uint64_t)1 << from);
-		board->setBitboard(board->nextColour, piece, bitboard);
-
-		board->removePositionalScore(board->nextColour, piece, to);
-	}
-	break;
 	case kingSideCastling:
 	{
 		//Moves the king
@@ -586,6 +568,15 @@ void Move::updateZorbistKeys(Board * board, colours opponentColour)
 
 	switch (moveType)
 	{
+	case quietMove:
+	{
+		//Double pawn moves
+		if (piece == pawn && std::abs(to - from) == 16)
+		{
+			board->zorbistKey ^= ZorbistKeys::enPassantKeys[to % 8];
+		}
+	}
+	break;
 	case capture:
 	{
 		if (board->enPassantSquare == to && piece == pawn)
@@ -642,19 +633,6 @@ void Move::updateZorbistKeys(Board * board, colours opponentColour)
 
 		//Removes piece from pawn hash
 		board->pawnScoreZorbistKey ^= ZorbistKeys::pieceKeys[to][pawn + 6 * board->nextColour];
-	}
-	break;
-	case pawnDoubleMove:
-	{
-		//Sets En passant target hash.
-		if (board->nextColour == white)
-		{
-			board->zorbistKey ^= ZorbistKeys::enPassantKeys[to % 8];
-		}
-		else
-		{
-			board->zorbistKey ^= ZorbistKeys::enPassantKeys[to % 8];
-		}
 	}
 	break;
 	case kingSideCastling:

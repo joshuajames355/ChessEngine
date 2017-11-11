@@ -7,7 +7,7 @@
 
 #include "transpositionTable.h"
 
-enum MoveType{quietMove, capture, knightPromotion, bishopPromotion, rookPromotion, queenPromotion, pawnDoubleMove, kingSideCastling, queenSideCastling};
+enum MoveType{quietMove, capture, knightPromotion, bishopPromotion, rookPromotion, queenPromotion, kingSideCastling, queenSideCastling};
 
 struct Move
 {
@@ -29,6 +29,7 @@ struct Move
 	int enPassantSquare;
 	uint64_t hash;
 	uint64_t pawnHash;
+	int fiftyMoveTimer;
 
 	void applyMove(Board* board);
 	void undoMove(Board* board);

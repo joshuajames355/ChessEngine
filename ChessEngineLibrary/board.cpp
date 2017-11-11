@@ -35,6 +35,8 @@ void Board::clearBoard()
 	canWhiteCastleQueenSide = false;
 	canWhiteCastleKingSide = false;
 
+	fiftyMoveTimer = 0;
+
 	kingDangerSquares = 0;
 	whiteMaterialScore = 0;
 	blackMaterialScore = 0;
@@ -68,6 +70,8 @@ void Board::defaults()
 	canBlackCastleKingSide = true;
 	canWhiteCastleQueenSide = true;
 	canWhiteCastleKingSide = true;
+
+	fiftyMoveTimer = 0;
 
 	generateZorbistKey();
 	updateScoreValues();
@@ -290,17 +294,36 @@ void Board::loadFromFen(std::string fen)
 		int column = currentChar - 'a';
 		int row = fen[currentCharPos + 1] - '1';
 		int pos = row * 8 + column;
-
+		currentCharPos++;
 		enPassantSquare = pos;
 	}
 	else
 	{
 		enPassantSquare = -1;
 	}
-
 	currentCharPos += 2;
 
 	//Halfmove clock
+	currentChar = fen[currentCharPos];
+	fiftyMoveTimer = 0;
+	if (currentChar != '-')
+	{
+		std::string fiftyMoveTimerString = "";
+
+		while (currentChar >= '0' && currentChar <= '9')
+		{
+			fiftyMoveTimerString += currentChar;
+			currentCharPos++;
+			currentChar = fen[currentCharPos];
+		}
+
+		if (fiftyMoveTimerString.length() > 0)
+		{
+			fiftyMoveTimer = std::stoi(fiftyMoveTimerString);
+		}
+	}
+	currentCharPos ++;
+
 	//Fullmove clock	
 
 	updateScoreValues();
@@ -511,10 +534,8 @@ bool Board::isPieceAttacked(int piecePos, colours colour)
 	}
 	
 	//Rook and half of queen moves
-	uint64_t occupancy = magicBitboards::rookMask[piecePos] & allPieces;
-	uint64_t magicResult = occupancy * magicBitboards::magicNumberRook[piecePos];
-	int arrayIndex = magicResult >> magicBitboards::magicNumberShiftRook[piecePos];
-	uint64_t magicMoves = magicBitboards::magicMovesRook[piecePos][arrayIndex];
+
+	uint64_t magicMoves = rookMoves(piecePos, allPieces);
 
 	if (colour == white)
 	{
@@ -532,10 +553,7 @@ bool Board::isPieceAttacked(int piecePos, colours colour)
 	}
 
 	//Bishop and half of queen moves
-	occupancy = magicBitboards::bishopMask[piecePos] & allPieces;
-	magicResult = occupancy * magicBitboards::magicNumberBishop[piecePos];
-	arrayIndex = magicResult >> magicBitboards::magicNumberShiftBishop[piecePos];
-	magicMoves = magicBitboards::magicMovesBishop[piecePos][arrayIndex];
+	magicMoves = bishopMoves(piecePos, allPieces);
 
 	if (colour == white)
 	{
@@ -698,24 +716,14 @@ void Board::generateKingDangerSquares()
 	while (rookBitboard)
 	{
 		currentPos = pop(rookBitboard);
-		int piecePos = bitScanForward(currentPos);
-
-		uint64_t occupancy = magicBitboards::rookMask[piecePos] & allPiecesExceptKing;
-		uint64_t magicResult = occupancy * magicBitboards::magicNumberRook[piecePos];
-		int arrayIndex = magicResult >> magicBitboards::magicNumberShiftRook[piecePos];
-		attackSet |= magicBitboards::magicMovesRook[piecePos][arrayIndex];
+		attackSet |= rookMoves(bitScanForward(currentPos), allPiecesExceptKing);
 	}
 
 	uint64_t bishopBitboard = getPieceBitboard(oppositeColour, bishop) | getPieceBitboard(oppositeColour, queen);
 	while (bishopBitboard)
 	{
 		currentPos = pop(bishopBitboard);
-		int piecePos = bitScanForward(currentPos);
-
-		uint64_t occupancy = magicBitboards::bishopMask[piecePos] & allPiecesExceptKing;
-		uint64_t magicResult = occupancy * magicBitboards::magicNumberBishop[piecePos];
-		int arrayIndex = magicResult >> magicBitboards::magicNumberShiftBishop[piecePos];
-		attackSet |= magicBitboards::magicMovesBishop[piecePos][arrayIndex];
+		attackSet |= bishopMoves(bitScanForward(currentPos), allPiecesExceptKing);
 	}
 
 	kingDangerSquares = attackSet;

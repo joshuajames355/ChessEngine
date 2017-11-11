@@ -14,6 +14,7 @@
 #include "transpositionTable.h"
 #include "transpositionEntry.h"
 #include "moveOrdering.h"
+#include "syzygy/tbprobe.h"
 
 struct searchData
 {

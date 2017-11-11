@@ -9,6 +9,7 @@
 #include "transpositionTable.h"
 #include "moveGeneration.h"
 #include "timeManagement.h"
+#include "syzygy/tbprobe.h"
 
 
 void engineLoop();

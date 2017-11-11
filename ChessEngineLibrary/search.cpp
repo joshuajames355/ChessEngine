@@ -113,6 +113,12 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 		return DRAWSCORE;
 	}
 
+	//Draws by the fifty move rule.
+	if (board->getFiftyMoveTimer() == 50)
+	{
+		return DRAWSCORE;
+	}
+
 	//CheckMate / StaleMate
 	if (arraySize == 0)
 	{
@@ -129,6 +135,62 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 			return DRAWSCORE;
 		}
 	}
+
+	//TableBase lookup for non root node
+	if (bitSum(board->allPieces) <= TB_LARGEST && depthLeft != data->depth)
+	{
+		unsigned results[TB_MAX_MOVES];
+		unsigned res = tb_probe_wdl(board->whitePieces, board->blackPieces, board->getPieceBitboard(white, king) | board->getPieceBitboard(black, king), board->getPieceBitboard(white, queen) | board->getPieceBitboard(black, queen), board->getPieceBitboard(white, rook) | board->getPieceBitboard(black, rook), board->getPieceBitboard(white, bishop) | board->getPieceBitboard(black, bishop), board->getPieceBitboard(white, knight) | board->getPieceBitboard(black, knight), board->getPieceBitboard(white, pawn) | board->getPieceBitboard(black, pawn), board->getFiftyMoveTimer(), TB_CASTLING_K * board->canWhiteCastleKingSide + TB_CASTLING_Q * board->canWhiteCastleQueenSide + TB_CASTLING_k * board->canBlackCastleKingSide + TB_CASTLING_q * board->canBlackCastleQueenSide, board->enPassantSquare, board->nextColour == white);
+
+		//If tablebase lookup succeeded
+		if (res != TB_RESULT_FAILED)
+		{
+			int score;
+			switch (res)
+			{
+			case TB_LOSS:
+				score = -30000;
+				break;
+			case TB_BLESSED_LOSS:
+				score = -1;
+				break;
+			case TB_DRAW:
+				score = 0;
+				break;
+			case TB_CURSED_WIN:
+				score = 1;
+				break;
+			case TB_WIN:
+				score = 30000;
+				break;
+			}
+
+			if (score > alpha)
+				alpha = score;
+
+			goto savePV;
+		}
+	}
+	/*
+	//Tablebase lookup at root node.
+	else if (depthLeft == data->depth)
+	{
+		int res = tb_probe_root(board->whitePieces, board->blackPieces, board->getPieceBitboard(white, king) | board->getPieceBitboard(black, king), board->getPieceBitboard(white, queen) | board->getPieceBitboard(black, queen), board->getPieceBitboard(white, rook) | board->getPieceBitboard(black, rook), board->getPieceBitboard(white, bishop) | board->getPieceBitboard(black, bishop), board->getPieceBitboard(white, knight) | board->getPieceBitboard(black, knight), board->getPieceBitboard(white, pawn) | board->getPieceBitboard(black, pawn), board->getFiftyMoveTimer(), TB_CASTLING_K * board->canWhiteCastleKingSide + TB_CASTLING_Q * board->canWhiteCastleQueenSide + TB_CASTLING_k * board->canBlackCastleKingSide + TB_CASTLING_q * board->canBlackCastleQueenSide, board->enPassantSquare, board->nextColour == white, nullptr);
+		if (res != TB_RESULT_FAILED)
+		{
+
+
+			
+
+			MoveType moveType = quietMove;
+			if (TB_GET_TO(res) & board->allPieces)
+			{
+				moveType = capture;
+			}
+			Move tbMove = Move(TB_GET_FROM(res), TB_GET_TO(res), quietMove, board->getPieceTypeInSquare(TB_GET_FROM(res)0), board);
+		}
+	}
+	*/
 
 	//Futility pruning
 	if (depthLeft == 1 || depthLeft == 2 && !board->isInCheck())
@@ -230,6 +292,9 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 		
 	}
 
+	//Pre-search cut-offs skip here rather than returning a value
+	savePV:
+
 	TranspositionEntry newEntry = TranspositionEntry();
 	newEntry.score = alpha;
 	if (alpha <= alphaOriginal)
@@ -327,3 +392,13 @@ PVData extractPVLine(Board * board, TranspositionEntry * transpositionTable, int
 	return pv;
 }
 
+
+void probeTB(Board* board)
+{
+	if (bitSum(board->allPieces) <= TB_LARGEST)
+	{
+		unsigned results[TB_MAX_MOVES];
+		unsigned res = tb_probe_wdl(board->whitePieces, board->blackPieces, board->getPieceBitboard(white, king) | board->getPieceBitboard(black, king), board->getPieceBitboard(white, queen) | board->getPieceBitboard(black, queen), board->getPieceBitboard(white, rook) | board->getPieceBitboard(black, rook), board->getPieceBitboard(white, bishop) | board->getPieceBitboard(black, bishop), board->getPieceBitboard(white, knight) | board->getPieceBitboard(black, knight), board->getPieceBitboard(white, pawn) | board->getPieceBitboard(black, pawn), board->getFiftyMoveTimer(), TB_CASTLING_K * board->canWhiteCastleKingSide + TB_CASTLING_Q * board->canWhiteCastleQueenSide + TB_CASTLING_k * board->canBlackCastleKingSide + TB_CASTLING_q * board->canBlackCastleQueenSide, board->enPassantSquare, board->nextColour == white);
+		
+	}
+}

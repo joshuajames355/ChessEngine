@@ -113,6 +113,12 @@ public:
 	int whiteLateGameKingPositionalScore;
 	int blackLateGameKingPositionalScore;
 
+	inline void resetFiftyMoveTimer() { fiftyMoveTimer = 0; };
+	inline void incrementFiftyMoveTimer() { fiftyMoveTimer++; };
+	inline int getFiftyMoveTimer() { return fiftyMoveTimer; };
+	inline int setFiftyMoveTimer(int newTimer) { fiftyMoveTimer = newTimer; };
+
 private:
 	uint64_t pieceBitboards[2][6];
+	int fiftyMoveTimer;
 };

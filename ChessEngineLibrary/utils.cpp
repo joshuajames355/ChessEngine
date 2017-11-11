@@ -97,11 +97,7 @@ Move moveFromNotation(std::string moveNotation, Board * board)
 		throw std::runtime_error("moveFromNotation failed. Piece not on board.");
 	}
 
-	if (std::abs(from - to) == 16 && piece == pawn)//Pawn double move
-	{
-		return Move(from, to, pawnDoubleMove, piece, board);
-	}
-	else if ((((uint64_t)1 << to) & board->allPieces) != 0 && moveNotation.length() == 4)//Capture
+	if ((((uint64_t)1 << to) & board->allPieces) != 0 && moveNotation.length() == 4)//Capture
 	{
 		return Move(from, to, capture, piece, board);
 	}

@@ -26,6 +26,7 @@ void engineLoop()
 		{
 			std::cout << "id name UNSR Chess System\n";
 			std::cout << "id author UNSR\n";
+			std::cout << "option name SyzygyPath type string default\n";
 			std::cout << "uciok\n";
 		}
 		if (response == "isready")
@@ -76,6 +77,20 @@ void engineLoop()
 						currentMove = moveFromNotation(words[x], &board);
 						currentMove.applyMove(&board);
 
+					}
+				}
+			}
+		}
+
+		if (words[0] == "setoption")
+		{
+			if (words[1] == "name")
+			{
+				if (words[2] == "SyzygyPath")
+				{
+					if (words[3] == "value")
+					{
+						tb_init(response.substr(32).c_str());
 					}
 				}
 			}

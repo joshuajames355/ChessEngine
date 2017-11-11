@@ -84,6 +84,15 @@
     <ClInclude Include="moveGenerationTables.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="syzygy\tbconfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="syzygy\tbcore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="syzygy\tbprobe.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="board.cpp">
@@ -129,6 +138,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="moveGenerationTables.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="syzygy\tbcore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="syzygy\tbprobe.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

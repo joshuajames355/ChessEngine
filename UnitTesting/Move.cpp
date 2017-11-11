@@ -28,7 +28,7 @@ TEST(Move, ApplyPawnDoubleMoves)
 	Board board;
 	board.setBitboard(white, pawn, (uint64_t)1 << 8);
 	board.nextColour = white;
-	Move move = Move(8, 24, pawnDoubleMove, pawn, &board);
+	Move move = Move(8, 24, quietMove, pawn, &board);
 	move.applyMove(&board);
 	EXPECT_EQ(board.getPieceBitboard(white, pawn), (uint64_t)1 << 24);
 	EXPECT_EQ(board.allPieces, (uint64_t)1 << 24);
@@ -37,7 +37,7 @@ TEST(Move, ApplyPawnDoubleMoves)
 	board = Board();
 	board.setBitboard(black, pawn, (uint64_t)1 << 48);
 	board.nextColour = black;
-	move = Move(48, 32, pawnDoubleMove, pawn, &board);
+	move = Move(48, 32, quietMove, pawn, &board);
 	move.applyMove(&board);
 	EXPECT_EQ(board.getPieceBitboard(black, pawn), (uint64_t)1 << 32);
 	EXPECT_EQ(board.allPieces, (uint64_t)1 << 32);
@@ -323,7 +323,7 @@ TEST(Move, IncrementingZorbistKeys)
 	key2 = board.zorbistKey;
 	EXPECT_EQ(key1, key2);
 
-	board.loadFromFen("8/P7/8/8/8/8/8/8 w - -");
+	board.loadFromFen("8/P7/8/8/8/8/8/8 w - - 0");
 	move = moveFromNotation("a7a8q", &board);
 	move.applyMove(&board);
 

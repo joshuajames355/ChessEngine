@@ -137,3 +137,24 @@ std::array<uint64_t, 64> magicBitboards::magicNumberRook = { 0xa180022080400230,
 
 std::array<std::unordered_map<int, uint64_t>, 64> magicBitboards::magicMovesRook;
 std::array<std::unordered_map<int, uint64_t>, 64> magicBitboards::magicMovesBishop;
+
+uint64_t rookMoves(int pos, uint64_t allpieces)
+{
+	const uint64_t occupancy = magicBitboards::rookMask[pos] & allpieces;
+	const uint64_t magicResult = occupancy * magicBitboards::magicNumberRook[pos];
+	const int arrayIndex = magicResult >> magicBitboards::magicNumberShiftRook[pos];
+	return magicBitboards::magicMovesRook[pos][arrayIndex];
+}
+
+uint64_t bishopMoves(int pos, uint64_t allpieces)
+{
+	const uint64_t occupancy = magicBitboards::bishopMask[pos] & allpieces;
+	const uint64_t magicResult = occupancy * magicBitboards::magicNumberBishop[pos];
+	const int arrayIndex = magicResult >> magicBitboards::magicNumberShiftBishop[pos];
+	return magicBitboards::magicMovesBishop[pos][arrayIndex];
+}
+
+uint64_t queenMoves(int pos, uint64_t allpieces)
+{
+	return rookMoves(pos, allpieces) | bishopMoves(pos, allpieces);
+}
