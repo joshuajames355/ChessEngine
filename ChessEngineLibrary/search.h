@@ -28,7 +28,7 @@ struct PVData
 	std::string line;
 };
 
-void updateUI(searchData * data, Move currentMove, int currentMoveNumber, std::string pvLine);
+void updateUI(searchData * data, Move currentMove, int currentMoveNumber, std::string pvLine, float alpha);
 void finalUIUpdate(searchData * data, std::string pvLine);
 
 Move startSearch(Board* board, TranspositionEntry* transpositionTable, timeManagement* timer);

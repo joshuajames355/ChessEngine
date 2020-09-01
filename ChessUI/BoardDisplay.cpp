@@ -253,7 +253,7 @@ void BoardDisplay::updateChessPieces()
 		if (currentType != blank)
 		{
 			colours currentColour;
-			if (chessBoard.findBitboard(white, currentType) & currentPosBitboard)
+			if (chessBoard.getPieceBitboard(white, currentType) & currentPosBitboard)
 				currentColour = white;
 			else
 				currentColour = black;

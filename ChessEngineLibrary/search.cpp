@@ -1,13 +1,14 @@
 #include "search.h"
 
-void updateUI(searchData * data, Move currentMove, int currentMoveNumber, std::string pvLine)
+void updateUI(searchData * data, Move currentMove, int currentMoveNumber, std::string pvLine, float alpha)
 {
 	std::cout << "info depth " << data->depth;
 	std::cout << " nodes " << data->nodes;
 	std::cout << " nps " << (uint64_t)((data->nodes) / difftime(time(NULL), data->startTime));
 	std::cout << " pv " << pvLine;
 	std::cout << " currmove " << notationFromMove(currentMove);
-	std::cout << " currmovenumber " << currentMoveNumber << "\n";
+	std::cout << " currmovenumber " << currentMoveNumber;
+	std::cout << " score lowerbound " << alpha << std::endl;
 }
 
 void finalUIUpdate(searchData * data, std::string pvLine)
@@ -15,7 +16,7 @@ void finalUIUpdate(searchData * data, std::string pvLine)
 	std::cout << "info depth " << data->depth;
 	std::cout << " nodes " << data->nodes;
 	std::cout << " nps " << (uint64_t)((data->nodes) / difftime(time(NULL), data->startTime));
-	std::cout << " pv " << pvLine << "\n";
+	std::cout << " pv " << pvLine << std::endl;
 }
 
 Move startSearch(Board* board, TranspositionEntry* transpositionTable, timeManagement* timer)
@@ -172,7 +173,7 @@ int negascout(int alpha, int beta, int depthLeft, Board* board, searchData* data
 		if (depthLeft == data->depth)
 		{
 			PVData bestMove = extractPVLine(board, transpositionTable, depthLeft);
-			updateUI(data, moveList[x], x + 1, bestMove.line);
+			updateUI(data, moveList[x], x + 1, bestMove.line, alpha);
 		}
 
 		moveList[x].applyMove(board);
